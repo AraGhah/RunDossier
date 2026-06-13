@@ -4,6 +4,7 @@ import { runQAAgent, type QABrief, type QAResult } from '../agents/qa.agent.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
 import { loadActivePrompt } from '../utils/prompts.js';
+import { logFunnelEvent } from '../utils/funnel-log.js';
 
 interface Prospect {
   id: string;
@@ -11,6 +12,7 @@ interface Prospect {
   title: string;
   research_summary: string;
   top_3_signals: unknown;
+  source?: string;
 }
 
 function countShipped(variants: FirstLineVariant[], qaResults: QAResult[]): number {
@@ -74,7 +76,8 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
     const [prospect] = await query<Prospect>(
       `UPDATE prospects SET status = 'personalization_in_progress'
        WHERE id = $1 AND status IN ('research_complete', 'personalization_in_progress')
-       RETURNING id, name, title, research_summary, top_3_signals`,
+       RETURNING id, name, title, research_summary, top_3_signals,
+                 COALESCE(source, 'manual') AS source`,
       [prospectId]
     );
     if (!prospect) return;
@@ -153,6 +156,10 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
           ? `Personalize partial: ${prospect.name} (${shipped}/${config.variantCount} ready, retry scheduled)`
           : `Personalize failed: ${prospect.name} (0/${config.variantCount} ready)`
     );
+
+    if (allPassed && prospect.source === 'dogfood') {
+      await logFunnelEvent(prospectId, 'personalized', { shipped });
+    }
 
   } catch (err) {
     await query(

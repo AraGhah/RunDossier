@@ -3,8 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { ApifyClient } from 'apify-client';
 import { query, pool } from '../src/db.js';
 import { validateConfig, config } from '../src/config.js';
-import { startQueue, stopQueue } from '../src/queue.js';
-import { runScheduler } from '../src/jobs/scheduler.job.js';
+import { probePgBoss } from '../src/queue.js';
 
 type Check = { name: string; ok: boolean; detail: string };
 const checks: Check[] = [];
@@ -58,13 +57,10 @@ async function main(): Promise<void> {
   }
 
   try {
-    await startQueue();
-    await runScheduler();
-    await stopQueue();
-    record('pg-boss', true, 'Queue + scheduler OK');
+    await probePgBoss();
+    record('pg-boss', true, 'Connexion pg-boss OK (sans exécution de jobs)');
   } catch (e) {
     record('pg-boss', false, (e as Error).message);
-    try { await stopQueue(); } catch { /* ignore */ }
   }
 
   try {
@@ -179,12 +175,12 @@ async function main(): Promise<void> {
   }
 
   try {
-    const recentFails = await query<{ workflow: string; error: string; dead_letter_at: string }>(
-      `SELECT workflow, error, dead_letter_at::text
+    const recentFails = await query<{ workflow: string; error: string; created_at: string }>(
+      `SELECT workflow, error, created_at::text
        FROM failed_jobs
-       WHERE dead_letter_at > NOW() - INTERVAL '10 minutes'
+       WHERE created_at > NOW() - INTERVAL '10 minutes'
          AND error NOT LIKE '%updated_at%'
-       ORDER BY dead_letter_at DESC`
+       ORDER BY created_at DESC`
     );
     record(
       'recent-errors',
@@ -194,14 +190,14 @@ async function main(): Promise<void> {
         : `${recentFails.length} erreur(s) récente(s)`
     );
     for (const f of recentFails) {
-      console.log(`    [${f.dead_letter_at}] ${f.workflow}: ${f.error.slice(0, 100)}`);
+      console.log(`    [${f.created_at}] ${f.workflow}: ${f.error.slice(0, 100)}`);
     }
   } catch (e) {
     record('recent-errors', false, (e as Error).message);
   }
 
   const failed = await query<{ workflow: string; error: string }>(
-    `SELECT workflow, error FROM failed_jobs ORDER BY dead_letter_at DESC NULLS LAST LIMIT 3`
+    `SELECT workflow, error FROM failed_jobs ORDER BY created_at DESC LIMIT 3`
   );
   if (failed.length) {
     record('failed_jobs', true, `${failed.length} erreurs historiques (voir logs)`);

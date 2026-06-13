@@ -3,6 +3,7 @@ import { config, validateConfig } from './config.js';
 import { startQueue, stopQueue } from './queue.js';
 import { notify } from './notify.js';
 import { pool } from './db.js';
+import { registerDogfoodRoutes } from './routes/dogfood.js';
 
 const app = express();
 
@@ -21,6 +22,8 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 });
 
 app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
+
+registerDogfoodRoutes(app);
 
 // Explicit 404 for all other routes — avoid leaking route structure
 app.use((_req: Request, res: Response) => {

@@ -32,6 +32,8 @@ export const config = {
   databaseSslStrict: process.env.DATABASE_SSL_STRICT !== 'false',
   anthropicKey: optionalEnv('ANTHROPIC_API_KEY'),
   apifyToken: optionalEnv('APIFY_TOKEN'),
+  /** Apify actor for LinkedIn profiles (approve permissions in Apify console once). */
+  apifyLinkedInActor: optionalEnv('APIFY_LINKEDIN_ACTOR') || 'harvestapi~linkedin-profile-scraper',
   telegramBotToken: optionalEnv('TELEGRAM_BOT_TOKEN'),
   telegramChatId: optionalEnv('TELEGRAM_CHAT_ID'),
   podcastIndexKey: optionalEnv('PODCASTINDEX_KEY') || optionalEnv('PODCAST_INDEX_KEY'),
@@ -48,6 +50,20 @@ export const config = {
   batchFailAlertPct: 0.15,
   schedulerBatchSize: 50,
   notifyMaxLength: 4000,
+
+  /** Workflow 10 — self-selling dogfood pipeline */
+  dogfoodEnabled: process.env.DOGFOOD_ENABLED !== 'false',
+  dogfoodWeeklyCap: parseInt(process.env.DOGFOOD_WEEKLY_CAP ?? '200', 10) || 200,
+  dogfoodTopPercent: Math.min(1, Math.max(0.01, parseFloat(process.env.DOGFOOD_TOP_PERCENT ?? '0.3') || 0.3)),
+  dogfoodScrapeBatchSize: parseInt(process.env.DOGFOOD_SCRAPE_BATCH_SIZE ?? '30', 10) || 30,
+  apifySalesNavActor:
+    optionalEnv('APIFY_SALES_NAV_ACTOR') || 'silentflow~linkedin-sales-navigator-scraper',
+  apifySalesNavSearchUrl: optionalEnv('APIFY_SALES_NAV_SEARCH_URL'),
+  linkedinSalesNavCookie: optionalEnv('LINKEDIN_SALES_NAV_COOKIE'),
+  linkedinUserAgent: optionalEnv('LINKEDIN_USER_AGENT'),
+  smartleadApiKey: optionalEnv('SMARTLEAD_API_KEY'),
+  smartleadCampaignId: optionalEnv('SMARTLEAD_CAMPAIGN_ID'),
+  dogfoodApiToken: optionalEnv('DOGFOOD_API_TOKEN'),
 } as const;
 
 /** Call at startup — throws with a clear message if required secrets are missing. */

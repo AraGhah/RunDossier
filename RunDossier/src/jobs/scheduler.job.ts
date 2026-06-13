@@ -89,4 +89,27 @@ export async function runScheduler(): Promise<void> {
     );
     if (enqueued) await enqueuePersonalize(enqueued.id);
   }
+
+  const researchRetry = await query<{ id: string }>(
+    `SELECT id FROM prospects
+     WHERE status = 'research_failed'
+     LIMIT $1`,
+    [schedulerBatchSize]
+  );
+  for (const p of researchRetry) {
+    const [claimed] = await query<{ id: string }>(
+      `UPDATE prospects SET status = 'queued'
+       WHERE id = $1 AND status = 'research_failed'
+       RETURNING id`,
+      [p.id]
+    );
+    if (!claimed) continue;
+    const [enqueued] = await query<{ id: string }>(
+      `UPDATE prospects SET status = 'research_in_progress'
+       WHERE id = $1 AND status = 'queued'
+       RETURNING id`,
+      [claimed.id]
+    );
+    if (enqueued) await enqueueResearch(enqueued.id);
+  }
 }

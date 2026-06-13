@@ -1,16 +1,18 @@
 import { query } from '../db.js';
-import { scrapeLinkedIn } from '../scrapers/linkedin.js';
+import { scrapeLinkedIn, extractCompanyName, linkedinScrapeShouldRetry } from '../scrapers/linkedin.js';
 import { searchPodcasts } from '../scrapers/podcast.js';
 import { runResearchAgent } from '../agents/research.agent.js';
 import { withRetry } from '../utils/retry.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
 import { loadActivePrompt } from '../utils/prompts.js';
+import { logFunnelEvent } from '../utils/funnel-log.js';
 
 interface Prospect {
   id: string;
   name: string;
   linkedin_url: string;
+  source?: string;
 }
 
 export async function handleResearch(job: { data: { prospectId: string } }): Promise<void> {
@@ -19,7 +21,7 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
 
   try {
     [prospect] = await query<Prospect>(
-      `SELECT id, name, linkedin_url
+      `SELECT id, name, linkedin_url, COALESCE(source, 'manual') AS source
        FROM prospects WHERE id = $1 AND status = 'research_in_progress'`,
       [prospectId]
     );
@@ -33,7 +35,8 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
     const linkedInData = await withRetry(
       () => scrapeLinkedIn(linkedinUrl),
       config.maxRetries,
-      'linkedin-scrape'
+      'linkedin-scrape',
+      linkedinScrapeShouldRetry
     );
     if (!linkedInData) {
       throw new Error(`No LinkedIn profile returned for ${linkedinUrl}`);
@@ -46,8 +49,7 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
     );
 
     const linkedInRecord = linkedInData as Record<string, unknown>;
-    const companyName =
-      (linkedInRecord.company as { name?: string } | undefined)?.name ?? '';
+    const companyName = extractCompanyName(linkedInRecord);
 
     const podcasts = await searchPodcasts(prospect.name, companyName);
 
@@ -81,6 +83,12 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
         prospectId,
       ]
     );
+
+    if (prospect.source === 'dogfood' && status === 'research_complete') {
+      await logFunnelEvent(prospectId, 'researched', {
+        confidence_score: research.confidence_score,
+      });
+    }
 
   } catch (err) {
     await query(
