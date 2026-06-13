@@ -8,16 +8,17 @@ const QUEUES = ['research', 'personalize', 'scheduler'] as const;
 
 let boss: PgBoss;
 
-export function getBoss() { return boss; }
+export function getBoss(): PgBoss { return boss; }
 
-export async function startQueue() {
+export async function startQueue(): Promise<void> {
   boss = new PgBoss({
     connectionString: config.databaseUrl,
-    ssl: config.databaseSsl ? { rejectUnauthorized: false } : undefined,
+    ssl: config.databaseSsl
+      ? { rejectUnauthorized: config.databaseSslStrict }
+      : undefined,
   });
 
-  boss.on('error', (err: Error) => console.error('pg-boss error:', err));
-
+  boss.on('error', (err: Error) => console.error('[pg-boss] error:', err));
   await boss.start();
 
   for (const name of QUEUES) {
@@ -36,5 +37,12 @@ export async function startQueue() {
     for (const _job of jobs) await runScheduler();
   });
 
-  console.log('Queue started, jobs registered');
+  console.log('[queue] Started — jobs registered');
+}
+
+export async function stopQueue(): Promise<void> {
+  if (boss) {
+    await boss.stop({ graceful: true, timeout: 10_000 });
+    console.log('[queue] Stopped gracefully');
+  }
 }

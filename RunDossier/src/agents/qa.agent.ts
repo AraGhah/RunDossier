@@ -2,10 +2,18 @@ import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config.js';
 import { logCost } from '../utils/cost-tracker.js';
 import { extractTextContent, parseJsonFromLLM } from '../utils/parse-json.js';
+import type { FirstLineVariant } from './personalize.agent.js';
 
 const client = new Anthropic({ apiKey: config.anthropicKey });
 
-const DEFAULT_QA_PROMPT = `You are a cold email QA judge. Score each variant on specificity, human-ness, relevance, and length. Return only valid JSON.`;
+const DEFAULT_QA_PROMPT =
+  'You are a cold email QA judge. Score each variant on specificity, human-ness, relevance, and length. Return only valid JSON.';
+
+export interface QABrief {
+  name: string;
+  research_summary: string;
+  top_3_signals: unknown;
+}
 
 export interface QAResult {
   variant_number: number;
@@ -20,8 +28,8 @@ export interface QAResult {
 
 export async function runQAAgent(
   prospectId: string,
-  variants: any[],
-  researchBrief: any,
+  variants: FirstLineVariant[],
+  researchBrief: QABrief,
   systemPrompt = DEFAULT_QA_PROMPT
 ): Promise<QAResult[]> {
   const userMessage = `Score these cold email openers against the research brief.
@@ -52,5 +60,11 @@ For each variant return:
     outputTokens: response.usage.output_tokens,
   });
 
-  return parseJsonFromLLM<QAResult[]>(text);
+  const results = parseJsonFromLLM<QAResult[]>(text);
+
+  if (!Array.isArray(results) || results.length === 0) {
+    throw new Error('QA agent returned no results');
+  }
+
+  return results;
 }

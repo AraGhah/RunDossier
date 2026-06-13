@@ -5,10 +5,17 @@ import { extractTextContent, parseJsonFromLLM } from '../utils/parse-json.js';
 
 const client = new Anthropic({ apiKey: config.anthropicKey });
 
-const DEFAULT_SYSTEM_PROMPT = `You are a B2B prospect researcher. Analyze LinkedIn and podcast data to produce actionable sales intelligence. Return only valid JSON.`;
+const DEFAULT_SYSTEM_PROMPT =
+  'You are a B2B prospect researcher. Analyze LinkedIn and podcast data to produce actionable sales intelligence. Return only valid JSON.';
+
+export interface ResearchSignal {
+  signal: string;
+  source: string;
+  date: string;
+}
 
 export interface ResearchOutput {
-  top_3_signals: { signal: string; source: string; date: string }[];
+  top_3_signals: ResearchSignal[];
   buying_triggers: string[];
   research_summary: string;
   confidence_score: number;
@@ -16,8 +23,8 @@ export interface ResearchOutput {
 
 export async function runResearchAgent(
   prospectId: string,
-  linkedInData: any,
-  podcastData: any[],
+  linkedInData: Record<string, unknown>,
+  podcastData: Record<string, unknown>[],
   systemPrompt = DEFAULT_SYSTEM_PROMPT
 ): Promise<ResearchOutput> {
   const userMessage = `Research this prospect:
@@ -49,5 +56,15 @@ Return ONLY valid JSON matching this schema:
     outputTokens: response.usage.output_tokens,
   });
 
-  return parseJsonFromLLM<ResearchOutput>(text);
+  const output = parseJsonFromLLM<ResearchOutput>(text);
+
+  if (
+    !Array.isArray(output.top_3_signals) ||
+    typeof output.research_summary !== 'string' ||
+    typeof output.confidence_score !== 'number'
+  ) {
+    throw new Error('Research agent returned malformed JSON — missing required fields');
+  }
+
+  return output;
 }

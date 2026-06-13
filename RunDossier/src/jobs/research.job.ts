@@ -7,13 +7,21 @@ import { notify } from '../notify.js';
 import { config } from '../config.js';
 import { loadActivePrompt } from '../utils/prompts.js';
 
-export async function handleResearch(job: { data: { prospectId: string } }) {
+interface Prospect {
+  id: string;
+  name: string;
+  linkedin_url: string;
+  company?: string;
+}
+
+export async function handleResearch(job: { data: { prospectId: string } }): Promise<void> {
   const { prospectId } = job.data;
-  let prospect: Record<string, any> | undefined;
+  let prospect: Prospect | undefined;
 
   try {
-    [prospect] = await query<Record<string, any>>(
-      `SELECT * FROM prospects WHERE id = $1 AND status = 'research_in_progress'`,
+    [prospect] = await query<Prospect>(
+      `SELECT id, name, linkedin_url, company
+       FROM prospects WHERE id = $1 AND status = 'research_in_progress'`,
       [prospectId]
     );
     if (!prospect) return;
@@ -38,25 +46,35 @@ export async function handleResearch(job: { data: { prospectId: string } }) {
       [prospectId, JSON.stringify(linkedInData)]
     );
 
-    const podcasts = await searchPodcasts(
-      String(prospect.name ?? ''),
-      (linkedInData as { company?: { name?: string } }).company?.name ?? ''
-    );
+    const linkedInRecord = linkedInData as Record<string, unknown>;
+    const companyName =
+      (linkedInRecord.company as { name?: string } | undefined)?.name ??
+      prospect.company ??
+      '';
+
+    const podcasts = await searchPodcasts(prospect.name, companyName);
 
     const systemPrompt = await loadActivePrompt(
       'research_agent',
       'You are a B2B prospect researcher. Analyze LinkedIn and podcast data to produce actionable sales intelligence. Return only valid JSON.'
     );
-    const research = await runResearchAgent(prospectId, linkedInData, podcasts, systemPrompt);
 
-    const status = research.confidence_score < config.confidenceFloor
-      ? 'thin_research'
-      : 'research_complete';
+    const research = await runResearchAgent(
+      prospectId,
+      linkedInRecord,
+      podcasts,
+      systemPrompt
+    );
+
+    const status =
+      research.confidence_score < config.confidenceFloor
+        ? 'thin_research'
+        : 'research_complete';
 
     await query(
       `UPDATE prospects
        SET research_summary = $1, top_3_signals = $2,
-           confidence_score = $3, status = $4
+           confidence_score = $3, status = $4, updated_at = NOW()
        WHERE id = $5`,
       [
         research.research_summary,
@@ -75,12 +93,14 @@ export async function handleResearch(job: { data: { prospectId: string } }) {
     ).catch(e => console.error('[research] failed_jobs insert error:', e));
 
     await query(
-      `UPDATE prospects SET status = 'research_failed'
+      `UPDATE prospects SET status = 'research_failed', updated_at = NOW()
        WHERE id = $1 AND status = 'research_in_progress'`,
       [prospectId]
     ).catch(e => console.error('[research] status reset error:', e));
 
-    await notify(`Research failed: ${prospect?.name ?? prospectId}\n${(err as Error).message}`);
+    await notify(
+      `Research failed: ${prospect?.name ?? prospectId}\n${(err as Error).message}`
+    );
     throw err;
   }
 }

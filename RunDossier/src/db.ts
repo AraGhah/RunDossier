@@ -1,18 +1,39 @@
 import { Pool } from 'pg';
 import { config } from './config.js';
 
+const sslConfig = config.databaseSsl
+  ? { rejectUnauthorized: config.databaseSslStrict }
+  : undefined;
+
 export const pool = new Pool({
   connectionString: config.databaseUrl,
-  ssl: config.databaseSsl ? { rejectUnauthorized: false } : undefined,
+  ssl: sslConfig,
   max: 10,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
 });
 
-export async function query<T = any>(sql: string, params?: any[]): Promise<T[]> {
-  const result = await pool.query(sql, params);
+pool.on('error', (err) => {
+  console.error('[db] Unexpected pool client error:', err);
+});
+
+pool.on('connect', (client) => {
+  // Kill runaway queries after 30 s at the session level
+  void client.query('SET statement_timeout = 30000');
+});
+
+export async function query<T = Record<string, unknown>>(
+  sql: string,
+  params?: unknown[]
+): Promise<T[]> {
+  const result = await pool.query(sql, params as unknown[]);
   return result.rows as T[];
 }
 
-export async function queryOne<T = any>(sql: string, params?: any[]): Promise<T | null> {
+export async function queryOne<T = Record<string, unknown>>(
+  sql: string,
+  params?: unknown[]
+): Promise<T | null> {
   const rows = await query<T>(sql, params);
   return rows[0] ?? null;
 }

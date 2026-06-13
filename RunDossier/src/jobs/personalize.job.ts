@@ -1,18 +1,26 @@
 import { query, queryOne } from '../db.js';
-import { runPersonalizeAgent } from '../agents/personalize.agent.js';
-import { runQAAgent } from '../agents/qa.agent.js';
+import { runPersonalizeAgent, type ResearchBrief } from '../agents/personalize.agent.js';
+import { runQAAgent, type QABrief } from '../agents/qa.agent.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
 import { loadActivePrompt } from '../utils/prompts.js';
 
-export async function handlePersonalize(job: { data: { prospectId: string } }) {
+interface Prospect {
+  id: string;
+  name: string;
+  title: string;
+  research_summary: string;
+  top_3_signals: unknown;
+}
+
+export async function handlePersonalize(job: { data: { prospectId: string } }): Promise<void> {
   const { prospectId } = job.data;
 
   try {
-    const [prospect] = await query<Record<string, any>>(
-      `UPDATE prospects SET status = 'personalization_in_progress'
+    const [prospect] = await query<Prospect>(
+      `UPDATE prospects SET status = 'personalization_in_progress', updated_at = NOW()
        WHERE id = $1 AND status IN ('research_complete', 'personalization_in_progress')
-       RETURNING *`,
+       RETURNING id, name, title, research_summary, top_3_signals`,
       [prospectId]
     );
     if (!prospect) return;
@@ -31,27 +39,22 @@ export async function handlePersonalize(job: { data: { prospectId: string } }) {
       'You are a cold email QA judge. Score each variant on specificity, human-ness, relevance, and length. Return only valid JSON.'
     );
 
-    const variants = await runPersonalizeAgent(
-      prospectId,
-      {
-        name: prospect.name,
-        title: prospect.title,
-        research_summary: prospect.research_summary,
-        top_3_signals: prospect.top_3_signals,
-      },
-      prompt.prompt_text
-    );
+    const brief: ResearchBrief = {
+      name: prospect.name,
+      title: prospect.title,
+      research_summary: prospect.research_summary,
+      top_3_signals: prospect.top_3_signals,
+    };
 
-    const qaResults = await runQAAgent(
-      prospectId,
-      variants,
-      {
-        name: prospect.name,
-        research_summary: prospect.research_summary,
-        top_3_signals: prospect.top_3_signals,
-      },
-      qaPrompt
-    );
+    const variants = await runPersonalizeAgent(prospectId, brief, prompt.prompt_text);
+
+    const qaBrief: QABrief = {
+      name: prospect.name,
+      research_summary: prospect.research_summary,
+      top_3_signals: prospect.top_3_signals,
+    };
+
+    const qaResults = await runQAAgent(prospectId, variants, qaBrief, qaPrompt);
 
     await query('DELETE FROM first_lines WHERE prospect_id = $1', [prospectId]);
 
@@ -81,12 +84,12 @@ export async function handlePersonalize(job: { data: { prospectId: string } }) {
 
     const newStatus = anyShipped ? 'personalized_qa_passed' : 'qa_failed';
     await query(
-      'UPDATE prospects SET status = $1 WHERE id = $2',
+      'UPDATE prospects SET status = $1, updated_at = NOW() WHERE id = $2',
       [newStatus, prospectId]
     );
 
     await notify(
-      `Personalize ${anyShipped ? 'passed' : 'failed'}: ${prospect.name ?? prospectId} (${variants.length} variants)`
+      `Personalize ${anyShipped ? 'passed' : 'failed'}: ${prospect.name} (${variants.length} variants)`
     );
 
   } catch (err) {
@@ -97,7 +100,7 @@ export async function handlePersonalize(job: { data: { prospectId: string } }) {
     ).catch(e => console.error('[personalize] failed_jobs insert error:', e));
 
     await query(
-      `UPDATE prospects SET status = 'personalization_failed'
+      `UPDATE prospects SET status = 'personalization_failed', updated_at = NOW()
        WHERE id = $1 AND status = 'personalization_in_progress'`,
       [prospectId]
     ).catch(e => console.error('[personalize] status reset error:', e));

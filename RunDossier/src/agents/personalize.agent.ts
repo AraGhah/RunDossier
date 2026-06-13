@@ -6,6 +6,13 @@ import { extractTextContent, parseJsonFromLLM } from '../utils/parse-json.js';
 
 const client = new Anthropic({ apiKey: config.anthropicKey });
 
+export interface ResearchBrief {
+  name: string;
+  title: string;
+  research_summary: string;
+  top_3_signals: unknown;
+}
+
 export interface FirstLineVariant {
   variant_number: number;
   subject: string;
@@ -16,7 +23,7 @@ export interface FirstLineVariant {
 
 export async function runPersonalizeAgent(
   prospectId: string,
-  researchBrief: any,
+  researchBrief: ResearchBrief,
   systemPrompt: string
 ): Promise<FirstLineVariant[]> {
   const userMessage = `Generate 3 cold email opener variants for this prospect:
@@ -43,6 +50,7 @@ Return ONLY a JSON array of 3 objects:
   }).catch(err => console.error('[personalize] cost log failed:', err));
 
   const variants = parseJsonFromLLM<FirstLineVariant[]>(text);
+
   if (!Array.isArray(variants) || variants.length === 0) {
     throw new Error('Personalization agent returned no variants');
   }
