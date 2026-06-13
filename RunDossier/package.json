@@ -1,5 +1,5 @@
 {
-  "name": "rundossier",
+  "name": "Preframe",
   "version": "1.0.0",
   "description": "Preframe B2B prospect research and personalization pipeline",
   "main": "dist/index.js",
@@ -16,7 +16,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.3",

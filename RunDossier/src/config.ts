@@ -27,7 +27,7 @@ const databaseUrl = process.env.DATABASE_URL?.trim() ?? '';
 
 export const config = {
   databaseUrl,
-  databaseSsl: process.env.DATABASE_SSL === 'true' || databaseUrl.includes('supabase.co'),
+  databaseSsl: process.env.DATABASE_SSL === 'true' || databaseUrl.includes('supabase.com'),
   /** Set DATABASE_SSL_STRICT=false only if your DB uses self-signed certs */
   databaseSslStrict: process.env.DATABASE_SSL_STRICT !== 'false',
   anthropicKey: optionalEnv('ANTHROPIC_API_KEY'),
@@ -39,10 +39,11 @@ export const config = {
   port: Number.isFinite(rawPort) && rawPort > 0 && rawPort <= 65535 ? rawPort : 3000,
 
   researchModel: 'claude-haiku-4-5-20251001' as const,
-  personalizeModel: 'claude-sonnet-4-6-20260514' as const,
+  personalizeModel: 'claude-sonnet-4-6' as const,
 
   confidenceFloor: 60,
   qaScoreFloor: 7,
+  variantCount: 3,
   maxRetries: 3,
   batchFailAlertPct: 0.15,
   schedulerBatchSize: 50,

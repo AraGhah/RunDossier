@@ -22,8 +22,7 @@ CREATE TABLE IF NOT EXISTS prospects (
                                  'qa_failed',
                                  'personalization_failed'
                                )),
-  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS prospect_signals_raw (
@@ -93,5 +92,4 @@ CREATE INDEX IF NOT EXISTS idx_prompt_versions_agent    ON prompt_versions(agent
 CREATE INDEX IF NOT EXISTS idx_failed_jobs_workflow     ON failed_jobs(workflow, created_at);
 CREATE INDEX IF NOT EXISTS idx_ai_costs_prospect        ON ai_costs(prospect_id);
 
--- Optional: auto-update trigger is in sql/triggers.sql
--- The application layer already sets updated_at = NOW() on every UPDATE.
+-- Optional: auto-update trigger is in sql/triggers.sql (requires prospects.updated_at column).

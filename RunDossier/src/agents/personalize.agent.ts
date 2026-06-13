@@ -24,10 +24,11 @@ export interface FirstLineVariant {
 export async function runPersonalizeAgent(
   prospectId: string,
   researchBrief: ResearchBrief,
-  systemPrompt: string
+  systemPrompt: string,
+  retryNotes = ''
 ): Promise<FirstLineVariant[]> {
   const userMessage = `Generate 3 cold email opener variants for this prospect:
-${JSON.stringify(researchBrief)}
+${JSON.stringify(researchBrief)}${retryNotes}
 
 Return ONLY a JSON array of 3 objects:
 [{"variant_number": 1, "subject": "...", "opener": "...", "bridge": "...", "angle": "..."}]`;

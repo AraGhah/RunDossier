@@ -11,7 +11,7 @@ interface CostEntry {
 // Pricing per 1M tokens (update as needed)
 const PRICING: Record<string, { input: number; output: number }> = {
   'claude-haiku-4-5-20251001':   { input: 0.80, output: 4.00 },
-  'claude-sonnet-4-6-20260514':  { input: 3.00, output: 15.00 },
+  'claude-sonnet-4-6':           { input: 3.00, output: 15.00 },
 };
 
 export async function logCost(entry: CostEntry) {

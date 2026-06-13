@@ -11,7 +11,6 @@ interface Prospect {
   id: string;
   name: string;
   linkedin_url: string;
-  company?: string;
 }
 
 export async function handleResearch(job: { data: { prospectId: string } }): Promise<void> {
@@ -20,7 +19,7 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
 
   try {
     [prospect] = await query<Prospect>(
-      `SELECT id, name, linkedin_url, company
+      `SELECT id, name, linkedin_url
        FROM prospects WHERE id = $1 AND status = 'research_in_progress'`,
       [prospectId]
     );
@@ -48,9 +47,7 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
 
     const linkedInRecord = linkedInData as Record<string, unknown>;
     const companyName =
-      (linkedInRecord.company as { name?: string } | undefined)?.name ??
-      prospect.company ??
-      '';
+      (linkedInRecord.company as { name?: string } | undefined)?.name ?? '';
 
     const podcasts = await searchPodcasts(prospect.name, companyName);
 
@@ -74,7 +71,7 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
     await query(
       `UPDATE prospects
        SET research_summary = $1, top_3_signals = $2,
-           confidence_score = $3, status = $4, updated_at = NOW()
+           confidence_score = $3, status = $4
        WHERE id = $5`,
       [
         research.research_summary,
@@ -93,7 +90,7 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
     ).catch(e => console.error('[research] failed_jobs insert error:', e));
 
     await query(
-      `UPDATE prospects SET status = 'research_failed', updated_at = NOW()
+      `UPDATE prospects SET status = 'research_failed'
        WHERE id = $1 AND status = 'research_in_progress'`,
       [prospectId]
     ).catch(e => console.error('[research] status reset error:', e));
