@@ -1,19 +1,19 @@
-export async function retry<T>(
+export async function withRetry<T>(
   fn: () => Promise<T>,
-  maxAttempts = 3,
-  baseDelayMs = 1000
+  maxRetries = 3,
+  label = 'operation'
 ): Promise<T> {
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+  let lastError: Error;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await fn();
     } catch (err) {
-      lastError = err;
-      if (attempt < maxAttempts) {
-        const delay = baseDelayMs * 2 ** (attempt - 1);
+      lastError = err as Error;
+      if (attempt < maxRetries) {
+        const delay = Math.pow(4, attempt - 1) * 1000; // 1s, 4s, 16s
         await new Promise(r => setTimeout(r, delay));
       }
     }
   }
-  throw lastError;
+  throw lastError!;
 }

@@ -1,58 +1,56 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config.js';
-import { trackCost } from '../utils/cost-tracker.js';
-import { stripEmdash } from '../utils/strip-emdash.js';
+import { logCost } from '../utils/cost-tracker.js';
+import { stripEmDashes } from '../utils/strip-emdash.js';
+import { extractTextContent, parseJsonFromLLM } from '../utils/parse-json.js';
 
-const anthropic = new Anthropic({ apiKey: config.anthropicApiKey });
+const client = new Anthropic({ apiKey: config.anthropicKey });
 
-export interface PersonalizeInput {
-  leadId: string;
-  fullName: string;
-  company: string;
-  talkingPoints: string[];
-  researchSummary: string;
-}
-
-export interface PersonalizeOutput {
+export interface FirstLineVariant {
+  variant_number: number;
   subject: string;
-  emailBody: string;
-  linkedinNote: string;
+  opener: string;
+  bridge: string;
+  angle: string;
 }
 
-export async function runPersonalizeAgent(input: PersonalizeInput): Promise<PersonalizeOutput> {
-  const prompt = `You are an expert B2B copywriter. Write a cold outreach email and a short LinkedIn note.
+export async function runPersonalizeAgent(
+  prospectId: string,
+  researchBrief: any,
+  systemPrompt: string
+): Promise<FirstLineVariant[]> {
+  const userMessage = `Generate 3 cold email opener variants for this prospect:
+${JSON.stringify(researchBrief)}
 
-Prospect: ${input.fullName} at ${input.company}
-Research summary: ${input.researchSummary}
-Key talking points: ${input.talkingPoints.join('; ')}
+Return ONLY a JSON array of 3 objects:
+[{"variant_number": 1, "subject": "...", "opener": "...", "bridge": "...", "angle": "..."}]`;
 
-Rules:
-- Email subject line: max 8 words, no clickbait
-- Email body: 3 short paragraphs, under 120 words total, no em-dashes
-- LinkedIn note: max 300 characters
-
-Return JSON with keys: subject, emailBody, linkedinNote. Plain JSON, no markdown.`;
-
-  const message = await anthropic.messages.create({
-    model: config.models.personalize,
-    max_tokens: 768,
-    messages: [{ role: 'user', content: prompt }],
+  const response = await client.messages.create({
+    model: config.personalizeModel,
+    max_tokens: 2000,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userMessage }],
   });
 
-  await trackCost({
-    model: config.models.personalize,
-    jobName: 'personalize',
-    inputTokens: message.usage.input_tokens,
-    outputTokens: message.usage.output_tokens,
-    leadId: input.leadId,
-  });
+  const text = extractTextContent(response.content);
 
-  const raw = (message.content[0] as { type: string; text: string }).text;
-  const parsed = JSON.parse(raw) as PersonalizeOutput;
+  await logCost({
+    agentName: 'personalization_agent',
+    prospectId,
+    model: config.personalizeModel,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  }).catch(err => console.error('[personalize] cost log failed:', err));
 
-  return {
-    subject: stripEmdash(parsed.subject),
-    emailBody: stripEmdash(parsed.emailBody),
-    linkedinNote: stripEmdash(parsed.linkedinNote),
-  };
+  const variants = parseJsonFromLLM<FirstLineVariant[]>(text);
+  if (!Array.isArray(variants) || variants.length === 0) {
+    throw new Error('Personalization agent returned no variants');
+  }
+
+  return variants.map(v => ({
+    ...v,
+    subject: stripEmDashes(v.subject),
+    opener: stripEmDashes(v.opener),
+    bridge: stripEmDashes(v.bridge),
+  }));
 }

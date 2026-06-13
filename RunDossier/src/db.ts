@@ -1,13 +1,18 @@
-import pg from 'pg';
+import { Pool } from 'pg';
 import { config } from './config.js';
 
-const { Pool } = pg;
+export const pool = new Pool({
+  connectionString: config.databaseUrl,
+  ssl: config.databaseSsl ? { rejectUnauthorized: false } : undefined,
+  max: 10,
+});
 
-export const pool = new Pool({ connectionString: config.databaseUrl });
+export async function query<T = any>(sql: string, params?: any[]): Promise<T[]> {
+  const result = await pool.query(sql, params);
+  return result.rows as T[];
+}
 
-export async function query<T extends pg.QueryResultRow = pg.QueryResultRow>(
-  text: string,
-  params?: unknown[]
-): Promise<pg.QueryResult<T>> {
-  return pool.query<T>(text, params);
+export async function queryOne<T = any>(sql: string, params?: any[]): Promise<T | null> {
+  const rows = await query<T>(sql, params);
+  return rows[0] ?? null;
 }

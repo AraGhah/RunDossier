@@ -1,55 +1,53 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config.js';
-import { trackCost } from '../utils/cost-tracker.js';
-import { stripEmdash } from '../utils/strip-emdash.js';
+import { logCost } from '../utils/cost-tracker.js';
+import { extractTextContent, parseJsonFromLLM } from '../utils/parse-json.js';
 
-const anthropic = new Anthropic({ apiKey: config.anthropicApiKey });
+const client = new Anthropic({ apiKey: config.anthropicKey });
 
-export interface ResearchInput {
-  leadId: string;
-  fullName: string;
-  headline: string;
-  company: string;
-  about: string;
-}
+const DEFAULT_SYSTEM_PROMPT = `You are a B2B prospect researcher. Analyze LinkedIn and podcast data to produce actionable sales intelligence. Return only valid JSON.`;
 
 export interface ResearchOutput {
-  summary: string;
-  keyInsights: string[];
-  talkingPoints: string[];
+  top_3_signals: { signal: string; source: string; date: string }[];
+  buying_triggers: string[];
+  research_summary: string;
+  confidence_score: number;
 }
 
-export async function runResearchAgent(input: ResearchInput): Promise<ResearchOutput> {
-  const prompt = `You are a B2B research analyst. Given this LinkedIn profile, extract structured intel for outreach.
+export async function runResearchAgent(
+  prospectId: string,
+  linkedInData: any,
+  podcastData: any[],
+  systemPrompt = DEFAULT_SYSTEM_PROMPT
+): Promise<ResearchOutput> {
+  const userMessage = `Research this prospect:
+LinkedIn data: ${JSON.stringify(linkedInData)}
+Podcast appearances: ${JSON.stringify(podcastData)}
 
-Name: ${input.fullName}
-Headline: ${input.headline}
-Company: ${input.company}
-About: ${input.about}
+Return ONLY valid JSON matching this schema:
+{
+  "top_3_signals": [{"signal": "...", "source": "...", "date": "..."}],
+  "buying_triggers": ["..."],
+  "research_summary": "...",
+  "confidence_score": 0-100
+}`;
 
-Return JSON with keys: summary (2 sentences), keyInsights (array of 3 strings), talkingPoints (array of 3 strings).
-No markdown fences. Plain JSON only.`;
-
-  const message = await anthropic.messages.create({
-    model: config.models.research,
-    max_tokens: 512,
-    messages: [{ role: 'user', content: prompt }],
+  const response = await client.messages.create({
+    model: config.researchModel,
+    max_tokens: 1500,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userMessage }],
   });
 
-  await trackCost({
-    model: config.models.research,
-    jobName: 'research',
-    inputTokens: message.usage.input_tokens,
-    outputTokens: message.usage.output_tokens,
-    leadId: input.leadId,
+  const text = extractTextContent(response.content);
+
+  await logCost({
+    agentName: 'research_agent',
+    prospectId,
+    model: config.researchModel,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
   });
 
-  const raw = (message.content[0] as { type: string; text: string }).text;
-  const parsed = JSON.parse(raw) as ResearchOutput;
-
-  return {
-    summary: stripEmdash(parsed.summary),
-    keyInsights: parsed.keyInsights.map(stripEmdash),
-    talkingPoints: parsed.talkingPoints.map(stripEmdash),
-  };
+  return parseJsonFromLLM<ResearchOutput>(text);
 }

@@ -1,45 +1,86 @@
-import PgBoss from 'pg-boss';
-import { scrapeLinkedIn } from '../scrapers/linkedin.js';
-import { runResearchAgent } from '../agents/research.agent.js';
 import { query } from '../db.js';
-import { JOB_NAMES } from '../queue.js';
+import { scrapeLinkedIn } from '../scrapers/linkedin.js';
+import { searchPodcasts } from '../scrapers/podcast.js';
+import { runResearchAgent } from '../agents/research.agent.js';
+import { withRetry } from '../utils/retry.js';
+import { notify } from '../notify.js';
+import { config } from '../config.js';
+import { loadActivePrompt } from '../utils/prompts.js';
 
-interface ResearchJobData {
-  leadId: string;
-  linkedinUrl: string;
-}
+export async function handleResearch(job: { data: { prospectId: string } }) {
+  const { prospectId } = job.data;
+  let prospect: Record<string, any> | undefined;
 
-export async function registerResearchJob(boss: PgBoss): Promise<void> {
-  await boss.work<ResearchJobData>(JOB_NAMES.RESEARCH, async (job) => {
-    const { leadId, linkedinUrl } = job.data;
+  try {
+    [prospect] = await query<Record<string, any>>(
+      `SELECT * FROM prospects WHERE id = $1 AND status = 'research_in_progress'`,
+      [prospectId]
+    );
+    if (!prospect) return;
 
-    const [profile] = await scrapeLinkedIn([linkedinUrl]);
-    if (!profile) throw new Error(`No profile returned for ${linkedinUrl}`);
+    const linkedinUrl = String(prospect.linkedin_url ?? '').trim();
+    if (!linkedinUrl) {
+      throw new Error(`Prospect ${prospectId} has no linkedin_url`);
+    }
 
-    const research = await runResearchAgent({
-      leadId,
-      fullName: profile.fullName,
-      headline: profile.headline,
-      company: profile.company,
-      about: profile.about,
-    });
+    const linkedInData = await withRetry(
+      () => scrapeLinkedIn(linkedinUrl),
+      config.maxRetries,
+      'linkedin-scrape'
+    );
+    if (!linkedInData) {
+      throw new Error(`No LinkedIn profile returned for ${linkedinUrl}`);
+    }
 
     await query(
-      `UPDATE leads SET
-         research_summary = $1,
-         key_insights = $2,
-         talking_points = $3,
-         status = 'researched'
-       WHERE id = $4`,
-      [research.summary, JSON.stringify(research.keyInsights), JSON.stringify(research.talkingPoints), leadId]
+      `INSERT INTO prospect_signals_raw (prospect_id, source, raw_payload)
+       VALUES ($1, 'linkedin', $2)`,
+      [prospectId, JSON.stringify(linkedInData)]
     );
 
-    await boss.send(JOB_NAMES.PERSONALIZE, {
-      leadId,
-      fullName: profile.fullName,
-      company: profile.company,
-      researchSummary: research.summary,
-      talkingPoints: research.talkingPoints,
-    });
-  });
+    const podcasts = await searchPodcasts(
+      String(prospect.name ?? ''),
+      (linkedInData as { company?: { name?: string } }).company?.name ?? ''
+    );
+
+    const systemPrompt = await loadActivePrompt(
+      'research_agent',
+      'You are a B2B prospect researcher. Analyze LinkedIn and podcast data to produce actionable sales intelligence. Return only valid JSON.'
+    );
+    const research = await runResearchAgent(prospectId, linkedInData, podcasts, systemPrompt);
+
+    const status = research.confidence_score < config.confidenceFloor
+      ? 'thin_research'
+      : 'research_complete';
+
+    await query(
+      `UPDATE prospects
+       SET research_summary = $1, top_3_signals = $2,
+           confidence_score = $3, status = $4
+       WHERE id = $5`,
+      [
+        research.research_summary,
+        JSON.stringify(research.top_3_signals),
+        research.confidence_score,
+        status,
+        prospectId,
+      ]
+    );
+
+  } catch (err) {
+    await query(
+      `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
+       VALUES ('research', $1, $2, $3)`,
+      [prospectId, (err as Error).message, config.maxRetries]
+    ).catch(e => console.error('[research] failed_jobs insert error:', e));
+
+    await query(
+      `UPDATE prospects SET status = 'research_failed'
+       WHERE id = $1 AND status = 'research_in_progress'`,
+      [prospectId]
+    ).catch(e => console.error('[research] status reset error:', e));
+
+    await notify(`Research failed: ${prospect?.name ?? prospectId}\n${(err as Error).message}`);
+    throw err;
+  }
 }

@@ -1,33 +1,35 @@
 import crypto from 'crypto';
 import { config } from '../config.js';
 
-export interface PodcastEpisode {
-  id: number;
-  title: string;
-  description: string;
-  datePublished: number;
-  enclosureUrl: string;
-  feedTitle: string;
-}
+export async function searchPodcasts(personName: string, companyName: string) {
+  if (!config.podcastIndexKey || !config.podcastIndexSecret) {
+    return [];
+  }
 
-export async function searchPodcasts(query: string, max = 10): Promise<PodcastEpisode[]> {
-  const apiHeaderTime = Math.floor(Date.now() / 1000);
-  const hash = crypto
+  const q = encodeURIComponent(`${personName} ${companyName}`.trim());
+  const authDate = Math.floor(Date.now() / 1000);
+  const authorization = crypto
     .createHash('sha1')
-    .update(config.podcastIndexKey + config.podcastIndexSecret + apiHeaderTime)
+    .update(config.podcastIndexKey + config.podcastIndexSecret + authDate)
     .digest('hex');
 
-  const params = new URLSearchParams({ q: query, max: String(max) });
-  const res = await fetch(`https://api.podcastindex.org/api/1.0/search/byterm?${params}`, {
-    headers: {
-      'X-Auth-Key': config.podcastIndexKey,
-      'X-Auth-Date': String(apiHeaderTime),
-      Authorization: hash,
-      'User-Agent': 'RunDossier/1.0',
-    },
-  });
+  const res = await fetch(
+    `https://api.podcastindex.org/api/1.0/search/byterm?q=${q}`,
+    {
+      headers: {
+        'User-Agent': 'Preframe/1.0',
+        'X-Auth-Key': config.podcastIndexKey,
+        'X-Auth-Date': String(authDate),
+        Authorization: authorization,
+      },
+    }
+  );
 
-  if (!res.ok) throw new Error(`PodcastIndex error: ${res.status}`);
-  const data = (await res.json()) as { feeds: PodcastEpisode[] };
-  return data.feeds ?? [];
+  if (!res.ok) {
+    console.warn('[podcast] Podcast Index request failed:', res.status);
+    return [];
+  }
+
+  const data = await res.json();
+  return (data.feeds ?? []).slice(0, 3);
 }

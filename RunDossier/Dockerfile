@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN npm ci
 COPY tsconfig.json ./
 COPY src/ ./src/
-RUN npx tsc --outDir dist
+RUN npm run build
 
 FROM node:22-alpine
 WORKDIR /app

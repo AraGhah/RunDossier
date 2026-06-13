@@ -1,48 +1,56 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config.js';
-import { trackCost } from '../utils/cost-tracker.js';
+import { logCost } from '../utils/cost-tracker.js';
+import { extractTextContent, parseJsonFromLLM } from '../utils/parse-json.js';
 
-const anthropic = new Anthropic({ apiKey: config.anthropicApiKey });
+const client = new Anthropic({ apiKey: config.anthropicKey });
 
-export interface QaInput {
-  leadId: string;
-  subject: string;
-  emailBody: string;
-  linkedinNote: string;
+const DEFAULT_QA_PROMPT = `You are a cold email QA judge. Score each variant on specificity, human-ness, relevance, and length. Return only valid JSON.`;
+
+export interface QAResult {
+  variant_number: number;
+  specificity_score: number;
+  human_ness_score: number;
+  relevance_score: number;
+  length_ok: boolean;
+  qa_score: number;
+  qa_verdict: 'ship' | 'reject';
+  qa_reason: string;
 }
 
-export interface QaOutput {
-  passed: boolean;
-  score: number; // 0–100
-  issues: string[];
-}
+export async function runQAAgent(
+  prospectId: string,
+  variants: any[],
+  researchBrief: any,
+  systemPrompt = DEFAULT_QA_PROMPT
+): Promise<QAResult[]> {
+  const userMessage = `Score these cold email openers against the research brief.
 
-export async function runQaAgent(input: QaInput): Promise<QaOutput> {
-  const prompt = `You are a QA reviewer for B2B cold outreach. Score the following copy on a 0-100 scale.
+Research brief: ${JSON.stringify(researchBrief)}
 
-Subject: ${input.subject}
-Email body: ${input.emailBody}
-LinkedIn note: ${input.linkedinNote}
+Variants: ${JSON.stringify(variants)}
 
-Criteria: personalization, brevity, clear CTA, no spam words, no em-dashes, professional tone.
-Passing threshold: 70.
+For each variant return:
+[{"variant_number": 1, "specificity_score": 0-10, "human_ness_score": 0-10,
+  "relevance_score": 0-10, "length_ok": true/false,
+  "qa_score": 0-10, "qa_verdict": "ship"|"reject", "qa_reason": "..."}]`;
 
-Return JSON: { score: number, passed: boolean, issues: string[] }. Plain JSON only.`;
-
-  const message = await anthropic.messages.create({
-    model: config.models.qa,
-    max_tokens: 256,
-    messages: [{ role: 'user', content: prompt }],
+  const response = await client.messages.create({
+    model: config.researchModel,
+    max_tokens: 1500,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userMessage }],
   });
 
-  await trackCost({
-    model: config.models.qa,
-    jobName: 'qa',
-    inputTokens: message.usage.input_tokens,
-    outputTokens: message.usage.output_tokens,
-    leadId: input.leadId,
+  const text = extractTextContent(response.content);
+
+  await logCost({
+    agentName: 'qa_agent',
+    prospectId,
+    model: config.researchModel,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
   });
 
-  const raw = (message.content[0] as { type: string; text: string }).text;
-  return JSON.parse(raw) as QaOutput;
+  return parseJsonFromLLM<QAResult[]>(text);
 }
