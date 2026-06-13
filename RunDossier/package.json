@@ -1,0 +1,28 @@
+{
+  "name": "rundossier",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.9.3",
+    "@types/pg": "^8.20.0",
+    "express": "^5.2.1",
+    "pg": "^8.21.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
+    "apify-client": "^2.23.4",
+    "dotenv": "^17.4.2",
+    "pg-boss": "^12.18.3"
+  }
+}
