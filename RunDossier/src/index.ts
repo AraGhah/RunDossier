@@ -5,6 +5,7 @@ import { notify } from './notify.js';
 import { pool } from './db.js';
 import { registerDogfoodRoutes } from './routes/dogfood.js';
 import { handlePilotSubmit } from './routes/pilot.js';
+import { handleIntakeSubmit } from './routes/intake.js';
 import { handleAdminToken, handlePilotToken } from './routes/auth.js';
 import { corsMiddleware } from './middleware/cors.js';
 import { requireJwt } from './middleware/auth.js';
@@ -21,7 +22,7 @@ app.disable('x-powered-by');
 
 app.use(corsMiddleware);
 app.use(securityHeaders);
-app.use(express.json({ limit: '16kb' }));
+app.use(express.json({ limit: '512kb' }));
 
 const limitAuthToken = rateLimit({ keyPrefix: 'auth-token', windowMs: 15 * 60_000, max: 10 });
 const limitPilotToken = rateLimit({ keyPrefix: 'pilot-token', windowMs: 60_000, max: 20 });
@@ -34,6 +35,7 @@ const limitPilotSubmit = rateLimit({
     return email ? email.slice(0, 64) : '';
   },
 });
+const limitIntake = rateLimit({ keyPrefix: 'intake', windowMs: 60_000, max: 10 });
 const limitDogfood = rateLimit({ keyPrefix: 'dogfood', windowMs: 60_000, max: 60 });
 
 app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
@@ -45,6 +47,13 @@ app.post(
   limitPilotSubmit,
   requireJwt({ role: 'pilot', audience: 'pilot' }),
   (req, res) => { void handlePilotSubmit(req, res); }
+);
+
+app.post(
+  '/api/intake',
+  limitIntake,
+  requireJwt({ role: 'admin' }),
+  (req, res) => { void handleIntakeSubmit(req, res); }
 );
 
 app.use('/dogfood', limitDogfood);

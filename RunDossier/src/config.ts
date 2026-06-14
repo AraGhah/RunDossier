@@ -57,7 +57,13 @@ export const config = {
   maxRetries: 3,
   batchFailAlertPct: 0.15,
   schedulerBatchSize: 50,
+  intakeBatchSize: 50,
   notifyMaxLength: 4000,
+
+  /** W5 delivery */
+  deliveryDir: optionalEnv('DELIVERY_DIR') || 'data/deliveries',
+  resendApiKey: optionalEnv('RESEND_API_KEY'),
+  deliveryFromEmail: optionalEnv('DELIVERY_FROM_EMAIL') || 'deliveries@getdossier.co',
 
   /** Workflow 10 — self-selling dogfood pipeline */
   dogfoodEnabled: process.env.DOGFOOD_ENABLED !== 'false',

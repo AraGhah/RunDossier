@@ -73,13 +73,16 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
     await query(
       `UPDATE prospects
        SET research_summary = $1, top_3_signals = $2,
-           confidence_score = $3, status = $4
-       WHERE id = $5`,
+           buying_triggers = $3, confidence_score = $4, status = $5,
+           company = COALESCE(NULLIF(company, ''), $6)
+       WHERE id = $7`,
       [
         research.research_summary,
         JSON.stringify(research.top_3_signals),
+        JSON.stringify(research.buying_triggers ?? []),
         research.confidence_score,
         status,
+        companyName || null,
         prospectId,
       ]
     );

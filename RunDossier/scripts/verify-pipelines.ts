@@ -24,7 +24,7 @@ async function main(): Promise<void> {
   }
 
   try {
-    const tables = ['prospects', 'prospect_signals_raw', 'prompt_versions', 'first_lines', 'ai_costs', 'failed_jobs'];
+    const tables = ['prospects', 'prospect_signals_raw', 'prompt_versions', 'first_lines', 'ai_costs', 'failed_jobs', 'clients', 'batches'];
     for (const t of tables) {
       const [row] = await query<{ ok: boolean }>(
         `SELECT to_regclass($1) IS NOT NULL AS ok`, [`public.${t}`]
@@ -80,7 +80,8 @@ async function main(): Promise<void> {
     const names = prompts.map((p) => p.agent_name);
     const hasResearch = names.includes('research_agent');
     const hasPersonalize = names.some((n) => n.includes('personalization'));
-    if (!hasResearch || !hasPersonalize) {
+    const hasQa = names.includes('qa_agent');
+    if (!hasResearch || !hasPersonalize || !hasQa) {
       throw new Error(`Prompts actifs incomplets: ${names.join(', ')}`);
     }
     record('prompts', true, `Actifs: ${names.join(', ')}`);

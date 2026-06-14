@@ -1,6 +1,6 @@
 import { query, queryOne } from '../db.js';
 import { runPersonalizeAgent, type FirstLineVariant, type ResearchBrief } from '../agents/personalize.agent.js';
-import { runQAAgent, type QABrief, type QAResult } from '../agents/qa.agent.js';
+import { runQAAgent, pickBestVariant, passesW45Criteria, type QABrief, type QAResult } from '../agents/qa.agent.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
 import { loadActivePrompt } from '../utils/prompts.js';
@@ -10,24 +10,18 @@ interface Prospect {
   id: string;
   name: string;
   title: string;
+  company: string | null;
   research_summary: string;
   top_3_signals: unknown;
   source?: string;
-}
-
-function countShipped(variants: FirstLineVariant[], qaResults: QAResult[]): number {
-  return variants.filter(v => {
-    const qa = qaResults.find(q => q.variant_number === v.variant_number);
-    return qa && qa.qa_score >= config.qaScoreFloor;
-  }).length;
 }
 
 function buildRetryNotes(variants: FirstLineVariant[], qaResults: QAResult[]): string {
   const rejected = variants
     .map(v => {
       const qa = qaResults.find(q => q.variant_number === v.variant_number);
-      if (!qa || qa.qa_score >= config.qaScoreFloor) return null;
-      return `Variant ${v.variant_number} (${v.angle}): score ${qa.qa_score}/10 — ${qa.qa_reason}`;
+      if (!qa || passesW45Criteria(qa)) return null;
+      return `Variant ${v.variant_number} (${v.signal_used}): score ${qa.qa_score}/10 — ${qa.qa_reason}`;
     })
     .filter((line): line is string => line !== null);
 
@@ -40,33 +34,41 @@ async function persistVariants(
   variants: FirstLineVariant[],
   qaResults: QAResult[],
   promptId: string
-): Promise<number> {
+): Promise<{ passed: boolean; chosenVariant: number | null }> {
   await query('DELETE FROM first_lines WHERE prospect_id = $1', [prospectId]);
 
-  let shipped = 0;
+  const best = pickBestVariant(variants, qaResults);
+
   for (const variant of variants) {
     const qa = qaResults.find(q => q.variant_number === variant.variant_number);
-    const verdict = qa && qa.qa_score >= config.qaScoreFloor ? 'ship' : 'reject';
-    if (verdict === 'ship') shipped += 1;
+    const passed = qa ? passesW45Criteria(qa) : false;
+    const isChosen = best?.variant.variant_number === variant.variant_number;
 
     await query(
       `INSERT INTO first_lines
-       (prospect_id, variant_number, subject, opener, bridge, angle,
+       (prospect_id, variant_number, subject, opener, bridge, angle, signal_used,
         qa_score, specificity_score, human_ness_score, relevance_score, length_ok,
-        qa_verdict, qa_reason, model_used, prompt_version_id, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+        grounded, qa_verdict, qa_reason, model_used, prompt_version_id, status,
+        is_chosen, qa_created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,NOW())`,
       [
         prospectId, variant.variant_number,
-        variant.subject, variant.opener, variant.bridge, variant.angle,
+        variant.subject, variant.opener, variant.bridge, variant.signal_used, variant.signal_used,
         qa?.qa_score ?? 0, qa?.specificity_score ?? 0,
         qa?.human_ness_score ?? 0, qa?.relevance_score ?? 0,
-        qa?.length_ok ?? false, verdict, qa?.qa_reason ?? '',
+        qa?.length_ok ?? false, qa?.grounded ?? false,
+        qa?.qa_verdict ?? 'reject', qa?.qa_reason ?? '',
         config.personalizeModel, promptId,
-        verdict === 'ship' ? 'ready' : 'rejected',
+        passed ? 'qa_passed' : 'qa_failed',
+        isChosen,
       ]
     );
   }
-  return shipped;
+
+  return {
+    passed: best !== null,
+    chosenVariant: best?.variant.variant_number ?? null,
+  };
 }
 
 export async function handlePersonalize(job: { data: { prospectId: string } }): Promise<void> {
@@ -76,7 +78,7 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
     const [prospect] = await query<Prospect>(
       `UPDATE prospects SET status = 'personalization_in_progress'
        WHERE id = $1 AND status IN ('research_complete', 'personalization_in_progress')
-       RETURNING id, name, title, research_summary, top_3_signals,
+       RETURNING id, name, title, company, research_summary, top_3_signals,
                  COALESCE(source, 'manual') AS source`,
       [prospectId]
     );
@@ -93,12 +95,13 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
 
     const qaPrompt = await loadActivePrompt(
       'qa_agent',
-      'You are a cold email QA judge. Score each variant on specificity, human-ness, relevance, and length. Return only valid JSON.'
+      'You are an independent QA reviewer for Preframe cold-email first lines. Score honestly. Return only valid JSON.'
     );
 
     const brief: ResearchBrief = {
       name: prospect.name,
       title: prospect.title,
+      company: prospect.company ?? undefined,
       research_summary: prospect.research_summary,
       top_3_signals: prospect.top_3_signals,
     };
@@ -112,53 +115,52 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
     let retryNotes = '';
     let bestVariants: FirstLineVariant[] = [];
     let bestQa: QAResult[] = [];
-    let bestShipped = 0;
+    let bestPick: ReturnType<typeof pickBestVariant> = null;
 
     for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
       const variants = await runPersonalizeAgent(prospectId, brief, prompt.prompt_text, retryNotes);
       const qaResults = await runQAAgent(prospectId, variants, qaBrief, qaPrompt);
-      const shipped = countShipped(variants, qaResults);
+      const pick = pickBestVariant(variants, qaResults);
 
-      if (shipped > bestShipped) {
+      if (pick && (!bestPick || pick.qa.qa_score > bestPick.qa.qa_score)) {
         bestVariants = variants;
         bestQa = qaResults;
-        bestShipped = shipped;
+        bestPick = pick;
       }
 
-      if (shipped >= config.variantCount && variants.length >= config.variantCount) {
+      if (pick && pick.qa.qa_score >= config.qaScoreFloor) {
         bestVariants = variants;
         bestQa = qaResults;
-        bestShipped = shipped;
+        bestPick = pick;
         break;
       }
 
       retryNotes = buildRetryNotes(variants, qaResults);
     }
 
-    const shipped = await persistVariants(prospectId, bestVariants, bestQa, prompt.id);
-    const allPassed = shipped >= config.variantCount && bestVariants.length >= config.variantCount;
+    if (bestVariants.length === 0) {
+      throw new Error('Personalization produced no variants after retries');
+    }
 
-    const newStatus = allPassed
-      ? 'personalized_qa_passed'
-      : shipped > 0
-        ? 'research_complete'
-        : 'qa_failed';
-
-    await query(
-      'UPDATE prospects SET status = $1 WHERE id = $2',
-      [newStatus, prospectId]
+    const { passed, chosenVariant } = await persistVariants(
+      prospectId,
+      bestVariants,
+      bestQa,
+      prompt.id
     );
+
+    const newStatus = passed ? 'personalized_qa_passed' : 'qa_failed';
+
+    await query('UPDATE prospects SET status = $1 WHERE id = $2', [newStatus, prospectId]);
 
     await notify(
-      allPassed
-        ? `Personalize passed: ${prospect.name} (${shipped}/${config.variantCount} ready)`
-        : shipped > 0
-          ? `Personalize partial: ${prospect.name} (${shipped}/${config.variantCount} ready, retry scheduled)`
-          : `Personalize failed: ${prospect.name} (0/${config.variantCount} ready)`
+      passed
+        ? `W4/W4.5 passed: ${prospect.name} (chosen variant ${chosenVariant})`
+        : `W4/W4.5 failed: ${prospect.name} (no variant met ship criteria)`
     );
 
-    if (allPassed && prospect.source === 'dogfood') {
-      await logFunnelEvent(prospectId, 'personalized', { shipped });
+    if (passed && prospect.source === 'dogfood') {
+      await logFunnelEvent(prospectId, 'personalized', { chosenVariant });
     }
 
   } catch (err) {

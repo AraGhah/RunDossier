@@ -1,12 +1,14 @@
 import { PgBoss } from 'pg-boss';
 import { config } from './config.js';
-import { getPgSslConfig, logDatabaseSslConfig } from './pg-ssl.js';import { handleResearch } from './jobs/research.job.js';
+import { getPgSslConfig, logDatabaseSslConfig } from './pg-ssl.js';
+import { handleResearch } from './jobs/research.job.js';
 import { handlePersonalize } from './jobs/personalize.job.js';
 import { runScheduler } from './jobs/scheduler.job.js';
+import { runDelivery } from './jobs/delivery.job.js';
 import { runDogfoodScrape } from './jobs/dogfood-scrape.job.js';
 import { runDogfoodPromote } from './jobs/dogfood-promote.job.js';
 
-const QUEUES = ['research', 'personalize', 'scheduler', 'dogfood-scrape', 'dogfood-promote'] as const;
+const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote'] as const;
 
 let boss: PgBoss;
 
@@ -34,6 +36,17 @@ export async function startQueue(): Promise<void> {
   await boss.schedule('scheduler', '*/5 * * * *');
   await boss.work('scheduler', async (jobs) => {
     for (const _job of jobs) await runScheduler();
+  });
+
+  await boss.schedule('delivery', '*/15 * * * *');
+  await boss.work('delivery', async (jobs) => {
+    for (const _job of jobs) {
+      try {
+        await runDelivery();
+      } catch (err) {
+        console.error('[delivery] job error:', err);
+      }
+    }
   });
 
   await boss.schedule('dogfood-scrape', '0 */6 * * *');

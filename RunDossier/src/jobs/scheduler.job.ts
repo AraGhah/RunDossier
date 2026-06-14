@@ -64,19 +64,18 @@ export async function runScheduler(): Promise<void> {
   const incomplete = await query<{ id: string }>(
     `SELECT p.id
      FROM prospects p
-     WHERE trim(p.status) = 'personalized_qa_passed'
-       AND (
-         SELECT COUNT(*)::int
-         FROM first_lines fl
-         WHERE fl.prospect_id = p.id AND fl.status = 'ready'
-       ) < $1
-     LIMIT $2`,
-    [config.variantCount, schedulerBatchSize]
+     WHERE p.status = 'personalized_qa_passed'
+       AND NOT EXISTS (
+         SELECT 1 FROM first_lines fl
+         WHERE fl.prospect_id = p.id AND fl.is_chosen = true
+       )
+     LIMIT $1`,
+    [schedulerBatchSize]
   );
   for (const p of incomplete) {
     const [claimed] = await query<{ id: string }>(
       `UPDATE prospects SET status = 'research_complete'
-       WHERE id = $1 AND trim(status) = 'personalized_qa_passed'
+       WHERE id = $1 AND status = 'personalized_qa_passed'
        RETURNING id`,
       [p.id]
     );
