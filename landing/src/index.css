@@ -39,3 +39,41 @@
 }
 .faq-body.open { grid-template-rows: 1fr; }
 .faq-body > div { overflow: hidden; }
+
+/* Timeline line draw */
+@keyframes drawLine {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+.timeline-line {
+  transform-origin: top center;
+  animation: drawLine 0.8s cubic-bezier(0.32,0.72,0,1) forwards;
+}
+
+/* Shimmer / skeleton effect */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(184,151,90,0.12) 50%, transparent 100%);
+  background-size: 800px 100%;
+  animation: shimmer 2.2s infinite linear;
+}
+
+/* Gradient text utility */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #B8975A 0%, #D4B07A 50%, #B8975A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Soft entrance for cards */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.card-in {
+  animation: cardIn 0.6s cubic-bezier(0.32,0.72,0,1) forwards;
+}
