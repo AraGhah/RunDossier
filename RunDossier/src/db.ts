@@ -1,13 +1,10 @@
 import { Pool } from 'pg';
 import { config } from './config.js';
-
-const sslConfig = config.databaseSsl
-  ? { rejectUnauthorized: config.databaseSslStrict }
-  : undefined;
+import { getPgSslConfig } from './pg-ssl.js';
 
 export const pool = new Pool({
   connectionString: config.databaseUrl,
-  ssl: sslConfig,
+  ssl: getPgSslConfig(),
   max: 10,
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 5_000,

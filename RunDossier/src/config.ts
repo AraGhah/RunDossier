@@ -24,12 +24,18 @@ function optionalEnv(key: string): string {
 
 const rawPort = parseInt(process.env.PORT ?? '3000', 10);
 const databaseUrl = process.env.DATABASE_URL?.trim() ?? '';
+const isSupabase = databaseUrl.includes('supabase.com') || databaseUrl.includes('supabase.co');
 
 export const config = {
   databaseUrl,
-  databaseSsl: process.env.DATABASE_SSL === 'true' || databaseUrl.includes('supabase.com'),
-  /** Set DATABASE_SSL_STRICT=false only if your DB uses self-signed certs */
-  databaseSslStrict: process.env.DATABASE_SSL_STRICT !== 'false',
+  databaseSsl: process.env.DATABASE_SSL === 'true' || isSupabase,
+  /**
+   * Supabase + Alpine Docker often fails strict CA verification (SELF_SIGNED_CERT_IN_CHAIN).
+   * Default: relaxed for Supabase, strict otherwise. Override with DATABASE_SSL_STRICT=true|false.
+   */
+  databaseSslStrict: process.env.DATABASE_SSL_STRICT !== undefined
+    ? process.env.DATABASE_SSL_STRICT === 'true'
+    : !isSupabase,
   anthropicKey: optionalEnv('ANTHROPIC_API_KEY'),
   apifyToken: optionalEnv('APIFY_TOKEN'),
   /** Apify actor for LinkedIn profiles (approve permissions in Apify console once). */

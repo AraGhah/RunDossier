@@ -1,6 +1,6 @@
 import { PgBoss } from 'pg-boss';
 import { config } from './config.js';
-import { handleResearch } from './jobs/research.job.js';
+import { getPgSslConfig } from './pg-ssl.js';import { handleResearch } from './jobs/research.job.js';
 import { handlePersonalize } from './jobs/personalize.job.js';
 import { runScheduler } from './jobs/scheduler.job.js';
 import { runDogfoodScrape } from './jobs/dogfood-scrape.job.js';
@@ -15,11 +15,8 @@ export function getBoss(): PgBoss { return boss; }
 export async function startQueue(): Promise<void> {
   boss = new PgBoss({
     connectionString: config.databaseUrl,
-    ssl: config.databaseSsl
-      ? { rejectUnauthorized: config.databaseSslStrict }
-      : undefined,
+    ssl: getPgSslConfig(),
   });
-
   boss.on('error', (err: Error) => console.error('[pg-boss] error:', err));
   await boss.start();
 
@@ -75,11 +72,8 @@ export async function stopQueue(): Promise<void> {
 export async function probePgBoss(): Promise<void> {
   const probe = new PgBoss({
     connectionString: config.databaseUrl,
-    ssl: config.databaseSsl
-      ? { rejectUnauthorized: config.databaseSslStrict }
-      : undefined,
-  });
-  probe.on('error', (err: Error) => console.error('[pg-boss] probe error:', err));
+    ssl: getPgSslConfig(),
+  });  probe.on('error', (err: Error) => console.error('[pg-boss] probe error:', err));
   await probe.start();
   for (const name of QUEUES) {
     await probe.createQueue(name);

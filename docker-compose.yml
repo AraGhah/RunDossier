@@ -1,0 +1,17 @@
+services:
+  api:
+    build:
+      context: ./RunDossier
+      dockerfile: Dockerfile
+    container_name: rundossier-api
+    restart: unless-stopped
+    env_file:
+      - ./RunDossier/.env
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
