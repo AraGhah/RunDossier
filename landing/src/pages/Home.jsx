@@ -48,7 +48,7 @@ function Hero() {
   }, [titleText])
 
   return (
-    <section className="relative pt-36 pb-28 overflow-hidden">
+    <section className="relative pt-28 sm:pt-36 pb-20 sm:pb-28 overflow-hidden">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/4 -right-1/4 w-[700px] h-[700px] rounded-full bg-gradient-radial from-gold/[0.07] to-transparent" />
         <div className="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] rounded-full bg-gradient-radial from-navy/[0.05] to-transparent" />
@@ -73,7 +73,7 @@ function Hero() {
             </h1>
 
             <motion.p {...fadeUp} transition={{ delay: 0.25, duration: 0.75, ease:[0.32,0.72,0,1] }}
-              className="text-xl text-muted leading-relaxed mb-4">
+              className="text-lg sm:text-xl text-muted leading-relaxed mb-4">
               {t('hero.subtitle')}{' '}
               <em className="font-display italic not-italic text-ink">{t('hero.italic')}</em>
             </motion.p>
@@ -106,22 +106,22 @@ function Hero() {
             </motion.div>
           </motion.div>
 
-          {/* Right: live opener preview card */}
+          {/* Right: live opener preview card — visible on all screen sizes */}
           <motion.div {...fadeUpBlur} transition={{ delay: 0.3, duration: 0.8, ease:[0.32,0.72,0,1] }}
-            className="hidden lg:block relative">
-            <div className="relative pt-6 pb-10">
-              <div className="bg-white border border-border rounded-xl3 p-7 shadow-card relative overflow-hidden">
+            className="relative mt-10 lg:mt-0">
+            <div className="relative pt-4 sm:pt-6 pb-8 sm:pb-10">
+              <div className="bg-white border border-border rounded-xl3 p-5 sm:p-7 shadow-card relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold via-gold/50 to-transparent" />
-                <p className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-emerald-700 flex items-center gap-2 mb-4">
+                <p className="text-[0.65rem] sm:text-[0.68rem] font-bold uppercase tracking-[0.12em] text-emerald-700 flex items-center gap-2 mb-4">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Dossier opener
                 </p>
-                <p className="font-display italic text-[1rem] leading-relaxed text-ink mb-5">
+                <p className="font-display italic text-[clamp(0.9rem,2.5vw,1rem)] leading-relaxed text-ink mb-5">
                   "Your breakdown of why cold email collapsed between 2023 and 2025 is the most precise articulation I've seen published. GPT filler is exactly the right framing."
                 </p>
-                <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-border">
+                  <div className="min-w-0">
                     <p className="text-[0.78rem] font-semibold text-ink-2">Founder, Outbound Consultancy</p>
-                    <p className="text-[0.72rem] text-muted italic mt-0.5">Signal: LinkedIn article, Q3 2024</p>
+                    <p className="text-[0.72rem] text-muted italic mt-0.5 break-words">Signal: LinkedIn article, Q3 2024</p>
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
                     {[1,2,3,4,5].map(d => <span key={d} className="w-2 h-2 rounded-full bg-gold" />)}
@@ -129,14 +129,14 @@ function Hero() {
                 </div>
               </div>
 
-              <div className="absolute -top-1 right-6 bg-navy text-white text-[0.72rem] font-semibold px-3.5 py-1.5 rounded-full shadow-cta flex items-center gap-2">
-                <span className="w-[5px] h-[5px] rounded-full bg-gold animate-pulse-dot" />
-                Signal sourced automatically
+              <div className="absolute -top-1 right-3 sm:right-6 bg-navy text-white text-[0.65rem] sm:text-[0.72rem] font-semibold px-3 sm:px-3.5 py-1.5 rounded-full shadow-cta flex items-center gap-2 max-w-[calc(100%-1.5rem)]">
+                <span className="w-[5px] h-[5px] rounded-full bg-gold animate-pulse-dot flex-shrink-0" />
+                <span className="truncate">Signal sourced automatically</span>
               </div>
 
-              <div className="absolute -bottom-3 left-8 bg-white border border-border rounded-xl px-4 py-3 shadow-card flex items-center gap-3">
-                <div className="font-display text-2xl font-bold text-navy">3.1%</div>
-                <p className="text-[0.72rem] text-muted leading-tight max-w-[110px]">avg reply rate vs 2.1% industry standard</p>
+              <div className="absolute -bottom-3 left-3 sm:left-8 bg-white border border-border rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-card flex items-center gap-2 sm:gap-3 max-w-[calc(100%-1.5rem)]">
+                <div className="font-display text-xl sm:text-2xl font-bold text-navy flex-shrink-0">3.1%</div>
+                <p className="text-[0.68rem] sm:text-[0.72rem] text-muted leading-tight">avg reply rate vs 2.1% industry standard</p>
               </div>
             </div>
           </motion.div>
@@ -192,8 +192,8 @@ function Problem() {
           <div className="inline-flex items-center gap-8 bg-white/[0.04] border border-white/[0.07] rounded-2xl px-8 py-5 flex-wrap justify-center gap-y-4">
             {stats.map(s => (
               <div key={s.val} className="text-center">
-                <div className="font-display text-3xl font-bold text-gold">{s.val}</div>
-                <div className="text-[0.72rem] text-white/40 mt-1 max-w-[130px] leading-tight">{s.label}</div>
+                <div className="font-display text-[clamp(1.5rem,4vw,1.875rem)] font-bold text-gold">{s.val}</div>
+                <div className="text-[0.68rem] sm:text-[0.72rem] text-white/40 mt-1 max-w-[140px] mx-auto leading-tight">{s.label}</div>
               </div>
             ))}
           </div>
@@ -229,8 +229,8 @@ function Agitation() {
           {stats.map((s,i) => (
             <motion.div key={i} variants={staggerItem}
               className="flex-1 p-6 sm:p-8 text-center hover:bg-cream/60 transition-colors duration-200">
-              <div className="font-display text-3xl font-bold text-navy mb-2">{s.stat}</div>
-              <p className="text-[0.76rem] text-muted leading-snug">{s.label}</p>
+              <div className="font-display text-[clamp(1.5rem,4vw,1.875rem)] font-bold text-navy mb-2">{s.stat}</div>
+              <p className="text-[0.72rem] sm:text-[0.76rem] text-muted leading-snug">{s.label}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -545,7 +545,7 @@ function Credibility() {
             {stats.map((s,i) => (
               <motion.div key={i} variants={staggerItem}
                 className="bg-white border border-border rounded-xl2 p-6 text-center hover:shadow-card hover:-translate-y-1 transition-all duration-300">
-                <div className="font-display text-4xl font-bold text-navy mb-2">{s.val}</div>
+                <div className="font-display text-[clamp(1.75rem,4vw,2.25rem)] font-bold text-navy mb-2">{s.val}</div>
                 <p className="text-xs text-muted leading-snug">{s.label}</p>
               </motion.div>
             ))}
@@ -611,7 +611,7 @@ function PricingPreview() {
               <Card hover>
                 <p className="text-[0.72rem] font-bold uppercase tracking-wider text-muted mb-1">{plan.name}</p>
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="font-display text-4xl font-bold text-ink">{plan.price}</span>
+                  <span className="font-display text-[clamp(1.75rem,4vw,2.25rem)] font-bold text-ink">{plan.price}</span>
                   <span className="text-muted text-sm">{plan.unit}</span>
                 </div>
                 <p className="text-xs text-muted mb-3">{plan.prospects}</p>

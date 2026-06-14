@@ -18,6 +18,12 @@ const sampleOpeners = [
   { quote: 'Most founders bury their best result in a case study nobody reads. You put it in your headline — smart move, and probably why your inbound is converting above what your size would suggest.', role: 'Founder, B2B Lead Gen Agency', signal: 'Website hero copy analysis', qa: 4 },
 ]
 
+const csvRows = [
+  { n:'J. Whitmore', co:'LeadFlow Inc.', signal:'LinkedIn article on cold email decay', a:'Your breakdown of why cold email collapsed 2023 to 2025 is the most precise articulation I\'ve seen...', b:'The part about confusing volume with signal is something most agencies still haven\'t admitted...', qa:'4/5', conf:'High' },
+  { n:'M. Okafor', co:'Apex Outbound', signal:'ProductHunt launch, Feb 2025', a:'Saw you launched in February and positioned around removing friction everyone else buries in 5-step flows...', b:'Your PH launch framing — one CSV in, one campaign out — is the clearest positioning in leads tooling this year...', qa:'5/5', conf:'High' },
+  { n:'R. Castillo', co:'Clearpath B2B', signal:'Twitter thread, 2.4k engagements', a:'Your thread on why SDR handoffs break under 50 people is something I\'ve seen play out at 3 agencies...', b:'The nuance about handoffs breaking before the CRM even exists usually gets lost when people write about this...', qa:'3/5', conf:'Medium' },
+]
+
 export default function FreeLines() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -41,7 +47,7 @@ export default function FreeLines() {
   return (
     <>
       {/* Hero */}
-      <Section className="pt-32 pb-0 overflow-hidden">
+      <Section className="pt-24 sm:pt-32 pb-0 overflow-hidden">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-1/4 -right-1/4 w-[600px] h-[600px] rounded-full bg-gradient-radial from-gold/[0.07] to-transparent" />
         </div>
@@ -181,7 +187,32 @@ export default function FreeLines() {
               What the CSV actually <em className="italic text-gold">looks like.</em>
             </h2>
           </motion.div>
-          <motion.div {...fadeUp} transition={{delay:0.1}} className="overflow-x-auto">
+          {/* Mobile: card layout */}
+          <motion.div {...fadeUp} transition={{delay:0.1}} className="md:hidden flex flex-col gap-4">
+            {csvRows.map((row, i) => (
+              <div key={i} className="bg-white border border-border rounded-xl2 p-4 sm:p-5 shadow-card">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-ink">{row.n}</p>
+                    <p className="text-sm text-muted">{row.co}</p>
+                  </div>
+                  <span className={`text-[0.68rem] font-bold px-2 py-1 rounded-full flex-shrink-0 ${row.conf==='High'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}`}>{row.conf}</span>
+                </div>
+                <p className="text-[0.72rem] text-muted mb-3 break-words"><span className="font-semibold text-ink-2">Signal:</span> {row.signal}</p>
+                <p className="text-[0.78rem] italic text-ink leading-snug mb-2 break-words"><span className="not-italic font-semibold text-[0.65rem] uppercase tracking-wider text-muted block mb-1">Opener A</span>{row.a}</p>
+                <p className="text-[0.78rem] italic text-ink leading-snug mb-3 break-words"><span className="not-italic font-semibold text-[0.65rem] uppercase tracking-wider text-muted block mb-1">Opener B</span>{row.b}</p>
+                <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <span className="text-[0.68rem] font-semibold uppercase tracking-wider text-muted">QA score</span>
+                  <div className="flex gap-0.5">
+                    {[1,2,3,4,5].map(d => <span key={d} className={`w-1.5 h-1.5 rounded-full ${d<=parseInt(row.qa)?'bg-gold':'bg-border-2'}`}/>)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Desktop: table */}
+          <motion.div {...fadeUp} transition={{delay:0.1}} className="hidden md:block overflow-x-auto">
             <div className="bg-black/[0.025] border border-black/[0.05] rounded-xl3 p-1.5 min-w-[640px]">
               <div className="bg-white rounded-[calc(1.5rem-5px)] overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
                 <div className="bg-navy px-5 py-3 flex items-center gap-3">
@@ -199,11 +230,7 @@ export default function FreeLines() {
                     </tr>
                   </thead>
                   <tbody>
-                    {[
-                      { n:'J. Whitmore', co:'LeadFlow Inc.', signal:'LinkedIn article on cold email decay', a:'Your breakdown of why cold email collapsed 2023 to 2025 is the most precise articulation I\'ve seen...', b:'The part about confusing volume with signal is something most agencies still haven\'t admitted...', qa:'4/5', conf:'High' },
-                      { n:'M. Okafor', co:'Apex Outbound', signal:'ProductHunt launch, Feb 2025', a:'Saw you launched in February and positioned around removing friction everyone else buries in 5-step flows...', b:'Your PH launch framing — one CSV in, one campaign out — is the clearest positioning in leads tooling this year...', qa:'5/5', conf:'High' },
-                      { n:'R. Castillo', co:'Clearpath B2B', signal:'Twitter thread, 2.4k engagements', a:'Your thread on why SDR handoffs break under 50 people is something I\'ve seen play out at 3 agencies...', b:'The nuance about handoffs breaking before the CRM even exists usually gets lost when people write about this...', qa:'3/5', conf:'Medium' },
-                    ].map((row,i) => (
+                    {csvRows.map((row,i) => (
                       <tr key={i} className={`border-t border-border ${i%2===1?'bg-cream/50':''}`}>
                         <td className="px-4 py-3 font-semibold text-ink whitespace-nowrap">{row.n}</td>
                         <td className="px-4 py-3 text-muted whitespace-nowrap">{row.co}</td>

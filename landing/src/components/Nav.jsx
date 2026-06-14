@@ -42,8 +42,8 @@ export default function Nav() {
       <ScrollProgress />
 
       {/* Floating pill nav */}
-      <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2.5rem)] max-w-5xl">
-        <div className={`flex items-center justify-between gap-3 rounded-full border px-5 py-2.5
+      <div className="fixed top-3 sm:top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.25rem)] sm:w-[calc(100%-2.5rem)] max-w-5xl">
+        <div className={`flex items-center justify-between gap-2 sm:gap-3 rounded-full border px-3 sm:px-5 py-2 sm:py-2.5
           transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]
           ${scrolled
             ? 'bg-cream/95 backdrop-blur-xl border-border-2 shadow-float'
@@ -55,7 +55,7 @@ export default function Nav() {
             <span className="w-6 h-6 rounded-md bg-navy flex items-center justify-center">
               <span className="w-2 h-2 rounded-full bg-gold animate-pulse-dot" />
             </span>
-            <span className="font-display font-semibold text-navy text-[0.95rem] tracking-tight">
+            <span className="font-display font-semibold text-navy text-[0.85rem] sm:text-[0.95rem] tracking-tight">
               Dossier
             </span>
           </Link>
@@ -119,11 +119,11 @@ export default function Nav() {
                 transition={{ delay: i * 0.08 + 0.1, duration: 0.45, ease: [0.32,0.72,0,1] }}
               >
                 {l.to.startsWith('/#') ? (
-                  <a href={l.to} className="font-display text-4xl font-semibold text-ink hover:text-navy transition-colors block py-1.5 text-center">
+                  <a href={l.to} className="font-display text-[clamp(1.75rem,8vw,2.5rem)] font-semibold text-ink hover:text-navy transition-colors block py-1.5 text-center">
                     {l.label}
                   </a>
                 ) : (
-                  <Link to={l.to} className="font-display text-4xl font-semibold text-ink hover:text-navy transition-colors block py-1.5 text-center">
+                  <Link to={l.to} className="font-display text-[clamp(1.75rem,8vw,2.5rem)] font-semibold text-ink hover:text-navy transition-colors block py-1.5 text-center">
                     {l.label}
                   </Link>
                 )}
