@@ -22,5 +22,9 @@ wrangler pages deploy landing --project-name=getdossier
 
 ## Before go-live
 
-- Replace `https://cal.com/getdossier/pilot` in `landing/index.html` with your real Cal.com link.
+- Default Cal.com link: `preframe/30min` (no env vars required).
+- Optional separate Zoom/Teams events:
+  - `VITE_CAL_ZOOM_LINK` — e.g. `preframe/zoom-30`
+  - `VITE_CAL_TEAMS_LINK` — e.g. `preframe/teams-30`
+- In Cal.com, enable Zoom + Teams as locations on the event so clients can pick during booking.
 - Optional: run `npx tsx scripts/export-landing-openers.ts` in RunDossier to paste real anonymized openers from your DB.

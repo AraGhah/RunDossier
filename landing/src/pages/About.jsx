@@ -14,20 +14,6 @@ function Placeholder({ label, hint, tall }) {
   )
 }
 
-function PlaceholderImage({ label, hint }) {
-  return (
-    <div className="w-full aspect-square rounded-xl3 border-2 border-dashed border-gold/30 bg-gold/[0.03] flex flex-col items-center justify-center text-center p-6 max-w-xs mx-auto">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="text-gold/40 mb-3">
-        <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" strokeWidth="1.5"/>
-        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M2 22l7-6 5 5 4-4 12 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-      <span className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-gold">{label}</span>
-      {hint && <span className="text-xs text-muted-2 mt-1 leading-relaxed">{hint}</span>}
-    </div>
-  )
-}
-
 export default function About() {
   return (
     <>
@@ -120,14 +106,11 @@ export default function About() {
               The person behind Dossier.
             </h2>
           </motion.div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center max-w-4xl mx-auto">
-            <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
-              <PlaceholderImage label="Founder photo" hint="Professional headshot or portrait. Square or portrait ratio." />
-            </motion.div>
-            <motion.div {...fadeUp} className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-3">
-                <Placeholder label="Founder full name" hint="Your full name as you want it displayed." />
-                <Placeholder label="Title / role" hint="e.g. Founder, or Founder and CEO" />
+          <div className="max-w-2xl mx-auto">
+            <motion.div {...fadeUp} transition={{ delay: 0.1 }} className="flex flex-col gap-4">
+              <div>
+                <h3 className="font-display text-2xl font-semibold text-ink">Ara Ghahramanyan</h3>
+                <p className="text-sm text-muted mt-1">Founder, Dossier</p>
               </div>
               <Placeholder label="Short bio — sentence 1" hint="Your background. Where you come from and what you were doing before Dossier." tall />
               <Placeholder label="Short bio — sentence 2" hint="What led you specifically to start Dossier. The personal reason." tall />
@@ -215,7 +198,7 @@ export default function About() {
           </motion.div>
           <motion.div {...fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Placeholder label="Email address" hint="Your business or contact email." tall />
-            <Placeholder label="Booking / Cal.com link" hint="Link for scheduling a call. Currently: cal.com/getdossier/pilot" tall />
+            <Placeholder label="Booking / Cal.com embed" hint="Zoom + Teams on /book-call. Set VITE_CAL_ZOOM_LINK and VITE_CAL_TEAMS_LINK (20–30 min events)." tall />
             <Placeholder label="Other contact method (optional)" hint="LinkedIn DM, X DM, or a contact form URL." tall />
           </motion.div>
         </ContainerSm>
@@ -234,7 +217,7 @@ export default function About() {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <BtnPrimary to="/free-lines" large>Claim 100 Free Lines</BtnPrimary>
-              <BtnGhost to="/book-call" light>Book a 15-min Call</BtnGhost>
+              <BtnGhost to="/book-call" light>Book a 20–30 min Call</BtnGhost>
             </div>
           </motion.div>
         </Container>

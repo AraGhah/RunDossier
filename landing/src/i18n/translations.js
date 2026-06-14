@@ -15,7 +15,7 @@ export const translations = {
     'hero.italic': 'Prospects reply.',
     'hero.stat': 'Pilot results: 3.1% → 9.6% reply rate across 3 cold email campaigns',
     'hero.cta1': 'Claim 100 Free Lines',
-    'hero.cta2': 'Book a 15-min Call',
+    'hero.cta2': 'Book a 20–30 min Call',
     'hero.disclaimer': 'No campaign access needed · CSV delivered · 24–48 hour turnaround · No commitment',
 
     // PROBLEM
@@ -179,12 +179,12 @@ export const translations = {
     'finalcta.titleEm': 'free.',
     'finalcta.sub': 'No credit card. No campaign access. No commitment. 100 research-backed openers delivered in 48 hours — then we review the results together.',
     'finalcta.cta1': 'Claim 100 Free Lines',
-    'finalcta.cta2': 'Book a 15-min Call',
+    'finalcta.cta2': 'Book a 20–30 min Call',
     'finalcta.disclaimer': 'No commitment · No credit card · Pilot results reviewed together',
 
     // FOOTER
     'footer.brand': 'Personalized cold email openers built on real prospect research. For outbound agencies and B2B teams who know reply rate is won or lost in the first line.',
-    'footer.cta': 'Book a free 15-min call',
+    'footer.cta': 'Book a free 20–30 min call',
   },
 
   // ─────────────────────────────────────────────────────────────── FRANÇAIS ───
@@ -202,7 +202,7 @@ export const translations = {
     'hero.italic': 'Les taux de réponse augmentent.',
     'hero.stat': 'Cohorte pilote : taux de réponse passé de 3,1 % à 9,6 % avec Dossier',
     'hero.cta1': '100 Lignes Gratuites',
-    'hero.cta2': 'Réserver un Appel de 15 min',
+    'hero.cta2': 'Réserver un appel de 20–30 min',
     'hero.disclaimer': 'Aucun accès aux campagnes · Livraison CSV · Délai 24 à 48 h · Sans engagement',
 
     'problem.eyebrow': 'Le problème',
@@ -355,11 +355,11 @@ export const translations = {
     'finalcta.titleEm': 'gratuitement.',
     'finalcta.sub': 'Pas de carte de crédit. Pas d\'accès aux campagnes. Résultats pilotes en 48 heures. Si les accroches battent votre référence, on en parle.',
     'finalcta.cta1': '100 Lignes Gratuites',
-    'finalcta.cta2': 'Réserver un Appel de 15 min',
+    'finalcta.cta2': 'Réserver un appel de 20–30 min',
     'finalcta.disclaimer': 'Sans engagement · Sans carte de crédit · Résultats pilotes examinés ensemble',
 
     'footer.brand': 'Accroches personnalisées basées sur la recherche pour les agences outbound et les fondateurs B2B qui refusent d\'envoyer la même ligne à tout le monde.',
-    'footer.cta': 'Réserver un appel gratuit de 15 min',
+    'footer.cta': 'Réserver un appel gratuit de 20–30 min',
   },
 
   // ──────────────────────────────────────────────────────────────── ESPAÑOL ───
@@ -377,7 +377,7 @@ export const translations = {
     'hero.italic': 'Las tasas de respuesta suben.',
     'hero.stat': 'Cohorte piloto: la tasa de respuesta pasó del 3,1 % al 9,6 % con Dossier',
     'hero.cta1': '100 Líneas Gratis',
-    'hero.cta2': 'Reservar una Llamada de 15 min',
+    'hero.cta2': 'Reservar una llamada de 20–30 min',
     'hero.disclaimer': 'Sin acceso a campañas · Entrega en CSV · Plazo de 24 a 48 h · Sin compromiso',
 
     'problem.eyebrow': 'El problema',
@@ -530,10 +530,10 @@ export const translations = {
     'finalcta.titleEm': 'gratis.',
     'finalcta.sub': 'Sin tarjeta de crédito. Sin acceso a campañas. Resultados del piloto en 48 horas. Si las aperturas superan tu línea base, hablamos.',
     'finalcta.cta1': '100 Líneas Gratis',
-    'finalcta.cta2': 'Reservar una Llamada de 15 min',
+    'finalcta.cta2': 'Reservar una llamada de 20–30 min',
     'finalcta.disclaimer': 'Sin compromiso · Sin tarjeta de crédito · Resultados del piloto revisados juntos',
 
     'footer.brand': 'Aperturas personalizadas respaldadas por investigación para agencias de outbound y fundadores B2B que se niegan a enviar la misma línea a todos.',
-    'footer.cta': 'Reservar una llamada gratuita de 15 min',
+    'footer.cta': 'Reservar una llamada gratuita de 20–30 min',
   },
 }

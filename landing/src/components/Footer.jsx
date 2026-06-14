@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { calBookingUrl } from '../lib/cal'
 
 // Hash links must use plain <a href> — React Router's <Link> does not scroll to anchors reliably
 function FooterLink({ to, children, newTab }) {
@@ -25,11 +26,11 @@ const nav = {
   ],
   Offers: [
     { l: '100 Free Lines',      to: '/free-lines' },
-    { l: 'Book a 15-min Call',  to: '/book-call' },
+    { l: 'Book a 20–30 min Call',  to: '/book-call' },
   ],
   Company: [
     { l: 'About',   to: '/about' },
-    { l: 'Contact', to: 'https://cal.com/getdossier/pilot' },
+    { l: 'Contact', to: '/book-call' },
   ],
   Legal: [
     { l: 'Privacy Policy',   to: '/privacy',  newTab: true },
@@ -58,12 +59,12 @@ export default function Footer() {
             </p>
             <div className="mt-6">
               <a
-                href="https://cal.com/getdossier/pilot"
+                href={calBookingUrl('zoom')}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-navy text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-cta hover:bg-navy-2 transition-all duration-200"
               >
-                Book a free 15-min call
+                Book a free 20–30 min call
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                   <path d="M2 8L8 2M8 2H4M8 2V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -90,10 +91,9 @@ export default function Footer() {
           <p className="text-xs text-muted-2">© {new Date().getFullYear()} Dossier. All rights reserved.</p>
           <p className="text-xs text-muted-2">
             Questions?{' '}
-            <a href="https://cal.com/getdossier/pilot" target="_blank" rel="noopener noreferrer"
-              className="text-navy hover:underline">
+            <Link to="/book-call" className="text-navy hover:underline">
               Book a call →
-            </a>
+            </Link>
           </p>
         </div>
       </div>

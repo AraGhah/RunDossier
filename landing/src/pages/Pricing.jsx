@@ -77,7 +77,7 @@ const faqs = [
   { q: 'Is the 100 free lines pilot really free?', a: 'Yes. 100 prospects, no credit card, no commitment. We research and write three QA-scored openers per lead and deliver within 48 hours. If the openers beat your baseline, we talk about a paid plan. If not, there is no conversation to have.' },
   { q: 'What counts as a prospect toward my monthly limit?', a: 'Each row in your CSV counts as one prospect. We research each one and write three opener variants. Prospects flagged as low-confidence do not count toward your monthly limit.' },
   { q: 'Can I pause or cancel anytime?', a: 'Yes. Monthly plans can be paused or cancelled at any time. There are no annual contracts on the Starter or Growth plans unless you specifically request one for a discount.' },
-  { q: 'How does billing work for the Agency plan?', a: 'Agency pricing is based on volume, delivery speed, and integration requirements. Book a 15-minute call and we will put together a custom proposal within 24 hours.' },
+  { q: 'How does billing work for the Agency plan?', a: 'Agency pricing is based on volume, delivery speed, and integration requirements. Book a 20–30 minute call and we will put together a custom proposal within 24 hours.' },
   { q: 'What happens to prospects that get flagged as low-confidence?', a: 'They appear in your deliverable with a flag and a note explaining what signal was missing. You decide whether to pull them from the campaign, use the lower-confidence opener, or re-queue them.' },
 ]
 
@@ -244,7 +244,7 @@ export default function Pricing() {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <BtnPrimary to="/free-lines" large>Claim 100 Free Lines</BtnPrimary>
-              <BtnGhost to="/book-call" light>Book a 15-min Call</BtnGhost>
+              <BtnGhost to="/book-call" light>Book a 20–30 min Call</BtnGhost>
             </div>
           </motion.div>
         </Container>
