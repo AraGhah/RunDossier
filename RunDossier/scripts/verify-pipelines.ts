@@ -6,6 +6,7 @@ import { validateConfig, config } from '../src/config.js';
 import { probePgBoss } from '../src/queue.js';
 import { geminiGenerateContent } from '../src/utils/gemini.js';
 import { enrichPersonViaApollo } from '../src/scrapers/apollo.js';
+import { countShippedLinesSql } from '../src/utils/first-line-status.js';
 
 type Check = { name: string; ok: boolean; detail: string };
 const checks: Check[] = [];
@@ -151,60 +152,65 @@ async function main(): Promise<void> {
     record('health-endpoint', false, (e as Error).message);
   }
 
-  const prospects = await query<{
-    name: string;
-    status: string;
-    shipped_lines: string;
-    chosen_lines: string;
-    total_lines: string;
-  }>(
-    `SELECT p.name, trim(p.status) AS status,
-            ${countShippedLinesSql('fl')}::text AS shipped_lines,
-            COUNT(*) FILTER (WHERE fl.is_chosen = true)::text AS chosen_lines,
-            COUNT(fl.id)::text AS total_lines
-     FROM prospects p
-     LEFT JOIN first_lines fl ON fl.prospect_id = p.id
-     GROUP BY p.id, p.name, p.status
-     ORDER BY p.name`
-  );
-
-  const terminalStatuses = new Set([
-    'thin_research',
-    'research_failed',
-    'qa_failed',
-    'personalization_failed',
-    'delivered',
-  ]);
-
-  console.log('\n--- Prospects ---');
   let pipelineOk = true;
   let passedCount = 0;
-  for (const p of prospects) {
-    const shipped = Number(p.shipped_lines);
-    const chosen = Number(p.chosen_lines);
-    const isPassed = p.status === 'personalized_qa_passed';
-    if (isPassed) passedCount += 1;
 
-    let ok = true;
-    if (isPassed) {
-      ok = shipped >= 1;
-      if (pipelineOk && !ok) pipelineOk = false;
-    } else if (!terminalStatuses.has(p.status) && p.status !== 'queued' && p.status !== 'research_in_progress' && p.status !== 'research_complete' && p.status !== 'personalization_in_progress') {
-      ok = false;
-    }
-
-    const marker = isPassed ? (ok ? '✓' : '✗') : '·';
-    console.log(
-      `  ${marker} ${p.name}: ${p.status} | ${p.shipped_lines} shipped, ${p.chosen_lines} chosen (${p.total_lines} variantes)`
+  try {
+    const prospects = await query<{
+      name: string;
+      status: string;
+      shipped_lines: string;
+      chosen_lines: string;
+      total_lines: string;
+    }>(
+      `SELECT p.name, trim(p.status) AS status,
+              ${countShippedLinesSql('fl')}::text AS shipped_lines,
+              COUNT(*) FILTER (WHERE fl.is_chosen = true)::text AS chosen_lines,
+              COUNT(fl.id)::text AS total_lines
+       FROM prospects p
+       LEFT JOIN first_lines fl ON fl.prospect_id = p.id
+       GROUP BY p.id, p.name, p.status
+       ORDER BY p.name`
     );
+
+    const terminalStatuses = new Set([
+      'thin_research',
+      'research_failed',
+      'qa_failed',
+      'personalization_failed',
+      'delivered',
+    ]);
+
+    console.log('\n--- Prospects ---');
+    for (const p of prospects) {
+      const shipped = Number(p.shipped_lines);
+      const isPassed = p.status === 'personalized_qa_passed';
+      if (isPassed) passedCount += 1;
+
+      let ok = true;
+      if (isPassed) {
+        ok = shipped >= 1;
+        if (pipelineOk && !ok) pipelineOk = false;
+      } else if (!terminalStatuses.has(p.status) && p.status !== 'queued' && p.status !== 'research_in_progress' && p.status !== 'research_complete' && p.status !== 'personalization_in_progress') {
+        ok = false;
+      }
+
+      const marker = isPassed ? (ok ? '✓' : '✗') : '·';
+      console.log(
+        `  ${marker} ${p.name}: ${p.status} | ${p.shipped_lines} shipped, ${p.chosen_lines} chosen (${p.total_lines} variantes)`
+      );
+    }
+    record(
+      'prospects',
+      pipelineOk,
+      pipelineOk
+        ? `${passedCount} prospect(s) QA passés avec lignes livrables`
+        : `${passedCount} passés — au moins un sans ligne shipped`
+    );
+  } catch (e) {
+    record('prospects', false, (e as Error).message);
+    pipelineOk = false;
   }
-  record(
-    'prospects',
-    pipelineOk,
-    pipelineOk
-      ? `${passedCount} prospect(s) QA passés avec lignes livrables`
-      : `${passedCount} passés — au moins un sans ligne shipped`
-  );
 
   try {
     const missingResearch = await query<{ name: string }>(

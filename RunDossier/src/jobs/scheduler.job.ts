@@ -130,4 +130,20 @@ export async function runScheduler(): Promise<void> {
     );
     if (enqueued) await enqueuePersonalize(enqueued.id);
   }
+
+  const stuckResearch = await query<{ id: string }>(
+    `SELECT id FROM prospects WHERE status = 'research_in_progress' LIMIT $1`,
+    [schedulerBatchSize]
+  );
+  for (const p of stuckResearch) {
+    await enqueueResearch(p.id);
+  }
+
+  const stuckPersonalize = await query<{ id: string }>(
+    `SELECT id FROM prospects WHERE status = 'personalization_in_progress' LIMIT $1`,
+    [schedulerBatchSize]
+  );
+  for (const p of stuckPersonalize) {
+    await enqueuePersonalize(p.id);
+  }
 }

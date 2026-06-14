@@ -65,17 +65,14 @@ export function normalizeIntakeRecord(raw: Record<string, unknown>): IntakeRecor
 export function validateIntakeRecord(record: IntakeRecord): string | null {
   if (!record.name) return 'name is required';
   if (!record.client_id) return 'client_id is required';
-  if (!record.linkedin_url && !record.email) {
-    return 'linkedin_url or email is required';
+  if (!record.linkedin_url) {
+    return 'linkedin_url is required for the research pipeline (W3)';
   }
-  if (record.linkedin_url && !LINKEDIN_PROFILE_RE.test(record.linkedin_url)) {
+  if (!LINKEDIN_PROFILE_RE.test(record.linkedin_url)) {
     return `invalid linkedin_url: ${record.linkedin_url}`;
   }
   if (record.email && !EMAIL_RE.test(record.email)) {
     return `invalid email: ${record.email}`;
-  }
-  if (!record.linkedin_url) {
-    return 'linkedin_url is required for the research pipeline (W3)';
   }
   return null;
 }
@@ -141,13 +138,14 @@ export async function ingestProspects(
 
       const [batch] = await query<{ id: string }>(
         `INSERT INTO batches (client_id, prospect_count, status)
-         VALUES ($1, $2, 'queued')
+         VALUES ($1, 0, 'queued')
          RETURNING id`,
-        [clientId, chunk.length]
+        [clientId]
       );
       if (!batch) continue;
       batchIds.push(batch.id);
 
+      let batchInserted = 0;
       for (const p of chunk) {
         if (p.linkedin_url) {
           const [existing] = await query<{ id: string; status: string }>(
@@ -192,6 +190,14 @@ export async function ingestProspects(
         );
         if (row?.id) prospectIds.push(row.id);
         inserted += 1;
+        batchInserted += 1;
+      }
+
+      if (batchInserted > 0) {
+        await query(
+          `UPDATE batches SET prospect_count = $1 WHERE id = $2`,
+          [batchInserted, batch.id]
+        );
       }
     }
   }

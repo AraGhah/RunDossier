@@ -3,9 +3,9 @@ import { join } from 'node:path';
 import { query } from '../db.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
-import { buildDeliveryCsv, filterDeliveryRows, type DeliveryRow } from '../utils/csv-delivery.js';
+import { buildDeliveryCsv, isInternalEmail, type DeliveryRow } from '../utils/csv-delivery.js';
 import { buildDeliveryEmailContent } from '../utils/delivery-email.js';
-import { sendResendEmail } from '../utils/resend.js';
+import { resendConfigured, sendResendEmail } from '../utils/resend.js';
 import { BEST_SHIPPED_LINE_LATERAL } from '../utils/first-line-status.js';
 
 interface ClientRow {
@@ -74,20 +74,34 @@ export async function runDeliveryForClient(clientId: string): Promise<number> {
 
   if (prospects.length === 0) return 0;
 
-  const rows: DeliveryRow[] = prospects.map(p => ({
-    name: p.name,
-    title: p.title ?? '',
-    company: p.company ?? '',
-    email: p.email ?? '',
-    subject: p.subject,
-    opener: p.opener,
-    bridge: p.bridge,
-    fit_score: p.confidence_score ?? 0,
+  const rows = prospects.map(p => ({
+    id: p.id,
+    row: {
+      name: p.name,
+      title: p.title ?? '',
+      company: p.company ?? '',
+      email: p.email ?? '',
+      subject: p.subject,
+      opener: p.opener,
+      bridge: p.bridge,
+      fit_score: p.confidence_score ?? 0,
+    } satisfies DeliveryRow,
   }));
 
-  const deliverable = filterDeliveryRows(rows);
+  const deliverableEntries = rows.filter(entry => !isInternalEmail(entry.row.email));
+  const deliverable = deliverableEntries.map(entry => entry.row);
+  const deliverableIds = deliverableEntries.map(entry => entry.id);
+  const internalOnlyIds = rows
+    .filter(entry => isInternalEmail(entry.row.email))
+    .map(entry => entry.id);
+
   if (deliverable.length === 0) {
-    await notify(`Delivery skipped for ${client.name}: all rows filtered (internal emails)`);
+    await query(
+      `UPDATE prospects SET status = 'delivered', delivered_at = NOW()
+       WHERE id = ANY($1::uuid[])`,
+      [rows.map(r => r.id)]
+    );
+    await notify(`Delivery skipped for ${client.name}: all rows filtered (internal emails) — prospects marked delivered`);
     return 0;
   }
 
@@ -99,19 +113,6 @@ export async function runDeliveryForClient(clientId: string): Promise<number> {
   const filePath = join(config.deliveryDir, filename);
   await writeFile(filePath, csv, 'utf8');
 
-  const prospectIds = prospects.map(p => p.id);
-  await query(
-    `UPDATE prospects SET status = 'delivered', delivered_at = NOW()
-     WHERE id = ANY($1::uuid[])`,
-    [prospectIds]
-  );
-
-  await query(
-    `UPDATE batches SET status = 'delivered'
-     WHERE client_id = $1 AND status IN ('queued', 'processing')`,
-    [clientId]
-  );
-
   const emailed = await sendDeliveryEmail(
     client.contact_email,
     client.client_first_name,
@@ -120,11 +121,33 @@ export async function runDeliveryForClient(clientId: string): Promise<number> {
     filename
   );
 
+  const canFinalize = emailed || !resendConfigured();
+  if (canFinalize) {
+    const idsToDeliver = [...deliverableIds, ...internalOnlyIds];
+    await query(
+      `UPDATE prospects SET status = 'delivered', delivered_at = NOW()
+       WHERE id = ANY($1::uuid[])`,
+      [idsToDeliver]
+    );
+
+    await query(
+      `UPDATE batches SET status = 'delivered'
+       WHERE client_id = $1 AND status IN ('queued', 'processing')`,
+      [clientId]
+    );
+  }
+
   await notify(
-    `W5 Delivery: ${client.name}\n${deliverable.length} prospect(s)\nFile: ${filePath}\nEmail: ${client.contact_email}${emailed ? '' : '\n(Resend not configured — CSV saved only)'}`
+    `W5 Delivery: ${client.name}\n${deliverable.length} prospect(s)\nFile: ${filePath}\nEmail: ${client.contact_email}${
+      emailed
+        ? ''
+        : resendConfigured()
+          ? '\n(Email failed — prospects left in personalized_qa_passed for retry)'
+          : '\n(Resend not configured — CSV saved only)'
+    }`
   );
 
-  return deliverable.length;
+  return canFinalize ? deliverable.length : 0;
 }
 
 export async function runDelivery(): Promise<void> {

@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from '../context/LanguageContext'
+import FlagIcon from './FlagIcon'
 
 const LANGS = [
-  { code: 'en', label: 'English',  flag: '🇺🇸' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'es', label: 'Español',  flag: '🇪🇸' },
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'Français' },
+  { code: 'es', label: 'Español' },
 ]
 
 export default function Nav() {
@@ -117,9 +118,15 @@ export default function Nav() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 + 0.1, duration: 0.45, ease: [0.32,0.72,0,1] }}
               >
-                <Link to={l.to} className="font-display text-4xl font-semibold text-ink hover:text-navy transition-colors block py-1.5 text-center">
-                  {l.label}
-                </Link>
+                {l.to.startsWith('/#') ? (
+                  <a href={l.to} className="font-display text-4xl font-semibold text-ink hover:text-navy transition-colors block py-1.5 text-center">
+                    {l.label}
+                  </a>
+                ) : (
+                  <Link to={l.to} className="font-display text-4xl font-semibold text-ink hover:text-navy transition-colors block py-1.5 text-center">
+                    {l.label}
+                  </Link>
+                )}
               </motion.div>
             ))}
             <motion.div
@@ -165,7 +172,7 @@ function LangSwitcher() {
           hover:bg-black/[0.04] hover:text-ink transition-all duration-200"
         aria-label="Change language"
       >
-        <span className="text-[1rem] leading-none">{current.flag}</span>
+        <FlagIcon code={current.code} />
         <span className="uppercase tracking-wide">{current.code}</span>
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
           className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
@@ -193,7 +200,7 @@ function LangSwitcher() {
                     : 'text-ink-2 hover:bg-black/[0.04]'
                   }`}
               >
-                <span className="text-[1.1rem] leading-none">{l.flag}</span>
+                <FlagIcon code={l.code} />
                 <span>{l.label}</span>
                 {l.code === lang && (
                   <svg className="ml-auto text-navy" width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -213,7 +220,7 @@ function NavLink({ to, children }) {
   const isHash = to.startsWith('/#')
   if (isHash) {
     return (
-      <a href={to.replace('/', '')}
+      <a href={to}
         className="text-[0.82rem] font-medium text-muted px-3.5 py-2 rounded-full hover:text-ink hover:bg-black/[0.04] transition-all duration-200">
         {children}
       </a>

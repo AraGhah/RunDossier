@@ -22,7 +22,7 @@ export async function maybeRunDeliveryForClient(clientId: string): Promise<void>
     `SELECT COUNT(*)::text AS count
      FROM prospects
      WHERE client_id = $1
-       AND status = ANY($2::text[])`,
+       AND trim(status) = ANY($2::text[])`,
     [clientId, PIPELINE_ACTIVE_STATUSES]
   );
   if (Number(pending?.count ?? 0) > 0) return;
@@ -30,7 +30,7 @@ export async function maybeRunDeliveryForClient(clientId: string): Promise<void>
   const [ready] = await query<{ count: string }>(
     `SELECT COUNT(*)::text AS count
      FROM prospects
-     WHERE client_id = $1 AND status = 'personalized_qa_passed'`,
+     WHERE client_id = $1 AND trim(status) = 'personalized_qa_passed'`,
     [clientId]
   );
   if (Number(ready?.count ?? 0) === 0) return;
