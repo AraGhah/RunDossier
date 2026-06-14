@@ -8,6 +8,8 @@ export const CAL_MEETING_DURATION_LABEL = '20–30 minutes'
 
 export const CAL_HOST_NAME = 'Ara Ghahramanyan'
 export const CAL_HOST_ROLE = 'Founder, Dossier'
+/** Organizer notification email — set the same address in Cal.com account settings */
+export const CAL_HOST_EMAIL = 'ara@getdossier.co'
 
 export const calLinks = {
   zoom: import.meta.env.VITE_CAL_ZOOM_LINK?.trim() || DEFAULT_CAL_LINK,

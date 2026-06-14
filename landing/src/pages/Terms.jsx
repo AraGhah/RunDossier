@@ -1,5 +1,13 @@
 import { motion } from 'framer-motion'
 import { Section, ContainerSm, Eyebrow, fadeUp } from '../components/ui'
+import {
+  LEGAL_ENTITY,
+  LEGAL_OPERATOR,
+  LEGAL_WEBSITE,
+  LEGAL_EMAIL,
+  LEGAL_LAST_UPDATED,
+  LEGAL_JURISDICTION,
+} from '../lib/legal'
 
 function PolicySection({ title, children }) {
   return (
@@ -32,134 +40,207 @@ export default function Terms() {
             <h1 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.15] tracking-tight mb-3">
               Terms of Service
             </h1>
-            <p className="text-muted text-sm">Last updated: June 13, 2026</p>
+            <p className="text-muted text-sm">Last updated: {LEGAL_LAST_UPDATED}</p>
           </motion.div>
 
-          <PolicySection title="1. Agreement to these terms">
-            <P>By accessing our website or using our service, you agree to be bound by these Terms of Service ("Terms"). If you do not agree with any part of these Terms, you may not use our service.</P>
-            <P>These Terms constitute a legally binding agreement between you (or the business entity you represent, "Client") and Dossier ("we," "us," "our").</P>
+          <PolicySection title="1. Agreement">
+            <P>
+              By accessing {LEGAL_WEBSITE.replace('https://', '')} or using our services, you agree to these Terms of
+              Service (&quot;Terms&quot;). If you do not agree, do not use our services.
+            </P>
+            <P>
+              These Terms are a binding agreement between you (or the business you represent, &quot;Client&quot;) and{' '}
+              {LEGAL_ENTITY}, operated by {LEGAL_OPERATOR} in Canada (&quot;we,&quot; &quot;us,&quot; &quot;our&quot;).
+            </P>
           </PolicySection>
 
-          <PolicySection title="2. Description of service">
-            <P>Dossier provides a B2B prospect research and personalization service. Specifically, we:</P>
+          <PolicySection title="2. Service description">
+            <P>{LEGAL_ENTITY} provides B2B prospect research and email opener personalization. We:</P>
             <Ul items={[
-              'Accept lists of business prospects (name, company, LinkedIn URL) submitted by the Client.',
-              'Research each prospect using publicly available information.',
-              'Write three QA-scored, research-backed email opening lines per prospect.',
-              'Deliver the output as a CSV file compatible with the Client\'s email sequencer.',
+              'Accept business prospect lists (name, company, LinkedIn URL, etc.) submitted by the Client.',
+              'Research prospects using publicly available information.',
+              'Produce QA-scored, research-backed email opening lines.',
+              'Deliver output as a CSV compatible with the Client\'s sequencer.',
             ]} />
-            <P>Our service is a content creation service, not a managed outbound service. We do not send emails, access your email accounts, or manage your campaigns.</P>
+            <P>
+              We are a content and research provider. We do not send emails on your behalf, access your mailboxes,
+              or manage outbound campaigns.
+            </P>
           </PolicySection>
 
           <PolicySection title="3. Eligibility">
-            <P>You must be at least 18 years old and operating as or on behalf of a legitimate business to use Dossier. By using our service you represent that:</P>
+            <P>You must be at least 18 years old and acting for a legitimate business. You represent that:</P>
             <Ul items={[
-              'You have the legal authority to enter into these Terms on behalf of the entity you represent.',
-              'You will use our deliverables only in compliance with applicable laws and regulations.',
-              'You are not located in, or operating a business primarily in, a jurisdiction where our service is prohibited.',
+              'You have authority to bind the entity you represent.',
+              'Your use of our services and deliverables will comply with applicable laws.',
+              'You will not use our services where prohibited by law.',
             ]} />
           </PolicySection>
 
-          <PolicySection title="4. Free pilot offer">
-            <P>We offer a free 100-prospect pilot ("Pilot") subject to these conditions:</P>
+          <PolicySection title="4. Free pilot">
+            <P>Our free 100-prospect pilot (&quot;Pilot&quot;) is subject to:</P>
             <Ul items={[
-              'The Pilot is limited to one submission per business domain.',
-              'We reserve the right to decline a Pilot request at our sole discretion.',
-              'Pilot deliverables are provided "as-is" with no guarantee of outcome.',
-              'The Pilot is not redeemable for cash or credit.',
-              'We may discontinue the Pilot offer at any time without notice.',
+              'One Pilot request per business domain, unless we agree otherwise in writing.',
+              'Our right to decline any Pilot request at our discretion.',
+              'Delivery on an &quot;as-is&quot; basis with no guarantee of campaign results.',
+              'No cash value; we may modify or end the Pilot offer at any time.',
             ]} />
           </PolicySection>
 
           <PolicySection title="5. Paid plans and billing">
-            <P>Paid plans are billed monthly in advance. By subscribing to a paid plan you agree to:</P>
+            <P>Paid plans are billed monthly in advance unless otherwise agreed. You agree to:</P>
             <Ul items={[
-              'Provide accurate and complete billing information.',
-              'Pay the applicable monthly fee before service delivery begins for that cycle.',
-              'Understand that plan fees are non-refundable except as described in Section 6.',
+              'Provide accurate billing information.',
+              'Pay fees before service delivery for each billing cycle.',
+              'Accept that fees are generally non-refundable except as stated in Section 6.',
             ]} />
-            <P>We reserve the right to change pricing with 30 days written notice to active subscribers. Price changes apply at the start of the next billing cycle.</P>
-            <P>Agency plan pricing is custom and governed by a separate written agreement between the parties.</P>
+            <P>
+              We may change published pricing with at least 30 days&apos; notice to active subscribers. Changes
+              apply at the next billing cycle. Custom agency pricing is governed by a separate written agreement.
+            </P>
+            <P>
+              All prices are in Canadian dollars unless stated otherwise. Applicable taxes (GST/HST/QST/PST) are
+              added where required by Canadian law.
+            </P>
           </PolicySection>
 
           <PolicySection title="6. Cancellation and refunds">
-            <P>You may cancel your subscription at any time by contacting us before your next billing date. Cancellation takes effect at the end of the current billing period.</P>
-            <P>We do not offer prorated refunds for unused days in a billing period. However, if we fail to deliver your order within the stated turnaround time (24 to 48 hours) due to an error on our side, you are entitled to a credit equal to one month's subscription fee.</P>
-            <P>Refunds are issued at our discretion for first-time billing errors or technical failures clearly attributable to us.</P>
+            <P>
+              You may cancel before your next billing date; cancellation takes effect at the end of the current
+              paid period. We do not provide prorated refunds for unused days unless required by applicable
+              consumer protection law.
+            </P>
+            <P>
+              If we fail to deliver within the stated turnaround (24–48 hours) due to our error, you may receive a
+              credit equal to one month&apos;s subscription fee. Other refunds are at our discretion for clear
+              billing or technical errors on our side.
+            </P>
           </PolicySection>
 
-          <PolicySection title="7. Client obligations">
-            <P>As a Client you agree to:</P>
+          <PolicySection title="7. Client obligations — privacy and outbound compliance">
+            <P>As Client, you are responsible for your data and how you use our deliverables. You agree to:</P>
             <Ul items={[
-              'Provide accurate prospect data. We are not responsible for openers produced from inaccurate or fabricated inputs.',
-              'Use our deliverables in compliance with CAN-SPAM, GDPR, CASL, and all other applicable anti-spam and data protection laws in your target markets.',
-              'Not submit prospect lists that include private individuals (B2C), minors, or data obtained through unlawful means.',
-              'Not resell or sublicense our deliverables to third parties without our prior written consent.',
-              'Not use our service to produce content that is deceptive, harassing, defamatory, or otherwise unlawful.',
+              'Provide accurate prospect data; we are not liable for output based on false or incomplete inputs.',
+              'Comply with Canada\'s Anti-Spam Legislation (CASL) when sending commercial electronic messages to Canadian recipients — including consent, identification, and unsubscribe requirements.',
+              'Comply with PIPEDA, Quebec Law 25, and applicable provincial privacy laws when collecting and using personal information about prospects.',
+              'Comply with all laws in each jurisdiction you target (for example, GDPR/UK GDPR in Europe, CAN-SPAM in the United States, and local telemarketing rules).',
+              'Not submit lists of private consumers (B2C), minors, or data obtained unlawfully.',
+              'Not resell or sublicense our deliverables without our prior written consent.',
+              'Not use our service to create deceptive, harassing, defamatory, or unlawful content.',
             ]} />
+            <P>
+              {LEGAL_ENTITY} processes prospect data only as your service provider. You remain responsible for
+              determining that you have a lawful basis to provide that data to us and to contact those individuals.
+            </P>
           </PolicySection>
 
           <PolicySection title="8. Intellectual property">
-            <P>Upon full payment, you own the opener content we deliver to you. You may use, adapt, and distribute the openers in your campaigns without restriction.</P>
-            <P>We retain ownership of our research methodologies, QA frameworks, tooling, and any internal systems used to produce the deliverables. Nothing in these Terms transfers ownership of those to you.</P>
-            <P>Our website, brand, and all associated design assets are owned by Dossier and may not be reproduced without permission.</P>
+            <P>
+              Upon full payment, you own the opener text we deliver and may use it in your campaigns. We retain
+              ownership of our methodologies, QA systems, tooling, and internal processes.
+            </P>
+            <P>
+              Our website, brand, and design assets remain our property and may not be copied without permission.
+            </P>
           </PolicySection>
 
           <PolicySection title="9. Confidentiality">
-            <P>Both parties agree to keep the other's confidential information confidential. Specifically:</P>
+            <P>Each party will keep the other&apos;s confidential information confidential. Specifically:</P>
             <Ul items={[
-              'We will not share your prospect lists, business data, or campaign details with any third party except as required to fulfill your order or comply with law.',
-              'You will not disclose our pricing structures, internal processes, or proprietary methodologies to competitors.',
+              'We will not disclose your prospect lists, campaign details, or business data except to fulfill your order, use service providers bound by confidentiality, or as required by law.',
+              'You will not disclose our pricing, internal processes, or proprietary methods to competitors.',
             ]} />
-            <P>This obligation survives termination of these Terms for a period of 2 years.</P>
+            <P>This obligation survives termination for 2 years.</P>
           </PolicySection>
 
           <PolicySection title="10. Disclaimer of warranties">
-            <P>Our service is provided "as is" and "as available." We make no warranties, express or implied, including but not limited to:</P>
-            <Ul items={[
-              'That the openers we deliver will achieve any specific reply rate or campaign outcome.',
-              'That our service will be uninterrupted or error-free.',
-              'That the research underlying our openers is exhaustive or will remain accurate over time.',
-            ]} />
-            <P>We are a content and research service. Campaign performance depends on many variables beyond the opener — including your offer, targeting, sequencer configuration, and sending domain reputation. We do not guarantee results.</P>
+            <P>
+              Our services are provided &quot;as is&quot; and &quot;as available.&quot; To the fullest extent
+              permitted by applicable law, we disclaim all warranties, express or implied, including merchantability,
+              fitness for a particular purpose, and non-infringement.
+            </P>
+            <P>We do not warrant any specific reply rate, revenue outcome, or uninterrupted service. Campaign
+              results depend on factors outside our control.</P>
           </PolicySection>
 
           <PolicySection title="11. Limitation of liability">
-            <P>To the maximum extent permitted by applicable law, Dossier's total liability to you for any claim arising from or related to these Terms or our service shall not exceed the total fees you paid us in the 3 months immediately preceding the claim.</P>
-            <P>We are not liable for any indirect, incidental, special, consequential, or punitive damages, including lost profits, lost revenue, or reputational harm, even if we have been advised of the possibility of such damages.</P>
+            <P>
+              To the maximum extent permitted by applicable law, our total liability for any claim arising from
+              these Terms or our services shall not exceed the fees you paid us in the 3 months before the claim.
+            </P>
+            <P>
+              We are not liable for indirect, incidental, special, consequential, or punitive damages, including
+              lost profits or reputational harm, even if advised of the possibility — except where such exclusion
+              is prohibited by law (including certain consumer protection statutes in Canada).
+            </P>
           </PolicySection>
 
           <PolicySection title="12. Indemnification">
-            <P>You agree to indemnify, defend, and hold harmless Dossier and its operators from any claim, damages, loss, or expense (including reasonable legal fees) arising from:</P>
+            <P>You agree to indemnify and hold harmless {LEGAL_ENTITY} and {LEGAL_OPERATOR} from claims, damages,
+              and reasonable legal fees arising from:</P>
             <Ul items={[
-              'Your use of our deliverables in violation of applicable law.',
               'Your breach of these Terms.',
-              'Any third-party claim arising from the emails you send using our openers.',
+              'Your violation of CASL, PIPEDA, Law 25, or other applicable law in connection with your campaigns.',
+              'Third-party claims related to emails you send using our deliverables.',
             ]} />
           </PolicySection>
 
           <PolicySection title="13. Termination">
-            <P>We reserve the right to suspend or terminate your access to our service immediately and without notice if:</P>
+            <P>We may suspend or terminate access immediately if you:</P>
             <Ul items={[
-              'You violate any provision of these Terms.',
-              'We reasonably believe your use of our service creates legal or reputational risk.',
-              'You have an outstanding unpaid balance older than 14 days.',
+              'Breach these Terms.',
+              'Create legal or reputational risk through your use of our services.',
+              'Have an unpaid balance more than 14 days overdue.',
             ]} />
-            <P>You may terminate your account at any time. Termination does not entitle you to a refund for any prepaid period, except as described in Section 6.</P>
+            <P>
+              You may stop using our services at any time. Termination does not entitle you to a refund for prepaid
+              periods except as in Section 6.
+            </P>
           </PolicySection>
 
           <PolicySection title="14. Governing law and disputes">
-            <P>These Terms are governed by the laws of the jurisdiction in which Dossier is registered. Any dispute that cannot be resolved amicably shall be submitted to the exclusive jurisdiction of the courts in that jurisdiction.</P>
-            <P>Before initiating any formal dispute, both parties agree to attempt good-faith resolution through direct communication for a minimum of 30 days.</P>
+            <P>
+              These Terms are governed by the laws of Canada and the {LEGAL_JURISDICTION}, without regard to
+              conflict-of-law rules. The United Nations Convention on Contracts for the International Sale of
+              Goods does not apply.
+            </P>
+            <P>
+              Before formal proceedings, both parties will attempt good-faith resolution by written notice to{' '}
+              <a href={`mailto:${LEGAL_EMAIL}`} className="text-navy hover:underline">{LEGAL_EMAIL}</a> for at
+              least 30 days.
+            </P>
+            <P>
+              Subject to mandatory arbitration or consumer-protection rules that cannot be waived, disputes shall
+              be brought exclusively in the courts of the {LEGAL_JURISDICTION}.
+            </P>
           </PolicySection>
 
-          <PolicySection title="15. Changes to these Terms">
-            <P>We may update these Terms at any time. When we do, we will update the "Last updated" date at the top of this page. For material changes, we will notify active subscribers by email with at least 14 days notice before the changes take effect.</P>
-            <P>Continued use of our service after the effective date of any update constitutes your acceptance of the revised Terms.</P>
+          <PolicySection title="15. Privacy">
+            <P>
+              Our collection and use of personal information is described in our{' '}
+              <a href="/privacy" className="text-navy hover:underline">Privacy Policy</a>, which forms part of
+              these Terms.
+            </P>
           </PolicySection>
 
-          <PolicySection title="16. Contact">
-            <P>Questions about these Terms? Contact us at the email listed on our About page. We respond to all legal inquiries within 5 business days.</P>
+          <PolicySection title="16. Changes">
+            <P>
+              We may update these Terms. The &quot;Last updated&quot; date will change accordingly. Material changes
+              to active subscribers will be notified by email at least 14 days before taking effect. Continued use
+              after the effective date constitutes acceptance.
+            </P>
+          </PolicySection>
+
+          <PolicySection title="17. Contact">
+            <P>
+              Legal or contractual questions:{' '}
+              <a href={`mailto:${LEGAL_EMAIL}`} className="text-navy hover:underline">{LEGAL_EMAIL}</a>.
+              We aim to respond within 5 business days.
+            </P>
+            <P className="text-muted-2 text-xs mt-4">
+              These Terms are a commercial agreement template and do not constitute legal advice. Consult a
+              qualified lawyer for advice specific to your business.
+            </P>
           </PolicySection>
         </ContainerSm>
       </Section>
