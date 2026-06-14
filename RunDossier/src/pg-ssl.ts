@@ -6,3 +6,16 @@ export function getPgSslConfig(): ConnectionOptions | undefined {
   if (!config.databaseSsl) return undefined;
   return { rejectUnauthorized: config.databaseSslStrict };
 }
+
+export function logDatabaseSslConfig(): void {
+  const host = (() => {
+    try {
+      return new URL(config.databaseUrl.replace(/^postgresql:/, 'http:')).hostname;
+    } catch {
+      return '(invalid DATABASE_URL)';
+    }
+  })();
+  console.log(
+    `[db] SSL enabled=${config.databaseSsl} strict=${config.databaseSslStrict} host=${host}`
+  );
+}

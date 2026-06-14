@@ -1,6 +1,6 @@
 import { PgBoss } from 'pg-boss';
 import { config } from './config.js';
-import { getPgSslConfig } from './pg-ssl.js';import { handleResearch } from './jobs/research.job.js';
+import { getPgSslConfig, logDatabaseSslConfig } from './pg-ssl.js';import { handleResearch } from './jobs/research.job.js';
 import { handlePersonalize } from './jobs/personalize.job.js';
 import { runScheduler } from './jobs/scheduler.job.js';
 import { runDogfoodScrape } from './jobs/dogfood-scrape.job.js';
@@ -13,8 +13,8 @@ let boss: PgBoss;
 export function getBoss(): PgBoss { return boss; }
 
 export async function startQueue(): Promise<void> {
-  boss = new PgBoss({
-    connectionString: config.databaseUrl,
+  logDatabaseSslConfig();
+  boss = new PgBoss({    connectionString: config.databaseUrl,
     ssl: getPgSslConfig(),
   });
   boss.on('error', (err: Error) => console.error('[pg-boss] error:', err));

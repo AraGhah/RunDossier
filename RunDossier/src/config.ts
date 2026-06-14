@@ -23,19 +23,21 @@ function optionalEnv(key: string): string {
 }
 
 const rawPort = parseInt(process.env.PORT ?? '3000', 10);
-const databaseUrl = process.env.DATABASE_URL?.trim() ?? '';
+const rawDatabaseUrl = process.env.DATABASE_URL?.trim() ?? '';
+
+/** pg parses sslmode= in the URL and can override our ssl.rejectUnauthorized — strip it. */
+function stripSslModeParam(url: string): string {
+  return url.replace(/([?&])sslmode=[^&]*(&|$)/, (_, sep, tail) => (tail === '&' ? sep : '')).replace(/\?$/, '');
+}
+
+const databaseUrl = stripSslModeParam(rawDatabaseUrl);
 const isSupabase = databaseUrl.includes('supabase.com') || databaseUrl.includes('supabase.co');
 
 export const config = {
   databaseUrl,
   databaseSsl: process.env.DATABASE_SSL === 'true' || isSupabase,
-  /**
-   * Supabase + Alpine Docker often fails strict CA verification (SELF_SIGNED_CERT_IN_CHAIN).
-   * Default: relaxed for Supabase, strict otherwise. Override with DATABASE_SSL_STRICT=true|false.
-   */
-  databaseSslStrict: process.env.DATABASE_SSL_STRICT !== undefined
-    ? process.env.DATABASE_SSL_STRICT === 'true'
-    : !isSupabase,
+  /** Only opt-in strict verification. Default false — required for Supabase on Alpine/Docker. */
+  databaseSslStrict: process.env.DATABASE_SSL_STRICT === 'true',
   anthropicKey: optionalEnv('ANTHROPIC_API_KEY'),
   apifyToken: optionalEnv('APIFY_TOKEN'),
   /** Apify actor for LinkedIn profiles (approve permissions in Apify console once). */

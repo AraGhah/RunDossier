@@ -7,6 +7,9 @@ services:
     restart: unless-stopped
     env_file:
       - ./RunDossier/.env
+    environment:
+      DATABASE_SSL: "true"
+      DATABASE_SSL_STRICT: "false"
     ports:
       - "3000:3000"
     healthcheck:
