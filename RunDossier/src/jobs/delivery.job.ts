@@ -4,6 +4,8 @@ import { query } from '../db.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
 import { buildDeliveryCsv, filterDeliveryRows, type DeliveryRow } from '../utils/csv-delivery.js';
+import { buildDeliveryEmailContent } from '../utils/delivery-email.js';
+import { sendResendEmail } from '../utils/resend.js';
 import { BEST_SHIPPED_LINE_LATERAL } from '../utils/first-line-status.js';
 
 interface ClientRow {
@@ -15,37 +17,30 @@ interface ClientRow {
 
 async function sendDeliveryEmail(
   to: string,
-  clientName: string,
-  rowCount: number,
+  clientFirstName: string | null,
+  deliverable: DeliveryRow[],
   csvBody: string,
   filename: string
-): Promise<void> {
-  if (!config.resendApiKey || !config.deliveryFromEmail) return;
+): Promise<boolean> {
+  const { subject, html, text } = buildDeliveryEmailContent(
+    clientFirstName,
+    deliverable.length,
+    deliverable,
+    filename
+  );
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.resendApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: config.deliveryFromEmail,
-      to: [to],
-      subject: `Dossier delivery — ${rowCount} prospect${rowCount === 1 ? '' : 's'}`,
-      text: `Hi,\n\nYour Dossier batch for ${clientName} is ready (${rowCount} prospects).\n\nThe CSV is attached.\n\n— Dossier / Preframe`,
-      attachments: [
-        {
-          filename,
-          content: Buffer.from(csvBody, 'utf8').toString('base64'),
-        },
-      ],
-    }),
+  return sendResendEmail({
+    to,
+    subject,
+    html,
+    text,
+    attachments: [
+      {
+        filename,
+        content: Buffer.from(csvBody, 'utf8').toString('base64'),
+      },
+    ],
   });
-
-  if (!res.ok) {
-    const body = await res.text();
-    console.error('[delivery] Resend error:', res.status, body.slice(0, 300));
-  }
 }
 
 export async function runDeliveryForClient(clientId: string): Promise<number> {
@@ -117,10 +112,16 @@ export async function runDeliveryForClient(clientId: string): Promise<number> {
     [clientId]
   );
 
-  await sendDeliveryEmail(client.contact_email, client.name, deliverable.length, csv, filename);
+  const emailed = await sendDeliveryEmail(
+    client.contact_email,
+    client.client_first_name,
+    deliverable,
+    csv,
+    filename
+  );
 
   await notify(
-    `W5 Delivery: ${client.name}\n${deliverable.length} prospect(s)\nFile: ${filePath}\nEmail: ${client.contact_email}`
+    `W5 Delivery: ${client.name}\n${deliverable.length} prospect(s)\nFile: ${filePath}\nEmail: ${client.contact_email}${emailed ? '' : '\n(Resend not configured — CSV saved only)'}`
   );
 
   return deliverable.length;

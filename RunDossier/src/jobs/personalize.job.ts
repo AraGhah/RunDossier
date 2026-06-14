@@ -5,12 +5,14 @@ import { notify } from '../notify.js';
 import { config } from '../config.js';
 import { loadActivePrompt } from '../utils/prompts.js';
 import { logFunnelEvent } from '../utils/funnel-log.js';
+import { maybeRunDeliveryForClient } from '../utils/delivery-trigger.js';
 
 interface Prospect {
   id: string;
   name: string;
   title: string;
   company: string | null;
+  client_id: string | null;
   research_summary: string;
   top_3_signals: unknown;
   source?: string;
@@ -78,7 +80,7 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
     const [prospect] = await query<Prospect>(
       `UPDATE prospects SET status = 'personalization_in_progress'
        WHERE id = $1 AND status IN ('research_complete', 'personalization_in_progress')
-       RETURNING id, name, title, company, research_summary, top_3_signals,
+       RETURNING id, name, title, company, client_id, research_summary, top_3_signals,
                  COALESCE(source, 'manual') AS source`,
       [prospectId]
     );
@@ -161,6 +163,14 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
 
     if (passed && prospect.source === 'dogfood') {
       await logFunnelEvent(prospectId, 'personalized', { chosenVariant });
+    }
+
+    if (passed && prospect.client_id) {
+      try {
+        await maybeRunDeliveryForClient(prospect.client_id);
+      } catch (deliveryErr) {
+        console.error('[personalize] delivery trigger error:', deliveryErr);
+      }
     }
 
   } catch (err) {
