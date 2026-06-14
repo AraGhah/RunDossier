@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Section, Container, ContainerSm, Eyebrow, BtnPrimary, Card, Divider, fadeUp, staggerContainer, staggerItem, OpenerCard } from '../components/ui'
+import { submitPilotRequest } from '../lib/api'
 
 const included = [
   { icon:'✍️', title:'3 opener variants per prospect', body:'Each lead gets three QA-scored first lines, each with a different angle and framing. You pick the one that fits your campaign.' },
@@ -19,12 +20,22 @@ const sampleOpeners = [
 
 export default function FreeLines() {
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
   const [form, setForm] = useState({ name:'', email:'', company:'', sequencer:'', url:'' })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitted(true)
-    // In production: send to your backend or Cal.com
+    setError('')
+    setSubmitting(true)
+    try {
+      await submitPilotRequest(form)
+      setSubmitted(true)
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -102,12 +113,15 @@ export default function FreeLines() {
                           />
                         </div>
                       ))}
-                      <button type="submit"
+                      <button type="submit" disabled={submitting}
                         className="w-full bg-navy text-white font-semibold text-[0.95rem] py-3.5 rounded-full
                           shadow-cta hover:bg-navy-2 hover:shadow-cta-hover active:scale-[0.98]
-                          transition-all duration-200 mt-2">
-                        Claim 100 Free Lines →
+                          transition-all duration-200 mt-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                        {submitting ? 'Sending…' : 'Claim 100 Free Lines →'}
                       </button>
+                      {error && (
+                        <p className="text-center text-sm text-red-600" role="alert">{error}</p>
+                      )}
                       <p className="text-center text-xs text-muted-2">No credit card. No campaign access. No commitment.</p>
                     </form>
                   </div>

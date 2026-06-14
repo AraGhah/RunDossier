@@ -16,6 +16,7 @@
     "dogfood:scrape": "tsx scripts/run-dogfood-scrape.ts",
     "dogfood:queue": "tsx scripts/dogfood-review-queue.ts",
     "landing:openers": "tsx scripts/export-landing-openers.ts",
+    "pilot:migrate": "tsx scripts/apply-pilot-migration.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {

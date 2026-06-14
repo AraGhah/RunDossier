@@ -72,6 +72,12 @@ export const config = {
   smartleadApiKey: optionalEnv('SMARTLEAD_API_KEY'),
   smartleadCampaignId: optionalEnv('SMARTLEAD_CAMPAIGN_ID'),
   dogfoodApiToken: optionalEnv('DOGFOOD_API_TOKEN'),
+
+  /** Comma-separated origins for landing → API (e.g. https://getdossier.co,http://localhost:5173) */
+  corsOrigins: (optionalEnv('CORS_ORIGINS') || 'http://localhost:5173,http://127.0.0.1:5173')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean),
 } as const;
 
 /** Call at startup — throws with a clear message if required secrets are missing. */

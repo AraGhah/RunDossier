@@ -10,6 +10,7 @@ services:
     environment:
       DATABASE_SSL: "true"
       DATABASE_SSL_STRICT: "false"
+      CORS_ORIGINS: "https://getdossier.co,https://www.getdossier.co,http://localhost:5173"
     ports:
       - "3000:3000"
     healthcheck:

@@ -4,8 +4,12 @@ import { startQueue, stopQueue } from './queue.js';
 import { notify } from './notify.js';
 import { pool } from './db.js';
 import { registerDogfoodRoutes } from './routes/dogfood.js';
+import { handlePilotSubmit } from './routes/pilot.js';
+import { corsMiddleware } from './middleware/cors.js';
 
 const app = express();
+
+app.use(corsMiddleware);
 
 // Limit body size to prevent memory-exhaustion via large payloads
 app.use(express.json({ limit: '64kb' }));
@@ -22,6 +26,8 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 });
 
 app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
+
+app.post('/api/pilot', (req, res) => { void handlePilotSubmit(req, res); });
 
 registerDogfoodRoutes(app);
 
