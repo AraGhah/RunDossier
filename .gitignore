@@ -1,0 +1,16 @@
+# Dependencies (never commit — breaks branch checkout on Windows/OneDrive)
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
