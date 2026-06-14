@@ -1,6 +1,3 @@
-# Dependencies (never commit — breaks branch checkout on Windows/OneDrive)
-node_modules/
-
 # Build output
 dist/
 *.tsbuildinfo
