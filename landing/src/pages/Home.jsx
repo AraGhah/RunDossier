@@ -56,52 +56,92 @@ function Hero() {
       </div>
 
       <Container className="relative z-10">
-        <motion.div {...fadeUp} className="max-w-4xl">
-          <p className="inline-flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-gold mb-6">
-            <span className="w-5 h-px bg-gold" />
-            {t('hero.eyebrow')}
-          </p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-          <h1
-            ref={titleRef}
-            className="font-display text-[clamp(2.6rem,5.5vw,4.4rem)] font-bold leading-[1.08] tracking-[-0.025em] text-ink mb-6"
-          >
-            {titleText}
-          </h1>
+          {/* Left: headline + CTAs */}
+          <motion.div {...fadeUp}>
+            <p className="inline-flex items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-gold mb-6">
+              <span className="w-5 h-px bg-gold" />
+              {t('hero.eyebrow')}
+            </p>
 
-          <motion.p {...fadeUp} transition={{ delay: 0.25, duration: 0.75, ease:[0.32,0.72,0,1] }}
-            className="text-xl text-muted leading-relaxed max-w-2xl mb-4">
-            {t('hero.subtitle')}{' '}
-            <em className="font-display italic not-italic text-ink">{t('hero.italic')}</em>
-          </motion.p>
+            <h1
+              ref={titleRef}
+              className="font-display text-[clamp(2.4rem,4.5vw,4rem)] font-bold leading-[1.08] tracking-[-0.025em] text-ink mb-6"
+            >
+              {titleText}
+            </h1>
 
-          <motion.div {...fadeUp} transition={{ delay: 0.35, duration: 0.7, ease:[0.32,0.72,0,1] }}
-            className="inline-flex items-center gap-2 bg-gold/10 border border-gold/25 rounded-full px-4 py-2 text-[0.82rem] font-medium text-ink-2 mb-10">
-            <span className="w-[5px] h-[5px] rounded-full bg-gold animate-pulse-dot" />
-            {t('hero.stat')}
+            <motion.p {...fadeUp} transition={{ delay: 0.25, duration: 0.75, ease:[0.32,0.72,0,1] }}
+              className="text-xl text-muted leading-relaxed mb-4">
+              {t('hero.subtitle')}{' '}
+              <em className="font-display italic not-italic text-ink">{t('hero.italic')}</em>
+            </motion.p>
+
+            <motion.div {...fadeUp} transition={{ delay: 0.35, duration: 0.7, ease:[0.32,0.72,0,1] }}
+              className="inline-flex items-center gap-2 bg-gold/10 border border-gold/25 rounded-full px-4 py-2 text-[0.82rem] font-medium text-ink-2 mb-10">
+              <span className="w-[5px] h-[5px] rounded-full bg-gold animate-pulse-dot" />
+              {t('hero.stat')}
+            </motion.div>
+
+            <motion.div {...fadeUp} transition={{ delay: 0.45, duration: 0.7, ease:[0.32,0.72,0,1] }}
+              className="flex flex-wrap items-center gap-3 mb-5">
+              <BtnPrimary to="/free-lines" large>{t('hero.cta1')}</BtnPrimary>
+              <BtnGhost to="/book-call">{t('hero.cta2')}</BtnGhost>
+            </motion.div>
+
+            <motion.p {...fadeUp} transition={{ delay: 0.55, duration: 0.7, ease:[0.32,0.72,0,1] }}
+              className="text-xs text-muted-2 flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.2"/><path d="M6 4v3l1.5 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+              {t('hero.disclaimer')}
+            </motion.p>
+
+            <motion.div {...fadeUp} transition={{ delay: 0.6, duration: 0.7, ease:[0.32,0.72,0,1] }}
+              className="flex flex-wrap gap-2 mt-10">
+              {['Smartlead','Instantly','Lemlist','EmailBison','Clay','Apollo CSV'].map(tag => (
+                <span key={tag} className="text-[0.72rem] font-medium bg-white border border-border text-muted rounded-full px-3 py-1.5 hover:border-border-2 transition-colors">
+                  {tag}
+                </span>
+              ))}
+            </motion.div>
           </motion.div>
 
-          <motion.div {...fadeUp} transition={{ delay: 0.45, duration: 0.7, ease:[0.32,0.72,0,1] }}
-            className="flex flex-wrap items-center gap-3 mb-5">
-            <BtnPrimary to="/free-lines" large>{t('hero.cta1')}</BtnPrimary>
-            <BtnGhost to="/book-call">{t('hero.cta2')}</BtnGhost>
+          {/* Right: live opener preview card */}
+          <motion.div {...fadeUpBlur} transition={{ delay: 0.3, duration: 0.8, ease:[0.32,0.72,0,1] }}
+            className="hidden lg:block relative">
+            <div className="relative pt-6 pb-10">
+              <div className="bg-white border border-border rounded-xl3 p-7 shadow-card relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold via-gold/50 to-transparent" />
+                <p className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-emerald-700 flex items-center gap-2 mb-4">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Dossier opener
+                </p>
+                <p className="font-display italic text-[1rem] leading-relaxed text-ink mb-5">
+                  "Your breakdown of why cold email collapsed between 2023 and 2025 is the most precise articulation I've seen published. GPT filler is exactly the right framing."
+                </p>
+                <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
+                  <div>
+                    <p className="text-[0.78rem] font-semibold text-ink-2">Founder, Outbound Consultancy</p>
+                    <p className="text-[0.72rem] text-muted italic mt-0.5">Signal: LinkedIn article, Q3 2024</p>
+                  </div>
+                  <div className="flex gap-1 flex-shrink-0">
+                    {[1,2,3,4,5].map(d => <span key={d} className="w-2 h-2 rounded-full bg-gold" />)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute -top-1 right-6 bg-navy text-white text-[0.72rem] font-semibold px-3.5 py-1.5 rounded-full shadow-cta flex items-center gap-2">
+                <span className="w-[5px] h-[5px] rounded-full bg-gold animate-pulse-dot" />
+                Signal sourced automatically
+              </div>
+
+              <div className="absolute -bottom-3 left-8 bg-white border border-border rounded-xl px-4 py-3 shadow-card flex items-center gap-3">
+                <div className="font-display text-2xl font-bold text-navy">3.1%</div>
+                <p className="text-[0.72rem] text-muted leading-tight max-w-[110px]">avg reply rate vs 2.1% industry standard</p>
+              </div>
+            </div>
           </motion.div>
 
-          <motion.p {...fadeUp} transition={{ delay: 0.55, duration: 0.7, ease:[0.32,0.72,0,1] }}
-            className="text-xs text-muted-2 flex items-center gap-1.5">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.2"/><path d="M6 4v3l1.5 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
-            {t('hero.disclaimer')}
-          </motion.p>
-        </motion.div>
-
-        <motion.div {...fadeUp} transition={{ delay: 0.6, duration: 0.7, ease:[0.32,0.72,0,1] }}
-          className="flex flex-wrap gap-2 mt-12">
-          {['Smartlead','Instantly','Lemlist','EmailBison','Clay','Apollo CSV'].map(tag => (
-            <span key={tag} className="text-[0.72rem] font-medium bg-white border border-border text-muted rounded-full px-3 py-1.5 hover:border-border-2 transition-colors">
-              {tag}
-            </span>
-          ))}
-        </motion.div>
+        </div>
       </Container>
     </section>
   )
@@ -138,8 +178,8 @@ function Problem() {
         <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{ once:true, margin:'-60px' }}
           className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {cards.map((c,i) => (
-            <motion.div key={i} variants={staggerItem}>
-              <Card dark>
+            <motion.div key={i} variants={staggerItem} className="h-full">
+              <Card dark className="h-full">
                 <span className="text-2xl block mb-4">{c.icon}</span>
                 <h3 className="font-display text-lg font-semibold text-white mb-2">{c.title}</h3>
                 <p className="text-sm text-white/50 leading-relaxed">{c.body}</p>
@@ -185,10 +225,10 @@ function Agitation() {
         </motion.div>
 
         <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-12">
+          className="flex flex-col sm:flex-row mt-12 rounded-2xl overflow-hidden border border-border bg-white divide-y sm:divide-y-0 sm:divide-x divide-border">
           {stats.map((s,i) => (
             <motion.div key={i} variants={staggerItem}
-              className="bg-white border border-border rounded-xl2 p-5 text-center hover:shadow-card hover:-translate-y-1 transition-all duration-300">
+              className="flex-1 p-6 sm:p-8 text-center hover:bg-cream/60 transition-colors duration-200">
               <div className="font-display text-3xl font-bold text-navy mb-2">{s.stat}</div>
               <p className="text-[0.76rem] text-muted leading-snug">{s.label}</p>
             </motion.div>
@@ -403,16 +443,19 @@ function Benefits() {
           </h2>
         </motion.div>
         <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {benefits.map((b,i) => (
-            <motion.div key={i} variants={staggerItem}>
-              <Card hover>
-                <span className="text-2xl block mb-3">{b.icon}</span>
-                <h3 className="font-semibold text-ink mb-1.5">{b.title}</h3>
-                <p className="text-sm text-muted leading-relaxed">{b.body}</p>
-              </Card>
-            </motion.div>
-          ))}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {benefits.map((b,i) => {
+            const spans = ['sm:col-span-2','sm:col-span-1','sm:col-span-1','sm:col-span-2','sm:col-span-1','sm:col-span-2']
+            return (
+              <motion.div key={i} variants={staggerItem} className={spans[i]}>
+                <Card hover className="h-full">
+                  <span className="text-2xl block mb-3">{b.icon}</span>
+                  <h3 className="font-semibold text-ink mb-1.5">{b.title}</h3>
+                  <p className="text-sm text-muted leading-relaxed">{b.body}</p>
+                </Card>
+              </motion.div>
+            )
+          })}
         </motion.div>
       </Container>
     </Section>
@@ -496,20 +539,25 @@ function Credibility() {
           <p className="mt-3 text-muted max-w-lg mx-auto">{t('cred.sub')}</p>
         </motion.div>
 
-        <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {stats.map((s,i) => (
-            <motion.div key={i} variants={staggerItem}
-              className="bg-white border border-border rounded-xl2 p-6 text-center hover:shadow-card hover:-translate-y-1 transition-all duration-300">
-              <div className="font-display text-4xl font-bold text-navy mb-2">{s.val}</div>
-              <p className="text-xs text-muted leading-snug">{s.label}</p>
-            </motion.div>
-          ))}
-        </motion.div>
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
+          <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
+            className="lg:col-span-3 grid grid-cols-2 gap-4">
+            {stats.map((s,i) => (
+              <motion.div key={i} variants={staggerItem}
+                className="bg-white border border-border rounded-xl2 p-6 text-center hover:shadow-card hover:-translate-y-1 transition-all duration-300">
+                <div className="font-display text-4xl font-bold text-navy mb-2">{s.val}</div>
+                <p className="text-xs text-muted leading-snug">{s.label}</p>
+              </motion.div>
+            ))}
+          </motion.div>
 
-        <motion.div {...fadeUp} className="bg-cream-2 border border-border border-l-4 border-l-gold rounded-xl p-5 text-sm text-muted leading-relaxed">
-          <strong className="text-ink font-semibold">{t('cred.note.bold')}</strong>{' '}{t('cred.note.body')}
-        </motion.div>
+          <motion.div {...fadeUp} className="lg:col-span-2">
+            <div className="bg-cream-2 border border-border border-l-4 border-l-gold rounded-xl p-6 text-sm text-muted leading-relaxed h-full flex flex-col justify-center">
+              <strong className="text-ink font-semibold block mb-2">{t('cred.note.bold')}</strong>
+              {t('cred.note.body')}
+            </div>
+          </motion.div>
+        </div>
       </Container>
     </Section>
   )
