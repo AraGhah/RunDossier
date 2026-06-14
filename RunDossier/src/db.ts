@@ -8,15 +8,11 @@ export const pool = new Pool({
   max: 10,
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 5_000,
+  options: '-c statement_timeout=30000',
 });
 
 pool.on('error', (err) => {
   console.error('[db] Unexpected pool client error:', err);
-});
-
-pool.on('connect', (client) => {
-  // Kill runaway queries after 30 s at the session level
-  void client.query('SET statement_timeout = 30000');
 });
 
 export async function query<T = Record<string, unknown>>(

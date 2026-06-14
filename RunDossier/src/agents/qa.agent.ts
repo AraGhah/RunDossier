@@ -44,7 +44,7 @@ export function passesW45Criteria(qa: QAResult): boolean {
 
 function mapScoreRow(row: Record<string, unknown>, fallbackIndex: number): QAResult {
   const variant_number = Number(row.variant_number) || fallbackIndex + 1;
-  const grounded = row.grounded !== false;
+  const grounded = row.grounded === true;
   const specificity_score = Number(row.specificity_score ?? 0);
   const human_ness_score = Number(row.human_ness_score ?? 0);
   const relevance_score = Number(row.relevance_score ?? 0);

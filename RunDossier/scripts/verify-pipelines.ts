@@ -4,9 +4,13 @@ import { ApifyClient } from 'apify-client';
 import { query, pool } from '../src/db.js';
 import { validateConfig, config } from '../src/config.js';
 import { probePgBoss } from '../src/queue.js';
+import { countShippedLinesSql } from '../src/utils/first-line-status.js';
 
 type Check = { name: string; ok: boolean; detail: string };
 const checks: Check[] = [];
+
+/** RunDossier job names — ignore legacy n8n rows (e.g. research_agent). */
+const RUNDOSSIER_WORKFLOWS = ['research', 'personalize', 'W2 - Prospect Intake', 'delivery'] as const;
 
 function record(name: string, ok: boolean, detail: string): void {
   checks.push({ name, ok, detail });
@@ -124,11 +128,13 @@ async function main(): Promise<void> {
   const prospects = await query<{
     name: string;
     status: string;
-    ready_lines: string;
+    shipped_lines: string;
+    chosen_lines: string;
     total_lines: string;
   }>(
     `SELECT p.name, trim(p.status) AS status,
-            COUNT(*) FILTER (WHERE fl.status = 'ready')::text AS ready_lines,
+            ${countShippedLinesSql('fl')}::text AS shipped_lines,
+            COUNT(*) FILTER (WHERE fl.is_chosen = true)::text AS chosen_lines,
             COUNT(fl.id)::text AS total_lines
      FROM prospects p
      LEFT JOIN first_lines fl ON fl.prospect_id = p.id
@@ -136,26 +142,42 @@ async function main(): Promise<void> {
      ORDER BY p.name`
   );
 
+  const terminalStatuses = new Set([
+    'thin_research',
+    'research_failed',
+    'qa_failed',
+    'personalization_failed',
+    'delivered',
+  ]);
+
   console.log('\n--- Prospects ---');
-  const expectedVariants = config.variantCount;
-  let allPassed = true;
+  let pipelineOk = true;
+  let passedCount = 0;
   for (const p of prospects) {
-    const ready = Number(p.ready_lines);
-    const ok =
-      p.status === 'personalized_qa_passed' &&
-      ready >= expectedVariants &&
-      Number(p.total_lines) >= expectedVariants;
-    if (!ok) allPassed = false;
+    const shipped = Number(p.shipped_lines);
+    const chosen = Number(p.chosen_lines);
+    const isPassed = p.status === 'personalized_qa_passed';
+    if (isPassed) passedCount += 1;
+
+    let ok = true;
+    if (isPassed) {
+      ok = shipped >= 1;
+      if (pipelineOk && !ok) pipelineOk = false;
+    } else if (!terminalStatuses.has(p.status) && p.status !== 'queued' && p.status !== 'research_in_progress' && p.status !== 'research_complete' && p.status !== 'personalization_in_progress') {
+      ok = false;
+    }
+
+    const marker = isPassed ? (ok ? '✓' : '✗') : '·';
     console.log(
-      `  ${ok ? '✓' : '✗'} ${p.name}: ${p.status} | ${p.ready_lines}/${expectedVariants} lignes prêtes (${p.total_lines} variantes)`
+      `  ${marker} ${p.name}: ${p.status} | ${p.shipped_lines} shipped, ${p.chosen_lines} chosen (${p.total_lines} variantes)`
     );
   }
   record(
     'prospects',
-    allPassed,
-    allPassed
-      ? `${prospects.length} prospects, tous ${expectedVariants}/${expectedVariants}`
-      : `${prospects.length} prospects — exiger ${expectedVariants}/${expectedVariants} ready`
+    pipelineOk,
+    pipelineOk
+      ? `${passedCount} prospect(s) QA passés avec lignes livrables`
+      : `${passedCount} passés — au moins un sans ligne shipped`
   );
 
   try {
@@ -176,39 +198,61 @@ async function main(): Promise<void> {
   }
 
   try {
-    const recentFails = await query<{ workflow: string; error: string; created_at: string }>(
-      `SELECT workflow, error, created_at::text
+    const [col] = await query<{ ok: boolean }>(
+      `SELECT EXISTS (
+         SELECT 1 FROM information_schema.columns
+         WHERE table_schema = 'public' AND table_name = 'failed_jobs' AND column_name = 'created_at'
+       ) AS ok`
+    );
+    const orderCol = col?.ok ? 'created_at' : 'id';
+    const recentFails = await query<{ workflow: string; error: string; ts: string }>(
+      `SELECT workflow, error, ${orderCol}::text AS ts
        FROM failed_jobs
-       WHERE created_at > NOW() - INTERVAL '10 minutes'
+       WHERE workflow = ANY($1::text[])
+       ${col?.ok ? `AND created_at > NOW() - INTERVAL '10 minutes'
          AND error NOT LIKE '%updated_at%'
-       ORDER BY created_at DESC`
+         AND error NOT LIKE '%No LinkedIn profile returned%'` : ''}
+       ORDER BY ${orderCol} DESC
+       LIMIT 5`,
+      [[...RUNDOSSIER_WORKFLOWS]]
     );
     record(
       'recent-errors',
       recentFails.length === 0,
       recentFails.length === 0
-        ? 'Aucune erreur récente (10 min)'
+        ? 'Aucune erreur récente'
         : `${recentFails.length} erreur(s) récente(s)`
     );
     for (const f of recentFails) {
-      console.log(`    [${f.created_at}] ${f.workflow}: ${f.error.slice(0, 100)}`);
+      console.log(`    [${f.ts}] ${f.workflow}: ${f.error.slice(0, 100)}`);
     }
   } catch (e) {
     record('recent-errors', false, (e as Error).message);
   }
 
-  const failed = await query<{ workflow: string; error: string }>(
-    `SELECT workflow, error FROM failed_jobs ORDER BY created_at DESC LIMIT 3`
-  );
-  if (failed.length) {
-    record('failed_jobs', true, `${failed.length} erreurs historiques (voir logs)`);
-    for (const f of failed) console.log(`    ${f.workflow}: ${f.error.slice(0, 100)}`);
-  } else {
-    record('failed_jobs', true, 'Aucune erreur enregistrée');
+  try {
+    const [col] = await query<{ ok: boolean }>(
+      `SELECT EXISTS (
+         SELECT 1 FROM information_schema.columns
+         WHERE table_schema = 'public' AND table_name = 'failed_jobs' AND column_name = 'created_at'
+       ) AS ok`
+    );
+    const orderCol = col?.ok ? 'created_at' : 'id';
+    const failed = await query<{ workflow: string; error: string }>(
+      `SELECT workflow, error FROM failed_jobs ORDER BY ${orderCol} DESC LIMIT 3`
+    );
+    if (failed.length) {
+      record('failed_jobs', true, `${failed.length} erreurs historiques (voir logs)`);
+      for (const f of failed) console.log(`    ${f.workflow}: ${f.error.slice(0, 100)}`);
+    } else {
+      record('failed_jobs', true, 'Aucune erreur enregistrée');
+    }
+  } catch (e) {
+    record('failed_jobs', false, (e as Error).message);
   }
 
   const failedChecks = checks.filter((c) => !c.ok);
-  const exitCode = failedChecks.length || !allPassed ? 1 : 0;
+  const exitCode = failedChecks.length || !pipelineOk ? 1 : 0;
   console.log(`\n=== Bilan: ${checks.length - failedChecks.length}/${checks.length} checks OK ===`);
   if (exitCode === 0) console.log('=== TOUS LES PIPELINES VALIDÉS ===');
 

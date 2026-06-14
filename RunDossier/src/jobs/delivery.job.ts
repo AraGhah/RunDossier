@@ -4,6 +4,7 @@ import { query } from '../db.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
 import { buildDeliveryCsv, filterDeliveryRows, type DeliveryRow } from '../utils/csv-delivery.js';
+import { BEST_SHIPPED_LINE_LATERAL } from '../utils/first-line-status.js';
 
 interface ClientRow {
   id: string;
@@ -71,7 +72,7 @@ export async function runDeliveryForClient(clientId: string): Promise<number> {
     `SELECT p.id, p.name, p.title, p.company, p.email, p.confidence_score,
             fl.subject, fl.opener, fl.bridge
      FROM prospects p
-     JOIN first_lines fl ON fl.prospect_id = p.id AND fl.is_chosen = true
+     ${BEST_SHIPPED_LINE_LATERAL}
      WHERE p.client_id = $1 AND p.status = 'personalized_qa_passed'`,
     [clientId]
   );

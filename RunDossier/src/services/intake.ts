@@ -67,6 +67,9 @@ export function validateIntakeRecord(record: IntakeRecord): string | null {
   if (record.email && !EMAIL_RE.test(record.email)) {
     return `invalid email: ${record.email}`;
   }
+  if (!record.linkedin_url) {
+    return 'linkedin_url is required for the research pipeline (W3)';
+  }
   return null;
 }
 
@@ -109,6 +112,18 @@ export async function ingestProspects(records: IntakeRecord[]): Promise<IntakeRe
   let inserted = 0;
 
   for (const [clientId, clientRecords] of byClient) {
+    const [client] = await query<{ id: string }>(
+      `SELECT id FROM clients WHERE id = $1`,
+      [clientId]
+    );
+    if (!client) {
+      for (const p of clientRecords) {
+        invalid += 1;
+        await logIntakeFailure(`unknown client_id: ${clientId}`, p);
+      }
+      continue;
+    }
+
     for (let i = 0; i < clientRecords.length; i += config.intakeBatchSize) {
       const chunk = clientRecords.slice(i, i + config.intakeBatchSize);
 
@@ -129,6 +144,18 @@ export async function ingestProspects(records: IntakeRecord[]): Promise<IntakeRe
             [clientId, p.linkedin_url]
           );
           if (existing) {
+            skipped += 1;
+            continue;
+          }
+        }
+
+        if (p.email) {
+          const [existingEmail] = await query<{ id: string }>(
+            `SELECT id FROM prospects
+             WHERE client_id = $1 AND lower(email) = $2 LIMIT 1`,
+            [clientId, p.email]
+          );
+          if (existingEmail) {
             skipped += 1;
             continue;
           }
