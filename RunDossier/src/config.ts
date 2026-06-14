@@ -41,6 +41,9 @@ export const config = {
   anthropicKey: optionalEnv('ANTHROPIC_API_KEY'),
   /** Google AI — W4.5 QA judge (Gemini). Accepts GOOGLE_API_KEY or GEMINI_API_KEY. */
   googleApiKey: optionalEnv('GOOGLE_API_KEY') || optionalEnv('GEMINI_API_KEY'),
+  /** Apollo.io — W3 people enrichment (linkedin_url match). Optional; skipped if unset. */
+  apolloApiKey: optionalEnv('APOLLO_API_KEY'),
+  apolloEnabled: process.env.APOLLO_ENABLED !== 'false',
   apifyToken: optionalEnv('APIFY_TOKEN'),
   /** Apify actor for LinkedIn profiles (approve permissions in Apify console once). */
   apifyLinkedInActor: optionalEnv('APIFY_LINKEDIN_ACTOR') || 'harvestapi~linkedin-profile-scraper',

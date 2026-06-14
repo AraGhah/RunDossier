@@ -6,7 +6,7 @@ import { extractTextContent, parseJsonFromLLM } from '../utils/parse-json.js';
 const client = new Anthropic({ apiKey: config.anthropicKey });
 
 const DEFAULT_SYSTEM_PROMPT =
-  'You are a B2B prospect researcher. Analyze LinkedIn and podcast data to produce actionable sales intelligence. Return only valid JSON.';
+  'You are a B2B research analyst. Read LinkedIn, Apollo enrichment, and podcast data to identify the 3 strongest personalization hooks for cold outbound email. Rank signals by recency, specificity, and emotional salience. Discard generic facts. Do not invent signals. Return only valid JSON.';
 
 export interface ResearchSignal {
   signal: string;
@@ -24,11 +24,13 @@ export interface ResearchOutput {
 export async function runResearchAgent(
   prospectId: string,
   linkedInData: Record<string, unknown>,
+  apolloData: Record<string, unknown> | null,
   podcastData: Record<string, unknown>[],
   systemPrompt = DEFAULT_SYSTEM_PROMPT
 ): Promise<ResearchOutput> {
   const userMessage = `Research this prospect:
 LinkedIn data: ${JSON.stringify(linkedInData)}
+Apollo enrichment: ${JSON.stringify(apolloData ?? {})}
 Podcast appearances: ${JSON.stringify(podcastData)}
 
 Return ONLY valid JSON matching this schema:

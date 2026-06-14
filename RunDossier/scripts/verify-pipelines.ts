@@ -5,6 +5,7 @@ import { query, pool } from '../src/db.js';
 import { validateConfig, config } from '../src/config.js';
 import { probePgBoss } from '../src/queue.js';
 import { geminiGenerateContent } from '../src/utils/gemini.js';
+import { enrichPersonViaApollo } from '../src/scrapers/apollo.js';
 
 type Check = { name: string; ok: boolean; detail: string };
 const checks: Check[] = [];
@@ -69,6 +70,20 @@ async function main(): Promise<void> {
     record('apify', true, `Connecté (${user.username ?? user.id})`);
   } catch (e) {
     record('apify', false, (e as Error).message);
+  }
+
+  if (!config.apolloApiKey || !config.apolloEnabled) {
+    record('apollo', true, 'Non configuré — enrichissement Apollo ignoré en W3');
+  } else {
+    try {
+      await enrichPersonViaApollo({
+        linkedinUrl: 'https://www.linkedin.com/in/tim-zheng',
+        name: 'Tim Zheng',
+      });
+      record('apollo', true, 'API people/match accessible');
+    } catch (e) {
+      record('apollo', false, (e as Error).message);
+    }
   }
 
   try {
