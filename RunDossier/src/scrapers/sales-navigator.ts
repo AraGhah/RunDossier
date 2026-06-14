@@ -11,6 +11,14 @@ export interface SalesNavLead {
   employeeCount: number | null;
 }
 
+export interface SalesNavSearchOptions {
+  searchUrl: string;
+  maxResults?: number;
+  actorId?: string;
+  cookie?: string;
+  userAgent?: string;
+}
+
 const LINKEDIN_PROFILE_RE =
   /^https:\/\/(www\.)?linkedin\.com\/in\/[A-Za-z0-9_%-]{3,100}\/?/i;
 
@@ -86,27 +94,29 @@ function mapItem(item: unknown): SalesNavLead | null {
   return { name: fullName, title, company, linkedinUrl, employeeCount };
 }
 
-export async function scrapeSalesNavigator(): Promise<SalesNavLead[]> {
-  if (!config.apifySalesNavSearchUrl) {
-    throw new Error(
-      'APIFY_SALES_NAV_SEARCH_URL manquant — collez une URL Sales Navigator filtrée (titres + 10–50 employés).'
-    );
+export async function scrapeSalesNavigatorSearch(
+  options: SalesNavSearchOptions
+): Promise<SalesNavLead[]> {
+  const searchUrl = options.searchUrl?.trim();
+  if (!searchUrl) {
+    throw new Error('searchUrl is required for Sales Navigator scrape');
   }
 
+  const maxResults = options.maxResults ?? config.dogfoodScrapeBatchSize;
+  const actorId = options.actorId ?? config.apifySalesNavActor;
+
   const input: Record<string, unknown> = {
-    searchUrl: config.apifySalesNavSearchUrl,
-    maxResults: config.dogfoodScrapeBatchSize,
+    searchUrl,
+    maxResults,
     proxyConfiguration: { useApifyProxy: true },
   };
 
-  if (config.linkedinSalesNavCookie) {
-    input.cookie = config.linkedinSalesNavCookie;
-  }
-  if (config.linkedinUserAgent) {
-    input.userAgent = config.linkedinUserAgent;
-  }
+  const cookie = options.cookie ?? config.linkedinSalesNavCookie;
+  const userAgent = options.userAgent ?? config.linkedinUserAgent;
+  if (cookie) input.cookie = cookie;
+  if (userAgent) input.userAgent = userAgent;
 
-  const run = await client.actor(config.apifySalesNavActor).call(input);
+  const run = await client.actor(actorId).call(input);
 
   if (run.status !== 'SUCCEEDED') {
     throw new Error(
@@ -126,4 +136,17 @@ export async function scrapeSalesNavigator(): Promise<SalesNavLead[]> {
   }
 
   return leads;
+}
+
+/** Dogfood default — uses APIFY_SALES_NAV_SEARCH_URL from env. */
+export async function scrapeSalesNavigator(): Promise<SalesNavLead[]> {
+  if (!config.apifySalesNavSearchUrl) {
+    throw new Error(
+      'APIFY_SALES_NAV_SEARCH_URL manquant — collez une URL Sales Navigator filtrée (titres + 10–50 employés).'
+    );
+  }
+  return scrapeSalesNavigatorSearch({
+    searchUrl: config.apifySalesNavSearchUrl,
+    maxResults: config.dogfoodScrapeBatchSize,
+  });
 }

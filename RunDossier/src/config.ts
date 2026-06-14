@@ -39,6 +39,8 @@ export const config = {
   /** Only opt-in strict verification. Default false — required for Supabase on Alpine/Docker. */
   databaseSslStrict: process.env.DATABASE_SSL_STRICT === 'true',
   anthropicKey: optionalEnv('ANTHROPIC_API_KEY'),
+  /** Google AI — W4.5 QA judge (Gemini). Accepts GOOGLE_API_KEY or GEMINI_API_KEY. */
+  googleApiKey: optionalEnv('GOOGLE_API_KEY') || optionalEnv('GEMINI_API_KEY'),
   apifyToken: optionalEnv('APIFY_TOKEN'),
   /** Apify actor for LinkedIn profiles (approve permissions in Apify console once). */
   apifyLinkedInActor: optionalEnv('APIFY_LINKEDIN_ACTOR') || 'harvestapi~linkedin-profile-scraper',
@@ -50,6 +52,8 @@ export const config = {
 
   researchModel: 'claude-haiku-4-5-20251001' as const,
   personalizeModel: 'claude-sonnet-4-6' as const,
+  /** W4.5 — independent QA judge (n8n: models/gemini-2.5-pro) */
+  qaModel: 'gemini-2.5-pro' as const,
 
   confidenceFloor: 60,
   qaScoreFloor: 7,
@@ -64,6 +68,11 @@ export const config = {
   deliveryDir: optionalEnv('DELIVERY_DIR') || 'data/deliveries',
   resendApiKey: optionalEnv('RESEND_API_KEY'),
   deliveryFromEmail: optionalEnv('DELIVERY_FROM_EMAIL') || 'deliveries@getdossier.co',
+
+  /** W1 prospect search */
+  searchEnabled: process.env.SEARCH_ENABLED !== 'false',
+  searchDefaultMaxResults: parseInt(process.env.SEARCH_DEFAULT_MAX_RESULTS ?? '50', 10) || 50,
+  searchEnrichMaxPerRun: parseInt(process.env.SEARCH_ENRICH_MAX_PER_RUN ?? '10', 10) || 10,
 
   /** Workflow 10 — self-selling dogfood pipeline */
   dogfoodEnabled: process.env.DOGFOOD_ENABLED !== 'false',
@@ -97,6 +106,9 @@ export const config = {
 export function validateConfig(): void {
   requireEnv('DATABASE_URL');
   requireEnv('ANTHROPIC_API_KEY');
+  if (!config.googleApiKey) {
+    throw new Error('Missing or placeholder env var: GOOGLE_API_KEY (or GEMINI_API_KEY)');
+  }
   requireEnv('APIFY_TOKEN');
   requireEnv('JWT_SECRET');
   requireEnv('JWT_API_KEY');

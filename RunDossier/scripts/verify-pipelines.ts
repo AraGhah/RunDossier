@@ -4,13 +4,13 @@ import { ApifyClient } from 'apify-client';
 import { query, pool } from '../src/db.js';
 import { validateConfig, config } from '../src/config.js';
 import { probePgBoss } from '../src/queue.js';
-import { countShippedLinesSql } from '../src/utils/first-line-status.js';
+import { geminiGenerateContent } from '../src/utils/gemini.js';
 
 type Check = { name: string; ok: boolean; detail: string };
 const checks: Check[] = [];
 
 /** RunDossier job names — ignore legacy n8n rows (e.g. research_agent). */
-const RUNDOSSIER_WORKFLOWS = ['research', 'personalize', 'W2 - Prospect Intake', 'delivery'] as const;
+const RUNDOSSIER_WORKFLOWS = ['research', 'personalize', 'W2 - Prospect Intake', 'W1 - Prospect Search', 'delivery'] as const;
 
 function record(name: string, ok: boolean, detail: string): void {
   checks.push({ name, ok, detail });
@@ -28,7 +28,7 @@ async function main(): Promise<void> {
   }
 
   try {
-    const tables = ['prospects', 'prospect_signals_raw', 'prompt_versions', 'first_lines', 'ai_costs', 'failed_jobs', 'clients', 'batches'];
+    const tables = ['prospects', 'prospect_signals_raw', 'prompt_versions', 'first_lines', 'ai_costs', 'failed_jobs', 'clients', 'batches', 'client_search_profiles', 'search_runs'];
     for (const t of tables) {
       const [row] = await query<{ ok: boolean }>(
         `SELECT to_regclass($1) IS NOT NULL AS ok`, [`public.${t}`]
@@ -50,6 +50,17 @@ async function main(): Promise<void> {
     record('anthropic', true, 'API accessible');
   } catch (e) {
     record('anthropic', false, (e as Error).message);
+  }
+
+  try {
+    await geminiGenerateContent(
+      'Reply with JSON only: {"ok":true}',
+      'ping',
+      config.qaModel
+    );
+    record('gemini', true, `W4.5 QA model ${config.qaModel} accessible`);
+  } catch (e) {
+    record('gemini', false, (e as Error).message);
   }
 
   try {

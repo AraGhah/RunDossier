@@ -18,6 +18,7 @@
     "landing:openers": "tsx scripts/export-landing-openers.ts",
     "pilot:migrate": "tsx scripts/apply-pilot-migration.ts",
     "workflow:migrate": "tsx scripts/apply-workflow-migration.ts",
+    "search": "tsx scripts/run-prospect-search.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {

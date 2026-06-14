@@ -15,6 +15,8 @@ export interface IntakeRecord {
   title?: string;
   company?: string;
   client_id: string;
+  employee_count?: number | null;
+  icp_fit_score?: number | null;
 }
 
 export interface IntakeResult {
@@ -22,6 +24,11 @@ export interface IntakeResult {
   skipped: number;
   invalid: number;
   batchIds: string[];
+  prospectIds: string[];
+}
+
+export interface IngestOptions {
+  source?: 'manual' | 'search' | 'dogfood';
 }
 
 function normalizeLinkedInUrl(raw: string): string {
@@ -81,7 +88,11 @@ async function logIntakeFailure(error: string, record: IntakeRecord): Promise<vo
   ).catch(e => console.error('[intake] failed_jobs insert error:', e));
 }
 
-export async function ingestProspects(records: IntakeRecord[]): Promise<IntakeResult> {
+export async function ingestProspects(
+  records: IntakeRecord[],
+  options: IngestOptions = {}
+): Promise<IntakeResult> {
+  const source = options.source ?? 'manual';
   const valid: IntakeRecord[] = [];
   let invalid = 0;
   let skipped = 0;
@@ -98,7 +109,7 @@ export async function ingestProspects(records: IntakeRecord[]): Promise<IntakeRe
   }
 
   if (valid.length === 0) {
-    return { inserted: 0, skipped, invalid, batchIds: [] };
+    return { inserted: 0, skipped, invalid, batchIds: [], prospectIds: [] };
   }
 
   const byClient = new Map<string, IntakeRecord[]>();
@@ -109,6 +120,7 @@ export async function ingestProspects(records: IntakeRecord[]): Promise<IntakeRe
   }
 
   const batchIds: string[] = [];
+  const prospectIds: string[] = [];
   let inserted = 0;
 
   for (const [clientId, clientRecords] of byClient) {
@@ -161,9 +173,10 @@ export async function ingestProspects(records: IntakeRecord[]): Promise<IntakeRe
           }
         }
 
-        await query(
-          `INSERT INTO prospects (name, title, company, linkedin_url, email, client_id, batch_id, status)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, 'queued')`,
+        const [row] = await query<{ id: string }>(
+          `INSERT INTO prospects (name, title, company, linkedin_url, email, client_id, batch_id, status, source, employee_count, icp_fit_score)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, 'queued', $8, $9, $10)
+           RETURNING id`,
           [
             p.name,
             p.title ?? null,
@@ -172,12 +185,16 @@ export async function ingestProspects(records: IntakeRecord[]): Promise<IntakeRe
             p.email ?? null,
             clientId,
             batch.id,
+            source,
+            p.employee_count ?? null,
+            p.icp_fit_score ?? null,
           ]
         );
+        if (row?.id) prospectIds.push(row.id);
         inserted += 1;
       }
     }
   }
 
-  return { inserted, skipped, invalid, batchIds };
+  return { inserted, skipped, invalid, batchIds, prospectIds };
 }

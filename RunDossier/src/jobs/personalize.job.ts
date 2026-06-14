@@ -58,7 +58,7 @@ async function persistVariants(
         qa?.human_ness_score ?? 0, qa?.relevance_score ?? 0,
         qa?.length_ok ?? false, qa?.grounded ?? false,
         qa?.qa_verdict ?? 'reject', qa?.qa_reason ?? '',
-        config.personalizeModel, promptId,
+        config.qaModel, promptId,
         passed ? 'qa_passed' : 'qa_failed',
         isChosen,
       ]

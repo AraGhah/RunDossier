@@ -7,8 +7,9 @@ import { runScheduler } from './jobs/scheduler.job.js';
 import { runDelivery } from './jobs/delivery.job.js';
 import { runDogfoodScrape } from './jobs/dogfood-scrape.job.js';
 import { runDogfoodPromote } from './jobs/dogfood-promote.job.js';
+import { runProspectSearchJob } from './jobs/prospect-search.job.js';
 
-const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote'] as const;
+const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search'] as const;
 
 let boss: PgBoss;
 
@@ -67,6 +68,17 @@ export async function startQueue(): Promise<void> {
         await runDogfoodPromote();
       } catch (err) {
         console.error('[dogfood-promote] job error:', err);
+      }
+    }
+  });
+
+  await boss.schedule('prospect-search', '0 7 * * *');
+  await boss.work('prospect-search', async (jobs) => {
+    for (const _job of jobs) {
+      try {
+        await runProspectSearchJob();
+      } catch (err) {
+        console.error('[prospect-search] job error:', err);
       }
     }
   });

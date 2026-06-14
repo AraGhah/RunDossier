@@ -1,10 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config.js';
 import { logCost } from '../utils/cost-tracker.js';
-import { extractTextContent, parseJsonFromLLM } from '../utils/parse-json.js';
+import { parseJsonFromLLM } from '../utils/parse-json.js';
+import { geminiGenerateContent } from '../utils/gemini.js';
 import type { FirstLineVariant } from './personalize.agent.js';
-
-const client = new Anthropic({ apiKey: config.anthropicKey });
 
 const DEFAULT_QA_PROMPT =
   'You are an independent QA reviewer for Preframe cold-email first lines. Score honestly and reject anything that is not genuinely good. Return only valid JSON.';
@@ -88,21 +86,14 @@ ${JSON.stringify(variants.map(v => ({
   bridge: v.bridge,
 })))}`;
 
-  const response = await client.messages.create({
-    model: config.researchModel,
-    max_tokens: 2000,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userMessage }],
-  });
-
-  const text = extractTextContent(response.content);
+  const { text, usage } = await geminiGenerateContent(systemPrompt, userMessage);
 
   await logCost({
     agentName: 'qa_agent',
     prospectId,
-    model: config.researchModel,
-    inputTokens: response.usage.input_tokens,
-    outputTokens: response.usage.output_tokens,
+    model: config.qaModel,
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
   });
 
   const parsed = parseJsonFromLLM<QAResult[] | QAScoresWrapper>(text);
