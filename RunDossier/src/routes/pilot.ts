@@ -5,12 +5,21 @@ import { notify } from '../notify.js';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX = { name: 120, email: 254, company: 200, sequencer: 80, url: 500 } as const;
 
+/** Common free-mail domains — pilot form expects a work email. */
+const FREE_EMAIL_DOMAINS = new Set([
+  'gmail.com', 'googlemail.com', 'yahoo.com', 'hotmail.com', 'outlook.com',
+  'live.com', 'msn.com', 'icloud.com', 'me.com', 'proton.me', 'protonmail.com',
+  'aol.com', 'mail.com', 'gmx.com', 'yandex.com', 'zoho.com',
+]);
+
 interface PilotBody {
   name?: unknown;
   email?: unknown;
   company?: unknown;
   sequencer?: unknown;
   url?: unknown;
+  /** Honeypot — must stay empty (bots fill hidden fields). */
+  website?: unknown;
 }
 
 function trimField(value: unknown, max: number): string {
@@ -28,8 +37,25 @@ function normalizeUrl(value: string): string | null {
   }
 }
 
+function isWorkEmail(email: string): boolean {
+  const domain = email.split('@')[1]?.toLowerCase();
+  return Boolean(domain && !FREE_EMAIL_DOMAINS.has(domain));
+}
+
+/** Silent success for bots — same shape as a real 201 without side effects. */
+function respondHoneypotTrap(res: Response): void {
+  res.status(201).json({ ok: true, id: 'accepted' });
+}
+
 export async function handlePilotSubmit(req: Request, res: Response): Promise<void> {
   const body = req.body as PilotBody;
+
+  const honeypot = trimField(body.website, 200);
+  if (honeypot) {
+    respondHoneypotTrap(res);
+    return;
+  }
+
   const name = trimField(body.name, MAX.name);
   const email = trimField(body.email, MAX.email).toLowerCase();
   const company = trimField(body.company, MAX.company);
@@ -45,12 +71,27 @@ export async function handlePilotSubmit(req: Request, res: Response): Promise<vo
     res.status(400).json({ ok: false, error: 'Invalid email address' });
     return;
   }
+  if (!isWorkEmail(email)) {
+    res.status(400).json({ ok: false, error: 'Please use your work email address' });
+    return;
+  }
   if (rawUrl && !profileUrl) {
     res.status(400).json({ ok: false, error: 'Invalid profile or website URL' });
     return;
   }
 
   try {
+    const recent = await queryOne<{ id: string }>(
+      `SELECT id FROM pilot_requests
+       WHERE LOWER(email) = $1 AND created_at > NOW() - INTERVAL '24 hours'
+       LIMIT 1`,
+      [email]
+    );
+    if (recent) {
+      res.status(429).json({ ok: false, error: 'A request was already submitted recently for this email' });
+      return;
+    }
+
     const row = await queryOne<{ id: string }>(
       `INSERT INTO pilot_requests (name, email, company, sequencer, profile_url)
        VALUES ($1, $2, $3, $4, $5)
@@ -81,7 +122,7 @@ export async function handlePilotSubmit(req: Request, res: Response): Promise<vo
     if (/pilot_requests|relation.*does not exist/i.test(message)) {
       res.status(503).json({
         ok: false,
-        error: 'Pilot intake is not configured yet. Run: npm run pilot:migrate',
+        error: 'Service temporarily unavailable',
       });
       return;
     }

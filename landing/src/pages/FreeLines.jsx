@@ -22,7 +22,7 @@ export default function FreeLines() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [form, setForm] = useState({ name:'', email:'', company:'', sequencer:'', url:'' })
+  const [form, setForm] = useState({ name:'', email:'', company:'', sequencer:'', url:'', website:'' })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -92,6 +92,18 @@ export default function FreeLines() {
                     <h2 className="font-display text-xl font-semibold text-ink mb-1">Claim your 100 free lines</h2>
                     <p className="text-sm text-muted mb-6">We confirm fit, get your list, and deliver within 48 hours.</p>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                      <div className="absolute opacity-0 pointer-events-none h-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
+                        <label htmlFor="website">Website</label>
+                        <input
+                          id="website"
+                          type="text"
+                          name="website"
+                          autoComplete="off"
+                          tabIndex={-1}
+                          value={form.website}
+                          onChange={e => setForm(p => ({...p, website: e.target.value}))}
+                        />
+                      </div>
                       {[
                         { label:'Full name', key:'name', type:'text', placeholder:'Sarah Chen', required:true },
                         { label:'Work email', key:'email', type:'email', placeholder:'sarah@youragency.com', required:true },

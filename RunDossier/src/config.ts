@@ -73,6 +73,13 @@ export const config = {
   smartleadCampaignId: optionalEnv('SMARTLEAD_CAMPAIGN_ID'),
   dogfoodApiToken: optionalEnv('DOGFOOD_API_TOKEN'),
 
+  jwtSecret: optionalEnv('JWT_SECRET'),
+  jwtApiKey: optionalEnv('JWT_API_KEY'),
+  jwtExpiresIn: optionalEnv('JWT_EXPIRES_IN') || '24h',
+  jwtPilotExpiresIn: optionalEnv('JWT_PILOT_EXPIRES_IN') || '15m',
+
+  trustProxy: process.env.TRUST_PROXY === 'true',
+
   /** Comma-separated origins for landing → API (e.g. https://getdossier.co,http://localhost:5173) */
   corsOrigins: (optionalEnv('CORS_ORIGINS') || 'http://localhost:5173,http://127.0.0.1:5173')
     .split(',')
@@ -85,4 +92,13 @@ export function validateConfig(): void {
   requireEnv('DATABASE_URL');
   requireEnv('ANTHROPIC_API_KEY');
   requireEnv('APIFY_TOKEN');
+  requireEnv('JWT_SECRET');
+  requireEnv('JWT_API_KEY');
+
+  if (config.jwtSecret.length < 32) {
+    throw new Error('JWT_SECRET must be at least 32 characters');
+  }
+  if (config.jwtApiKey.length < 16) {
+    throw new Error('JWT_API_KEY must be at least 16 characters');
+  }
 }

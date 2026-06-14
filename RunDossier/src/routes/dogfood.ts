@@ -1,28 +1,14 @@
-import type { Request, Response, NextFunction } from 'express';
-import { config } from '../config.js';
+import type { Request, Response } from 'express';
 import { query } from '../db.js';
 import { runDogfoodScrape } from '../jobs/dogfood-scrape.job.js';
 import { runDogfoodPromote } from '../jobs/dogfood-promote.job.js';
 import { logFunnelEvent, type FunnelStage } from '../utils/funnel-log.js';
-
-function requireDogfoodToken(req: Request, res: Response, next: NextFunction): void {
-  if (!config.dogfoodApiToken) {
-    next();
-    return;
-  }
-  const header = req.headers.authorization?.replace(/^Bearer\s+/i, '').trim();
-  const queryToken = typeof req.query.token === 'string' ? req.query.token : '';
-  if (header === config.dogfoodApiToken || queryToken === config.dogfoodApiToken) {
-    next();
-    return;
-  }
-  res.status(401).json({ error: 'Unauthorized' });
-}
+import { requireAdmin } from '../middleware/auth.js';
 
 export function registerDogfoodRoutes(
   app: import('express').Express
 ): void {
-  app.post('/dogfood/scrape', requireDogfoodToken, async (_req, res) => {
+  app.post('/dogfood/scrape', requireAdmin, async (_req, res) => {
     try {
       const result = await runDogfoodScrape();
       res.json({ ok: true, ...result });
@@ -31,7 +17,7 @@ export function registerDogfoodRoutes(
     }
   });
 
-  app.post('/dogfood/promote', requireDogfoodToken, async (_req, res) => {
+  app.post('/dogfood/promote', requireAdmin, async (_req, res) => {
     try {
       const result = await runDogfoodPromote();
       res.json({ ok: true, ...result });
@@ -40,7 +26,7 @@ export function registerDogfoodRoutes(
     }
   });
 
-  app.get('/dogfood/review-queue', requireDogfoodToken, async (_req, res) => {
+  app.get('/dogfood/review-queue', requireAdmin, async (_req, res) => {
     try {
       const rows = await query<Record<string, unknown>>(
         `SELECT sq.id AS queue_id, sq.status AS queue_status, sq.created_at,
@@ -59,7 +45,7 @@ export function registerDogfoodRoutes(
     }
   });
 
-  app.get('/dogfood/funnel', requireDogfoodToken, async (_req, res) => {
+  app.get('/dogfood/funnel', requireAdmin, async (_req, res) => {
     try {
       const summary = await query<{ stage: string; count: string }>(
         `SELECT stage, COUNT(*)::text AS count
@@ -74,7 +60,7 @@ export function registerDogfoodRoutes(
     }
   });
 
-  app.post('/dogfood/funnel/:prospectId', requireDogfoodToken, async (req, res) => {
+  app.post('/dogfood/funnel/:prospectId', requireAdmin, async (req, res) => {
     const stage = req.body?.stage as FunnelStage | undefined;
     const allowed: FunnelStage[] = ['open', 'reply', 'demo', 'closed'];
     if (!stage || !allowed.includes(stage)) {
