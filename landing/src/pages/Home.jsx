@@ -9,18 +9,54 @@ import {
 import {
   Section, Container, ContainerSm, Eyebrow, BtnPrimary, BtnGhost,
   Card, Divider, fadeUp, fadeUpBlur, staggerContainer, staggerItem,
-  OpenerCard, BeforeAfterRow,
+  OpenerCard,
 } from '../components/ui'
 import { useTranslation } from '../context/LanguageContext'
 
-// ── SAMPLE OPENERS — stay in English (they are example product output) ────────
+// ── EXAMPLE DATA — stay in English (product output, no dashes) ────────────────
+const examples = [
+  {
+    id: 1,
+    signalType: 'LinkedIn Article',
+    signalMeta: 'Published Q3 2024 · 4.2k views',
+    signalSummary: 'Founder published a detailed analysis of why cold email reply rates collapsed across the industry from 2023 onward.',
+    role: 'Founder, Outbound Consultancy',
+    before: '"Hi [First Name], I noticed you are in the outbound space and thought I would reach out. Your work looks really impressive. Would love to connect and potentially jump on a quick call."',
+    after: '"Your piece on why cold email reply rates collapsed from 2023 onward is the clearest diagnosis I have seen published on the topic. You named the actual cause before most people in this space were willing to say it out loud."',
+    why: 'References a specific published piece. Validates the prospect as a credible analyst. No generic compliments or vague flattery. The prospect knows immediately that someone actually read what they wrote.',
+    qa: 5,
+  },
+  {
+    id: 2,
+    signalType: 'ProductHunt Launch',
+    signalMeta: 'February 2025 · Top 5 of the day',
+    signalSummary: 'Co-founder shipped a B2B leads product positioned around one CSV input, one ready-to-send campaign as output.',
+    role: 'Co-Founder, Outbound SaaS',
+    before: '"Congratulations on the recent launch. It looks like you are building something really exciting in the leads space. Would love to learn more about what you are working on and explore if there is any overlap."',
+    after: '"Saw you launched in February and built the positioning around one CSV in, one campaign out. That removes the five-step setup that buries every other tool in this category. Clearest product angle I have seen in leads tooling this year."',
+    why: 'Uses the prospect\'s own positioning language. Makes a competitive observation from public product copy. Shows the opener writer understood what makes the product different, not just that a launch happened.',
+    qa: 5,
+  },
+  {
+    id: 3,
+    signalType: 'LinkedIn Post Series',
+    signalMeta: '3 posts · 6.1k combined views',
+    signalSummary: 'CEO published a series gradually reframing positioning from outbound tool to pipeline system, signaling a deliberate market shift.',
+    role: 'CEO, GTM Consulting Firm',
+    before: '"Hi [First Name], I came across your profile and noticed your company is doing some impressive work in GTM consulting. Would love to connect and see if there is any common ground between what we are each working on."',
+    after: '"The repositioning from outbound tool to pipeline system across your last three posts is deliberate. That is not a messaging adjustment. That signals you are entering a different competitive category entirely. Most teams do not make that move until a client forces them into it."',
+    why: 'Identifies a pattern across multiple posts rather than reacting to a single one. Treats the repositioning as a strategic signal. Shows analytical depth the prospect can recognize as genuine research rather than a LinkedIn scrape.',
+    qa: 4,
+  },
+]
+
 const openers = [
-  { quote: 'Your breakdown of why cold email collapsed between 2023 and 2025 is the most precise articulation of the problem I\'ve seen published. GPT filler is exactly the right framing.', role: 'Founder, Outbound Consultancy', signal: 'LinkedIn article, Q3 2024', qa: 4 },
-  { quote: 'Saw you shipped a new leads product in February and positioned it around removing the friction that every other tool buries in five-step workflows. Smart wedge for where the market is heading.', role: 'Co-Founder, Outbound SaaS', signal: 'ProductHunt launch review', qa: 5 },
-  { quote: 'Most founders bury their best result in a case study nobody reads. You put it in your headline — smart move, and probably the reason your inbound is converting above what your company size would suggest.', role: 'Founder, B2B Lead Gen Agency', signal: 'Website hero copy analysis', qa: 4 },
-  { quote: 'Your thread on why SDR-to-AE handoffs break in companies under 50 people is something I have seen play out at three agencies this year. The hand-to-hand combat framing is right.', role: 'VP Sales, B2B SaaS', signal: 'Twitter thread, 2.4k engagements', qa: 4 },
-  { quote: 'Noticed you moved upmarket in Q4 — from 50-person deals to 250-person minimums. That is not a pricing change, it is a full GTM rebuild. Most people do not realize how different those motions are until they are in it.', role: 'Founder, Outbound Agency', signal: 'LinkedIn pricing announcement', qa: 5 },
-  { quote: 'The way you reframed your positioning from outbound tool to pipeline system across your last two posts is subtle but signals you are thinking about the market differently than your competitors are.', role: 'CEO, GTM Consulting Firm', signal: 'LinkedIn post series analysis', qa: 4 },
+  { quote: 'Your piece on why cold email reply rates collapsed from 2023 onward is the clearest diagnosis I have seen published. You named the actual cause before most people in this space were willing to say it.', role: 'Founder, Outbound Consultancy', signal: 'LinkedIn article, 4.2k views', qa: 5 },
+  { quote: 'Saw you launched in February and built positioning around one CSV in, one campaign out. That clears the five-step setup every other tool in this category buries the result behind.', role: 'Co-Founder, Outbound SaaS', signal: 'ProductHunt launch, Feb 2025', qa: 5 },
+  { quote: 'Your thread on why SDR to AE handoffs break at companies under 50 people is something I have watched play out at three agencies this year. The framing you used is exactly right.', role: 'VP Sales, B2B SaaS', signal: 'Twitter thread, 2.4k engagements', qa: 4 },
+  { quote: 'Noticed you moved your minimum deal size to 250 seats in Q4. That is not a pricing adjustment. That is a full go-to-market rebuild. Most agencies do not talk about that transition publicly because the middle period is difficult.', role: 'Founder, Outbound Agency', signal: 'LinkedIn pricing announcement', qa: 5 },
+  { quote: 'You put your strongest result in the headline instead of burying it in a case study nobody reads. That is probably why your inbound is converting above what your company size would suggest.', role: 'Founder, B2B Lead Gen Agency', signal: 'Website hero copy analysis', qa: 4 },
+  { quote: 'The repositioning from outbound tool to pipeline system across your last three posts is deliberate. That is not a messaging change. That signals you are entering a different competitive frame entirely.', role: 'CEO, GTM Consulting Firm', signal: 'LinkedIn post series analysis', qa: 4 },
 ]
 
 // ── ICON BOX — consistent icon container ─────────────────────────────────────
@@ -384,30 +420,92 @@ function HowItWorks() {
   )
 }
 
+// ── EXAMPLE BLOCK ─────────────────────────────────────────────────────────────
+function ExampleBlock({ ex, index }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.6, delay: index * 0.07, ease: [0.32, 0.72, 0, 1] }}
+      className="bg-black/[0.022] border border-black/[0.055] p-[5px] rounded-[1.6rem] overflow-hidden"
+    >
+      <div className="bg-white rounded-[calc(1.6rem-5px)] overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+
+        {/* Signal bar */}
+        <div className="px-5 py-3.5 border-b border-border/60 bg-cream/50 flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="w-[5px] h-[5px] rounded-full bg-gold flex-shrink-0" aria-hidden="true" />
+            <span className="text-[0.61rem] font-bold uppercase tracking-[0.14em] text-gold whitespace-nowrap">{ex.signalType}</span>
+            <span className="text-[0.61rem] text-muted whitespace-nowrap">{ex.signalMeta}</span>
+          </div>
+          <span className="hidden sm:block text-[0.66rem] text-muted italic leading-snug ml-auto max-w-sm text-right line-clamp-1">{ex.signalSummary}</span>
+        </div>
+
+        {/* Before / After columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2">
+
+          {/* Before */}
+          <div className="p-5 sm:p-7 border-b sm:border-b-0 sm:border-r border-border/60">
+            <p className="text-[0.59rem] font-bold uppercase tracking-[0.15em] text-red-500 flex items-center gap-1.5 mb-4">
+              <span className="w-[5px] h-[5px] rounded-full bg-red-400 flex-shrink-0" aria-hidden="true" />
+              Generic opener
+            </p>
+            <p className="font-display italic text-[0.87rem] sm:text-[0.91rem] leading-relaxed text-ink/50">
+              {ex.before}
+            </p>
+            <p className="text-[0.63rem] text-muted-2 mt-4 leading-snug">
+              Applies to thousands of similar profiles. Deleted in under 3 seconds.
+            </p>
+          </div>
+
+          {/* After */}
+          <div className="relative p-5 sm:p-7 bg-cream/25 group hover:bg-cream/45 transition-colors duration-300">
+            <div className="absolute top-0 left-0 w-[3px] h-full bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" aria-hidden="true" />
+            <p className="text-[0.59rem] font-bold uppercase tracking-[0.15em] text-emerald-600 flex items-center gap-1.5 mb-4">
+              <span className="w-[5px] h-[5px] rounded-full bg-emerald-500 flex-shrink-0" aria-hidden="true" />
+              Dossier opener
+            </p>
+            <p className="font-display italic text-[0.87rem] sm:text-[0.91rem] leading-relaxed text-ink">
+              {ex.after}
+            </p>
+            <div className="flex items-center justify-between mt-4 pt-3.5 border-t border-border/50">
+              <span className="text-[0.63rem] text-muted">{ex.role}</span>
+              <div className="flex gap-[3px]" aria-label={`QA score: ${ex.qa} out of 5`}>
+                {[1, 2, 3, 4, 5].map(d => (
+                  <span key={d} className={`w-[5px] h-[5px] rounded-full ${d <= ex.qa ? 'bg-gold' : 'bg-black/10'}`} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Why it works */}
+        <div className="px-5 sm:px-7 py-4 border-t border-border/50 bg-navy/[0.025] flex items-start gap-3">
+          <svg className="w-3.5 h-3.5 text-gold flex-shrink-0 mt-[1px]" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5.8" stroke="currentColor" strokeWidth="1.3" />
+            <path d="M7 6.5V9.5M7 4.5V5.1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          </svg>
+          <p className="text-[0.75rem] text-muted leading-relaxed">
+            <strong className="text-ink font-semibold">Why this converts: </strong>
+            {ex.why}
+          </p>
+        </div>
+
+      </div>
+    </motion.div>
+  )
+}
+
 // ── EXAMPLES ─────────────────────────────────────────────────────────────────
 function Examples() {
   const { t } = useTranslation()
-  const pairs = [
-    {
-      before: '"Saw you\'re the founder of [Company]. Love what you\'re building — the work in outbound is really impressive."',
-      after:  '"Your breakdown of why cold email collapsed between 2023 and 2025 is the most precise articulation I\'ve seen published. GPT filler is exactly the right framing."',
-      source: 'LinkedIn article, Q3 2024',
-    },
-    {
-      before: '"I noticed you recently launched a new product. Congrats on the growth — exciting times at [Company]."',
-      after:  '"Saw you shipped a new leads product in February and positioned it around removing the friction that every other tool buries in five-step workflows. Smart wedge for where the market is heading."',
-      source: 'ProductHunt launch and homepage positioning',
-    },
-    {
-      before: '"Most founders bury their best result — you seem like someone who gets it. Would love to connect."',
-      after:  '"Most founders bury their best result in a case study nobody reads. You put it in your headline — smart move, and probably the reason your inbound is converting above what your company size would suggest."',
-      source: 'Website hero copy analysis',
-    },
-  ]
   return (
     <Section id="examples">
       <Container>
-        <motion.div {...fadeUp} className="text-center mb-14">
+
+        {/* Header */}
+        <motion.div {...fadeUp} className="text-center mb-12">
           <Eyebrow>{t('examples.eyebrow')}</Eyebrow>
           <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-bold leading-[1.2] tracking-tight">
             {t('examples.title')} <em className="italic text-gold">{t('examples.titleEm')}</em>
@@ -415,22 +513,33 @@ function Examples() {
           <p className="mt-3 text-muted max-w-lg mx-auto">{t('examples.sub')}</p>
         </motion.div>
 
-        <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
-          className="flex flex-col gap-4">
-          {pairs.map((row, i) => (
-            <motion.div key={i} variants={staggerItem}>
-              <BeforeAfterRow {...row} />
-            </motion.div>
-          ))}
-        </motion.div>
+        {/* 3 full before/after example blocks */}
+        <div className="flex flex-col gap-4">
+          {examples.map((ex, i) => <ExampleBlock key={ex.id} ex={ex} index={i} />)}
+        </div>
 
-        <motion.div {...fadeUp} transition={{delay:0.3}} className="mt-14">
+        {/* Sample opener cards */}
+        <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="mt-16">
           <Eyebrow>{t('examples.openers.eyebrow')}</Eyebrow>
-          <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+          <motion.div
+            variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{ once: true, margin: '-60px' }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-5"
+          >
             {openers.map((o, i) => <OpenerCard key={i} {...o} />)}
           </motion.div>
         </motion.div>
+
+        {/* CTA */}
+        <motion.div {...fadeUp} transition={{ delay: 0.3 }} className="mt-12 text-center">
+          <p className="text-sm text-muted mb-5">
+            Every opener above came from a publicly available signal. No guessing. No templates.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            <BtnPrimary to="/free-lines" large>Claim 100 Free Openers</BtnPrimary>
+            <BtnGhost to="/book-call">Book a 30 Minute Call</BtnGhost>
+          </div>
+        </motion.div>
+
       </Container>
     </Section>
   )
