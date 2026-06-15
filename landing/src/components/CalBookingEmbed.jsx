@@ -108,6 +108,7 @@ export default function CalBookingEmbed({ className = '' }) {
             layout: 'month_view',
             theme: 'light',
             useSlotsViewOnSmallScreen: 'true',
+            hideEventTypeDetails: true,
           }}
           style={{ width: '100%', minHeight: '420px', height: '100%', overflow: 'auto' }}
         />

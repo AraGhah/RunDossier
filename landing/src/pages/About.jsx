@@ -3,11 +3,16 @@ import { motion, useScroll, useTransform, useInView, animate } from 'framer-moti
 import {
   CheckCircle, XCircle, Mail, Linkedin,
   Search, Award, Zap, Heart, Calendar,
+  ArrowRight,
 } from 'lucide-react'
 import {
   Section, Container, ContainerSm, Eyebrow, BtnPrimary, BtnGhost,
   Card, Divider, fadeUp, fadeUpBlur, staggerContainer, staggerItem,
 } from '../components/ui'
+import { LEGAL_EMAIL } from '../lib/legal'
+
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const LINKEDIN_URL = 'https://www.linkedin.com/in/ara-ghahramanyan-086261405/'
 
 // ── COUNT-UP ANIMATION ────────────────────────────────────────────────────────
 function CountUp({ to, suffix = '', prefix = '', duration = 1.6, isDecimal }) {
@@ -32,200 +37,238 @@ function CountUp({ to, suffix = '', prefix = '', duration = 1.6, isDecimal }) {
   )
 }
 
-// ── FOUNDER AVATAR ────────────────────────────────────────────────────────────
-function FounderAvatar() {
+// ── FOUNDER CARD ──────────────────────────────────────────────────────────────
+function FounderCard() {
   return (
-    <div className="relative w-full aspect-square max-w-[340px] mx-auto">
-      <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-gold/25 to-navy/15 blur-3xl scale-110 opacity-60" />
+    <div className="relative w-full max-w-[360px] mx-auto">
+      {/* Ambient glow */}
+      <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-gold/30 to-navy/20 blur-3xl scale-110 opacity-50 pointer-events-none" />
+
       <motion.div
-        className="relative w-full h-full rounded-[2rem] bg-gradient-to-br from-navy to-navy-2 overflow-hidden border border-white/10 shadow-2xl"
-        whileHover={{ scale: 1.02 }}
-        transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+        className="relative rounded-[2rem] bg-gradient-to-br from-navy via-navy to-navy-2 border border-white/[0.09] shadow-[0_32px_80px_rgba(15,25,35,0.55)] overflow-hidden"
+        whileHover={{ scale: 1.018, y: -4 }}
+        transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
       >
-        <div className="absolute inset-0 grain-overlay opacity-[0.06]" />
-        {/* Grid lines */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.07]" viewBox="0 0 340 340" fill="none" preserveAspectRatio="none">
-          <line x1="0" y1="113" x2="340" y2="113" stroke="white" strokeWidth="0.8"/>
-          <line x1="0" y1="227" x2="340" y2="227" stroke="white" strokeWidth="0.8"/>
-          <line x1="113" y1="0" x2="113" y2="340" stroke="white" strokeWidth="0.8"/>
-          <line x1="227" y1="0" x2="227" y2="340" stroke="white" strokeWidth="0.8"/>
-          <circle cx="170" cy="170" r="110" stroke="white" strokeWidth="0.8"/>
-          <circle cx="170" cy="170" r="60" stroke="white" strokeWidth="0.5"/>
+        {/* Grain */}
+        <div className="absolute inset-0 grain-overlay opacity-[0.055]" />
+
+        {/* Decorative grid */}
+        <svg
+          className="absolute inset-0 w-full h-full opacity-[0.055]"
+          viewBox="0 0 360 420"
+          fill="none"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <line x1="0" y1="140" x2="360" y2="140" stroke="white" strokeWidth="0.8" />
+          <line x1="0" y1="280" x2="360" y2="280" stroke="white" strokeWidth="0.8" />
+          <line x1="120" y1="0" x2="120" y2="420" stroke="white" strokeWidth="0.8" />
+          <line x1="240" y1="0" x2="240" y2="420" stroke="white" strokeWidth="0.8" />
+          <circle cx="180" cy="190" r="130" stroke="white" strokeWidth="0.7" />
+          <circle cx="180" cy="190" r="70" stroke="white" strokeWidth="0.5" />
         </svg>
-        {/* Gold accent top-right */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-gold/20 to-transparent" />
-        {/* Monogram */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+
+        {/* Top accent */}
+        <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-bl from-gold/[0.18] to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-28 h-28 bg-gradient-to-tr from-navy-2/60 to-transparent pointer-events-none" />
+
+        {/* Content */}
+        <div className="relative flex flex-col items-center justify-center px-8 pt-14 pb-10 text-center">
+          {/* Monogram circle */}
           <motion.div
-            className="w-28 h-28 rounded-full border border-gold/40 bg-gradient-to-br from-gold/25 to-gold/5 flex items-center justify-center mb-5 shadow-[0_0_40px_rgba(184,151,90,0.2)]"
-            animate={{ scale: [1, 1.03, 1] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-[108px] h-[108px] rounded-full border border-gold/35 bg-gradient-to-br from-gold/20 to-gold/05 flex items-center justify-center mb-6 shadow-[0_0_48px_rgba(184,151,90,0.22)]"
+            animate={{ scale: [1, 1.035, 1] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+            aria-hidden="true"
           >
-            <span className="font-display text-5xl font-bold text-white/90">A</span>
+            <span className="font-display text-[3.2rem] font-bold text-white/90 leading-none select-none">A</span>
           </motion.div>
-          <p className="font-display text-xl font-semibold text-white/90 tracking-tight">Ara Ghahramanyan</p>
-          <p className="text-sm text-gold/80 mt-1.5 uppercase tracking-[0.1em] font-medium">Founder & CEO</p>
-          <div className="w-12 h-px bg-gold/30 mt-4" />
-          <p className="text-[0.7rem] text-white/30 mt-3 uppercase tracking-widest">Dossier</p>
+
+          <h3 className="font-display text-[1.35rem] font-bold text-white leading-tight tracking-tight mb-1">
+            Ara Ghahramanyan
+          </h3>
+          <p className="text-[0.68rem] text-gold/75 uppercase tracking-[0.14em] font-semibold mb-6">
+            Founder and CEO
+          </p>
+
+          {/* Divider line */}
+          <div className="w-10 h-px bg-gold/25 mb-6" />
+
+          {/* Role tags */}
+          <div className="flex flex-wrap justify-center gap-2">
+            {['B2B Outbound', 'Cold Email', 'AI Research'].map(tag => (
+              <span
+                key={tag}
+                className="text-[0.62rem] font-semibold uppercase tracking-wider bg-white/[0.06] border border-white/[0.08] text-white/50 rounded-full px-3 py-1"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Dossier label */}
+          <p className="text-[0.6rem] uppercase tracking-[0.22em] text-white/20 mt-8">Dossier</p>
         </div>
       </motion.div>
     </div>
   )
 }
 
-// ── TIMELINE DATA ─────────────────────────────────────────────────────────────
+// ── TIMELINE ──────────────────────────────────────────────────────────────────
 const milestones = [
   {
-    year: '2022',
-    title: 'The frustration begins',
-    body: 'Managing outbound campaigns for B2B clients, Ara watched reply rates plummet as inboxes overflowed with identical GPT-drafted openers. Every personalization tool promised scale — none delivered genuine research.',
+    tag: 'The problem',
+    title: 'Personalisation that breaks at scale',
+    body: 'Running outbound campaigns for B2B clients, the pattern was always the same. Reply rates held when prospects were researched individually. The moment we tried to scale, quality collapsed. Every tool on the market made the speed problem easier and the quality problem worse.',
   },
   {
-    year: '2023',
-    title: 'Testing everything on the market',
-    body: 'Tried every AI writing tool, LinkedIn scraper, and enrichment platform available. The problem was always the same: the tools could write fast, but none could actually read a prospect\'s signal and turn it into something worth replying to.',
+    tag: 'The insight',
+    title: 'The tools were skipping the research',
+    body: 'Every AI writing tool, enrichment platform, and LinkedIn scraper tried to solve personalisation at the drafting stage. None of them actually read what a prospect published, said, or announced. They prompted from a name and a job title. That is not personalisation. That is automation.',
   },
   {
-    year: 'Q1 2024',
-    title: 'Building the research pipeline',
-    body: 'Started designing Dossier from scratch: deep research first — LinkedIn, podcasts, company announcements — then AI-assisted drafting, then a QA scoring layer. Signal → Draft → Score → Deliver.',
+    tag: 'The build',
+    title: 'Research first, then the draft',
+    body: 'Dossier was designed around a different sequence: deep signal collection first, then AI-assisted drafting, then a QA scoring layer that removes anything below the bar. Signal. Draft. Score. Deliver. Every opener traces back to something real.',
   },
   {
-    year: 'Q3 2024',
-    title: 'First pilot cohort',
-    body: 'Ran the first external cohort across 100 prospects. Average reply rate: 9.6%. The research-first approach worked. Agencies started asking for access.',
+    tag: 'First cohort',
+    title: 'Pilot results: 9.6 percent average reply rate',
+    body: 'The first external pilot ran 100 prospects across a B2B outbound campaign. Average reply rate landed at 9.6 percent. The research-first approach produced results that volume-first tools consistently miss.',
   },
   {
-    year: '2025',
-    title: 'Public launch',
-    body: 'Dossier opens to the public with Starter, Growth, and Agency tiers. Every customer starts with 100 free lines — no credit card, no campaign access required — because we\'d rather prove the product than pitch it.',
+    tag: 'Public launch',
+    title: 'Open to everyone, starting with 100 free lines',
+    body: 'Dossier is now available for cold email agencies, B2B founders, and SDR teams. Every new customer starts with 100 free, QA-scored openers. No credit card required. No campaign access needed. Prove it works first, then decide.',
   },
 ]
 
 function TimelineItem({ milestone, index, isLast }) {
   return (
     <motion.div
-      initial={{ opacity: 0, x: -24 }}
+      initial={{ opacity: 0, x: -20 }}
       whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.7, delay: index * 0.08, ease: [0.32, 0.72, 0, 1] }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.65, delay: index * 0.07, ease: [0.32, 0.72, 0, 1] }}
       className="relative flex gap-5 items-start"
     >
-      {/* Year */}
-      <div className="flex-shrink-0 w-[82px] text-right pt-0.5">
-        <span className="inline-block text-[0.65rem] font-bold uppercase tracking-wider text-gold bg-gold/10 border border-gold/20 rounded-full px-2.5 py-1 whitespace-nowrap">
-          {milestone.year}
+      {/* Tag */}
+      <div className="flex-shrink-0 w-[90px] text-right pt-0.5">
+        <span className="inline-block text-[0.6rem] font-bold uppercase tracking-wider text-gold bg-gold/10 border border-gold/20 rounded-full px-2.5 py-1 whitespace-nowrap leading-tight">
+          {milestone.tag}
         </span>
       </div>
-      {/* Dot + vertical line */}
+
+      {/* Dot + line */}
       <div className="flex flex-col items-center flex-shrink-0">
         <motion.div
           initial={{ scale: 0 }}
           whileInView={{ scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: index * 0.08 + 0.2 }}
-          className="w-3 h-3 rounded-full bg-gold border-2 border-cream-2 shadow-[0_0_0_3px_rgba(184,151,90,0.25)] mt-1 z-10"
+          transition={{ duration: 0.35, delay: index * 0.07 + 0.2 }}
+          className="w-3 h-3 rounded-full bg-gold border-2 border-cream-2 shadow-[0_0_0_3px_rgba(184,151,90,0.22)] mt-1 z-10 flex-shrink-0"
         />
         {!isLast && (
           <motion.div
-            className="w-px bg-gradient-to-b from-gold/40 to-gold/05 flex-1 mt-1"
+            className="w-px bg-gradient-to-b from-gold/35 to-gold/04 mt-1"
+            style={{ minHeight: '64px', flex: 1 }}
             initial={{ scaleY: 0, originY: 0 }}
             whileInView={{ scaleY: 1 }}
             viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.8, delay: index * 0.08 + 0.3, ease: [0.32, 0.72, 0, 1] }}
-            style={{ minHeight: '64px' }}
+            transition={{ duration: 0.75, delay: index * 0.07 + 0.3, ease: [0.32, 0.72, 0, 1] }}
           />
         )}
       </div>
-      {/* Content */}
-      <div className="pb-10 flex-1">
-        <h3 className="font-display text-lg font-semibold text-ink mb-1.5 leading-tight">{milestone.title}</h3>
-        <p className="text-muted leading-relaxed text-[0.88rem]">{milestone.body}</p>
+
+      {/* Text */}
+      <div className="pb-10 flex-1 min-w-0">
+        <h3 className="font-display text-[1rem] font-semibold text-ink mb-1.5 leading-snug">{milestone.title}</h3>
+        <p className="text-muted leading-relaxed text-[0.855rem]">{milestone.body}</p>
       </div>
     </motion.div>
   )
 }
 
-// ── VALUES DATA ───────────────────────────────────────────────────────────────
+// ── VALUES ────────────────────────────────────────────────────────────────────
 const values = [
   {
     Icon: Search,
     title: 'Research before everything',
-    body: 'Every opener we write traces to a real, verifiable signal. No signal, no opener. We would rather send 3 perfect lines than 50 weak ones.',
+    body: 'Every opener traces to a real, verifiable signal. No signal means no opener. We would rather send three accurate lines than fifty weak ones.',
   },
   {
     Icon: Award,
     title: 'Quality over volume',
-    body: 'A QA scoring layer removes openers that are too generic, too risky, or too weak. Your list gets our best work — not our average work.',
+    body: 'A QA scoring layer removes openers that are too generic, too risky, or too weak. Your list receives our best work, not our average work.',
   },
   {
     Icon: Zap,
-    title: 'Human + machine, honestly',
-    body: 'AI drafts at scale. Humans design the research pipeline and QA criteria. We\'re transparent about what each layer does — and doesn\'t do.',
+    title: 'Human and machine, honestly',
+    body: 'AI drafts at scale. Humans design the research pipeline and the QA criteria. We are transparent about what each layer does and what it does not do.',
   },
   {
     Icon: Heart,
     title: 'Honest about fit',
-    body: 'We tell you when Dossier isn\'t the right tool. We\'d rather lose the deal than overpromise. Reputation is the only moat that compounds.',
+    body: 'We tell you when Dossier is not the right tool. We would rather lose the deal than overpromise. Reputation is the only moat that compounds.',
   },
 ]
 
-// ── STATS DATA ────────────────────────────────────────────────────────────────
-const stats = [
-  { value: 12000, suffix: '+', label: 'Prospects researched' },
-  { value: 9.6, suffix: '%', label: 'Avg. reply rate', isDecimal: true },
-  { value: 48, suffix: 'h', label: 'Delivery turnaround' },
-  { value: 3, suffix: 'x', label: 'QA-scored openers / prospect' },
-]
-
-// ── GOOD FIT / NOT A FIT ──────────────────────────────────────────────────────
+// ── FIT LISTS ─────────────────────────────────────────────────────────────────
 const goodFit = [
-  'Cold email agencies managing multiple client campaigns',
+  'Cold email agencies managing campaigns for multiple clients',
   'B2B founders running their own outbound motion',
-  'SDR teams sending 50–500 personalised emails per week',
-  'Growth teams that understand personalisation starts with research',
-  'Anyone who would rather send 10 great emails than 1,000 generic ones',
+  'SDR teams sending 50 to 500 personalised emails per week',
+  'Growth teams that know personalisation starts with research',
+  'Anyone who would rather send ten great emails than a thousand generic ones',
 ]
 
 const notFit = [
   'B2C outreach or consumer product campaigns',
-  'Companies that just want to blast high-volume sequences',
+  'Companies that want to blast high-volume sequences with no research',
   'Teams without a sequencer or sending infrastructure in place',
   'Anyone unwilling to provide a clean, enriched prospect list',
-  'Businesses that expect overnight results without testing',
+  'Businesses that expect overnight results without a testing phase',
+]
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+const stats = [
+  { value: 9.6,  suffix: '%',  label: 'Reply rate, first pilot cohort', isDecimal: true },
+  { value: 48,   suffix: 'h',  label: 'Standard delivery turnaround'   },
+  { value: 3,    suffix: '',   label: 'QA-scored openers per prospect'  },
+  { value: 100,  suffix: '',   label: 'Free openers to start. No card needed.' },
 ]
 
 // ── PAGE ──────────────────────────────────────────────────────────────────────
 export default function About() {
   const { scrollY } = useScroll()
-  const glow1Y = useTransform(scrollY, [0, 500], [0, -70])
-  const glow2Y = useTransform(scrollY, [0, 500], [0, 35])
+  const glow1Y = useTransform(scrollY, [0, 600], [0, -80])
+  const glow2Y = useTransform(scrollY, [0, 600], [0, 40])
 
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
+      <section className="relative pt-32 pb-20 sm:pt-36 sm:pb-24 overflow-hidden">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <motion.div
             style={{ y: glow1Y }}
-            className="absolute -top-1/4 -right-1/4 w-[650px] h-[650px] rounded-full bg-gradient-radial from-gold/[0.08] to-transparent"
+            className="absolute -top-1/4 -right-1/4 w-[700px] h-[700px] rounded-full bg-gradient-radial from-gold/[0.08] to-transparent"
           />
           <motion.div
             style={{ y: glow2Y }}
-            className="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] rounded-full bg-gradient-radial from-navy/[0.05] to-transparent"
+            className="absolute -bottom-1/4 -left-1/4 w-[520px] h-[520px] rounded-full bg-gradient-radial from-navy/[0.05] to-transparent"
           />
-          <div className="absolute inset-0 grain-overlay opacity-[0.028]" />
+          <div className="absolute inset-0 grain-overlay opacity-[0.025]" />
         </div>
 
         <ContainerSm className="relative z-10">
           <motion.div {...fadeUpBlur} className="text-center">
             <Eyebrow>About Dossier</Eyebrow>
-            <h1 className="font-display text-[clamp(2.6rem,5.5vw,4rem)] font-bold leading-[1.08] tracking-tight text-ink mb-6">
-              We make cold email<br />
-              <em className="italic text-gold">feel human again.</em>
+            <h1 className="font-display text-[clamp(2.6rem,5.5vw,4.2rem)] font-bold leading-[1.07] tracking-tight text-ink mb-7">
+              Research at scale.<br />
+              <em className="italic text-gold">Not prompts at scale.</em>
             </h1>
             <p className="text-lg text-muted leading-relaxed max-w-2xl mx-auto mb-5">
-              Dossier is a research-backed personalisation engine for B2B outbound. We dig into your prospects' signals — LinkedIn posts, podcasts, product launches, company announcements — and turn them into cold email openers that earn a reply.
+              Dossier is a research-backed personalisation engine for B2B outbound. We dig into your prospects' signals, LinkedIn posts, podcasts, product launches, and company announcements, and turn them into cold email openers that earn a reply.
             </p>
             <p className="text-base text-muted-2 leading-relaxed max-w-xl mx-auto">
               Not a template tool. Not a prompt-to-spam machine. A research pipeline with a QA scoring layer, built for agencies and founders who know the first line is the only line that matters.
@@ -235,21 +278,23 @@ export default function About() {
       </section>
 
       {/* ── STATS STRIP ───────────────────────────────────────────────────── */}
-      <div className="bg-navy border-y border-white/[0.06] py-10">
+      <div className="bg-navy border-y border-white/[0.06] py-10 sm:py-12">
         <Container>
           <motion.div
             variants={staggerContainer}
             initial="initial"
             whileInView="whileInView"
             viewport={{ once: true }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-8 divide-x divide-white/[0.07]"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-4 divide-x-0 lg:divide-x divide-white/[0.07]"
           >
             {stats.map((s, i) => (
-              <motion.div key={i} variants={staggerItem} className="text-center">
+              <motion.div key={i} variants={staggerItem} className="text-center px-4">
                 <div className="font-display text-[clamp(2rem,4vw,2.8rem)] font-bold text-white leading-none mb-2">
                   <CountUp to={s.value} suffix={s.suffix} isDecimal={s.isDecimal} />
                 </div>
-                <div className="text-[0.72rem] text-white/35 uppercase tracking-[0.12em] font-medium">{s.label}</div>
+                <div className="text-[0.7rem] text-white/35 uppercase tracking-[0.11em] font-medium leading-snug max-w-[140px] mx-auto">
+                  {s.label}
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -270,25 +315,29 @@ export default function About() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center max-w-4xl mx-auto">
             <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
-              <FounderAvatar />
+              <FounderCard />
             </motion.div>
 
-            <motion.div {...fadeUp} transition={{ delay: 0.22 }} className="flex flex-col gap-5">
+            <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="flex flex-col gap-5">
               <div>
-                <h3 className="font-display text-3xl font-bold text-ink leading-tight">Ara Ghahramanyan</h3>
-                <p className="text-gold font-semibold mt-1.5 text-[0.78rem] uppercase tracking-[0.12em]">Founder & CEO, Dossier</p>
+                <h3 className="font-display text-[2rem] font-bold text-ink leading-tight tracking-tight">
+                  Ara Ghahramanyan
+                </h3>
+                <p className="text-gold font-semibold mt-2 text-[0.73rem] uppercase tracking-[0.14em]">
+                  Founder and CEO, Dossier
+                </p>
               </div>
 
               <p className="text-muted leading-relaxed text-[0.93rem]">
-                I spent three years running outbound campaigns for B2B companies — agencies, SaaS startups, consulting firms. Reply rates were strong when we researched manually. They collapsed the moment we tried to scale. The gap was always the first line.
+                I ran outbound campaigns for B2B clients before building Dossier. Reply rates held when we researched prospects individually. They fell the moment we tried to scale. The first line was always where the quality broke down.
               </p>
 
               <p className="text-muted leading-relaxed text-[0.93rem]">
-                By 2023, every inbox was flooded with GPT-drafted openers that referenced nothing real. Reply rates dropped industry-wide. Prospects started ignoring anything that felt templated. The tools supposed to fix personalisation were making the problem worse — because they all skipped the research.
+                By the time AI writing tools became mainstream, every inbox was already flooded with openers that felt the same. High volume, low signal, generic framing. The tools made speed easier and quality worse. Every tool skipped the one step that actually mattered: reading what the prospect published.
               </p>
 
               <p className="text-muted leading-relaxed text-[0.93rem]">
-                Dossier exists to solve the problem I had as a practitioner: research at scale, not just prompting at scale. Every opener we deliver comes from a real, verifiable signal. That is the whole model.
+                Dossier fixes the step every other tool skips. We collect real signals first, then draft, then score for quality, then deliver. Every opener we ship comes from something your prospect actually said, launched, or announced. That is the entire model.
               </p>
 
               {/* Pullquote */}
@@ -298,27 +347,31 @@ export default function About() {
                 transition={{ duration: 0.25 }}
               >
                 <p className="font-display italic text-ink-2 leading-relaxed text-[0.97rem]">
-                  "The best cold email opener proves you actually looked. Dossier makes that possible for every prospect on your list — at scale."
+                  "The best cold email opener proves you actually looked. Dossier makes that possible for every prospect on your list, at scale."
                 </p>
-                <p className="text-[0.72rem] text-muted mt-2.5 font-medium">— Ara Ghahramanyan, Founder</p>
+                <p className="text-[0.72rem] text-muted mt-3 font-medium not-italic">
+                  Ara Ghahramanyan, Founder
+                </p>
               </motion.div>
 
-              {/* Social */}
+              {/* Social links */}
               <div className="flex gap-3 pt-1">
                 <a
-                  href="https://linkedin.com/in/araghahramanyan"
+                  href={LINKEDIN_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-[0.82rem] font-medium text-muted hover:text-navy border border-border-2 hover:border-navy/30 hover:bg-navy/[0.03] rounded-full px-4 py-2 transition-all duration-200"
+                  aria-label="Ara Ghahramanyan on LinkedIn"
+                  className="inline-flex items-center gap-2 text-[0.82rem] font-medium text-muted hover:text-navy border border-border-2 hover:border-navy/30 hover:bg-navy/[0.04] rounded-full px-4 py-2.5 transition-all duration-200"
                 >
-                  <Linkedin className="w-3.5 h-3.5" />
+                  <Linkedin className="w-3.5 h-3.5" aria-hidden="true" />
                   LinkedIn
                 </a>
                 <a
-                  href="mailto:ara@getdossier.com"
-                  className="inline-flex items-center gap-2 text-[0.82rem] font-medium text-muted hover:text-navy border border-border-2 hover:border-navy/30 hover:bg-navy/[0.03] rounded-full px-4 py-2 transition-all duration-200"
+                  href={`mailto:${LEGAL_EMAIL}`}
+                  aria-label={`Email ${LEGAL_EMAIL}`}
+                  className="inline-flex items-center gap-2 text-[0.82rem] font-medium text-muted hover:text-navy border border-border-2 hover:border-navy/30 hover:bg-navy/[0.04] rounded-full px-4 py-2.5 transition-all duration-200"
                 >
-                  <Mail className="w-3.5 h-3.5" />
+                  <Mail className="w-3.5 h-3.5" aria-hidden="true" />
                   Email
                 </a>
               </div>
@@ -329,17 +382,18 @@ export default function About() {
 
       <Divider />
 
-      {/* ── OUR STORY / TIMELINE ──────────────────────────────────────────── */}
+      {/* ── ORIGIN STORY ──────────────────────────────────────────────────── */}
       <Section className="bg-cream-2">
         <Container>
           <motion.div {...fadeUp} className="text-center mb-14">
-            <Eyebrow>Our story</Eyebrow>
+            <Eyebrow>How Dossier started</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
-              How we got here.
+              The problem came first.<br />
+              <em className="italic text-gold">The product followed.</em>
             </h2>
           </motion.div>
 
-          <div className="max-w-[640px] mx-auto">
+          <div className="max-w-[660px] mx-auto">
             {milestones.map((m, i) => (
               <TimelineItem key={i} milestone={m} index={i} isLast={i === milestones.length - 1} />
             ))}
@@ -355,7 +409,7 @@ export default function About() {
           <motion.div {...fadeUp} className="text-center mb-12">
             <Eyebrow>What we do</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
-              The problem we solve.
+              The problem, the fix, the result.
             </h2>
           </motion.div>
           <motion.div
@@ -363,7 +417,7 @@ export default function About() {
             initial="initial"
             whileInView="whileInView"
             viewport={{ once: true, margin: '-60px' }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+            className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch"
           >
             {[
               {
@@ -371,30 +425,30 @@ export default function About() {
                 colorCls: 'text-red-500',
                 bgCls: 'bg-red-50',
                 label: 'The problem',
-                body: 'Cold email personalisation is broken. Tools that promise scale without research produce openers that apply to everyone — and convert no one. Inboxes are smarter than ever. Generic does not work anymore.',
+                body: 'Cold email personalisation is broken. Tools that promise scale without research produce openers that apply to everyone and convert no one. Inboxes are smarter than ever. Generic copy does not work anymore.',
               },
               {
                 Icon: Search,
                 colorCls: 'text-navy',
                 bgCls: 'bg-navy/[0.06]',
-                label: 'How we solve it',
-                body: 'A three-stage pipeline: deep prospect research across LinkedIn, podcasts, and company news; AI-assisted drafting of 3 opener variants per prospect; QA scoring to remove anything below the bar.',
+                label: 'How we fix it',
+                body: 'A three-stage pipeline: deep prospect research across LinkedIn, podcasts, and company news. AI-assisted drafting of three opener variants per prospect. QA scoring to remove anything below the bar.',
               },
               {
                 Icon: CheckCircle,
                 colorCls: 'text-emerald-600',
                 bgCls: 'bg-emerald-50',
                 label: 'The result',
-                body: 'A CSV of research-backed openers, QA-scored and ready for your sequencer. Average reply rates of 8–12% across campaigns. Delivered in 24–48 hours. No campaign access. No credit card to start.',
+                body: 'A CSV of research-backed openers, QA-scored and ready for your sequencer. Pilot reply rates landed at 9.6 percent. Delivered in 48 hours. No campaign access. No credit card to start.',
               },
             ].map((item, i) => (
-              <motion.div key={i} variants={staggerItem}>
-                <Card hover>
+              <motion.div key={i} variants={staggerItem} className="h-full">
+                <Card hover className="h-full">
                   <div className={`w-10 h-10 rounded-xl ${item.bgCls} flex items-center justify-center mb-4`}>
-                    <item.Icon className={`w-5 h-5 ${item.colorCls}`} />
+                    <item.Icon className={`w-5 h-5 ${item.colorCls}`} aria-hidden="true" />
                   </div>
-                  <h3 className="font-display text-lg font-semibold text-ink mb-2.5">{item.label}</h3>
-                  <p className="text-muted text-[0.88rem] leading-relaxed">{item.body}</p>
+                  <h3 className="font-display text-[1rem] font-semibold text-ink mb-2.5 leading-snug">{item.label}</h3>
+                  <p className="text-muted text-[0.87rem] leading-relaxed">{item.body}</p>
                 </Card>
               </motion.div>
             ))}
@@ -408,7 +462,7 @@ export default function About() {
       <Section className="bg-cream-2">
         <Container>
           <motion.div {...fadeUp} className="text-center mb-12">
-            <Eyebrow>Our values</Eyebrow>
+            <Eyebrow>Our principles</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
               What we refuse to compromise on.
             </h2>
@@ -418,15 +472,15 @@ export default function About() {
             initial="initial"
             whileInView="whileInView"
             viewport={{ once: true, margin: '-60px' }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch"
           >
             {values.map((v, i) => (
-              <motion.div key={i} variants={staggerItem}>
-                <Card hover>
+              <motion.div key={i} variants={staggerItem} className="h-full">
+                <Card hover className="h-full">
                   <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/15 flex items-center justify-center mb-4">
-                    <v.Icon className="w-5 h-5 text-gold" />
+                    <v.Icon className="w-5 h-5 text-gold" aria-hidden="true" />
                   </div>
-                  <h3 className="font-display text-[0.97rem] font-semibold text-ink mb-2 leading-snug">{v.title}</h3>
+                  <h3 className="font-display text-[0.95rem] font-semibold text-ink mb-2 leading-snug">{v.title}</h3>
                   <p className="text-muted text-[0.83rem] leading-relaxed">{v.body}</p>
                 </Card>
               </motion.div>
@@ -441,19 +495,19 @@ export default function About() {
       <Section>
         <Container>
           <motion.div {...fadeUp} className="text-center mb-12">
-            <Eyebrow>Who we serve</Eyebrow>
+            <Eyebrow>Who we work with</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
               Good fit and not a fit.
             </h2>
-            <p className="text-muted mt-4 max-w-md mx-auto text-[0.88rem] leading-relaxed">
-              We'd rather be honest upfront than spend both our time on a campaign that won't work.
+            <p className="text-muted mt-4 max-w-md mx-auto text-[0.87rem] leading-relaxed">
+              We would rather be direct upfront than spend both our time on a campaign that will not work.
             </p>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-3xl mx-auto">
-            <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
-              <Card hover>
-                <p className="text-[0.7rem] font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-2 mb-5">
-                  <CheckCircle className="w-4 h-4" /> Good fit
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-3xl mx-auto items-stretch">
+            <motion.div {...fadeUp} transition={{ delay: 0.08 }} className="h-full">
+              <Card hover className="h-full">
+                <p className="text-[0.68rem] font-bold uppercase tracking-wider text-emerald-600 flex items-center gap-2 mb-5">
+                  <CheckCircle className="w-4 h-4" aria-hidden="true" /> Good fit
                 </p>
                 <div className="flex flex-col gap-3.5">
                   {goodFit.map((item, i) => (
@@ -465,10 +519,10 @@ export default function About() {
                 </div>
               </Card>
             </motion.div>
-            <motion.div {...fadeUp} transition={{ delay: 0.18 }}>
-              <Card hover>
-                <p className="text-[0.7rem] font-bold uppercase tracking-wider text-red-500 flex items-center gap-2 mb-5">
-                  <XCircle className="w-4 h-4" /> Not a fit
+            <motion.div {...fadeUp} transition={{ delay: 0.16 }} className="h-full">
+              <Card hover className="h-full">
+                <p className="text-[0.68rem] font-bold uppercase tracking-wider text-red-500 flex items-center gap-2 mb-5">
+                  <XCircle className="w-4 h-4" aria-hidden="true" /> Not a fit
                 </p>
                 <div className="flex flex-col gap-3.5">
                   {notFit.map((item, i) => (
@@ -490,12 +544,12 @@ export default function About() {
       <Section className="bg-cream-2">
         <ContainerSm>
           <motion.div {...fadeUp} className="text-center mb-12">
-            <Eyebrow>Contact</Eyebrow>
+            <Eyebrow>Get in touch</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
-              Get in touch.
+              Three ways to reach us.
             </h2>
-            <p className="text-muted mt-3 max-w-sm mx-auto text-[0.88rem] leading-relaxed">
-              Want to talk through a specific use case, or see if Dossier is right for your team? Reach out directly.
+            <p className="text-muted mt-3 max-w-sm mx-auto text-[0.87rem] leading-relaxed">
+              Want to talk through a specific use case, or find out if Dossier is the right tool for your team? Reach out directly.
             </p>
           </motion.div>
           <motion.div
@@ -503,21 +557,21 @@ export default function About() {
             initial="initial"
             whileInView="whileInView"
             viewport={{ once: true }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch"
           >
             {[
               {
                 Icon: Mail,
                 title: 'Email',
                 desc: 'Direct line to Ara',
-                action: 'ara@getdossier.com',
-                href: 'mailto:ara@getdossier.com',
+                action: LEGAL_EMAIL,
+                href: `mailto:${LEGAL_EMAIL}`,
               },
               {
                 Icon: Calendar,
                 title: 'Book a call',
-                desc: '20–30 min Zoom',
-                action: 'Pick a time →',
+                desc: '30 minute Zoom',
+                action: 'Pick a time',
                 to: '/book-call',
               },
               {
@@ -525,26 +579,29 @@ export default function About() {
                 title: 'LinkedIn',
                 desc: 'Follow for updates',
                 action: 'Connect',
-                href: 'https://linkedin.com/in/araghahramanyan',
+                href: LINKEDIN_URL,
               },
             ].map((item, i) => (
-              <motion.div key={i} variants={staggerItem}>
-                <Card hover>
-                  <div className="w-10 h-10 rounded-xl bg-navy/[0.06] flex items-center justify-center mb-4">
-                    <item.Icon className="w-5 h-5 text-navy" />
+              <motion.div key={i} variants={staggerItem} className="h-full">
+                <Card hover className="h-full flex flex-col">
+                  <div className="w-10 h-10 rounded-xl bg-navy/[0.06] border border-navy/[0.04] flex items-center justify-center mb-4">
+                    <item.Icon className="w-5 h-5 text-navy" aria-hidden="true" />
                   </div>
                   <h3 className="font-semibold text-ink text-sm mb-1">{item.title}</h3>
-                  <p className="text-[0.75rem] text-muted mb-3">{item.desc}</p>
+                  <p className="text-[0.75rem] text-muted mb-4 flex-1">{item.desc}</p>
                   {item.to ? (
-                    <BtnGhost to={item.to} className="text-xs !py-1.5 !px-3">{item.action}</BtnGhost>
+                    <BtnGhost to={item.to} className="text-xs !py-2 !px-3.5 self-start">
+                      {item.action}
+                    </BtnGhost>
                   ) : (
                     <a
                       href={item.href}
                       target={item.href.startsWith('http') ? '_blank' : undefined}
-                      rel="noopener noreferrer"
-                      className="text-[0.78rem] font-medium text-navy hover:text-navy-2 underline underline-offset-2 break-all transition-colors"
+                      rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      className="inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-navy hover:text-navy-2 underline underline-offset-2 break-all transition-colors"
                     >
                       {item.action}
+                      <ArrowRight className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
                     </a>
                   )}
                 </Card>
@@ -554,21 +611,25 @@ export default function About() {
         </ContainerSm>
       </Section>
 
-      {/* ── CTA ───────────────────────────────────────────────────────────── */}
+      {/* ── FINAL CTA ─────────────────────────────────────────────────────── */}
       <Section className="bg-navy-dark">
         <Container>
           <motion.div {...fadeUp} className="text-center">
             <Eyebrow light>Ready to start?</Eyebrow>
-            <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.15] text-white mb-4">
-              Start with 100 prospects, <em className="italic text-gold">free.</em>
+            <h2 className="font-display text-[clamp(2rem,4vw,3.2rem)] font-bold leading-[1.13] text-white mb-5">
+              Start with 100 prospects.<br />
+              <em className="italic text-gold">Completely free.</em>
             </h2>
-            <p className="text-white/50 max-w-md mx-auto mb-8 leading-relaxed">
-              No credit card. No campaign access. Openers delivered in 48 hours.
+            <p className="text-white/50 max-w-md mx-auto mb-8 leading-relaxed text-[0.93rem]">
+              No credit card. No campaign access. Research-backed openers delivered in 48 hours. Or book a 30 minute call and we will walk through a live example from your niche.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <BtnPrimary to="/free-lines" large>Claim 100 Free Lines</BtnPrimary>
-              <BtnGhost to="/book-call" light>Book a 20–30 min Call</BtnGhost>
+              <BtnGhost to="/book-call" light>Book a 30 Minute Call</BtnGhost>
             </div>
+            <p className="text-white/20 text-xs mt-6">
+              No commitment. No credit card. Cancel or step back at any point.
+            </p>
           </motion.div>
         </Container>
       </Section>

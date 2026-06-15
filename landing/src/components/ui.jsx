@@ -31,7 +31,7 @@ export const staggerItem = {
 // ── SECTION WRAPPER ──────────────────────────────────────────────────────────
 export function Section({ children, className = '', id }) {
   return (
-    <section id={id} className={`py-16 sm:py-24 lg:py-32 ${className}`}>
+    <section id={id} className={`relative py-16 sm:py-24 lg:py-32 ${className}`}>
       {children}
     </section>
   )
@@ -74,7 +74,16 @@ export function BtnPrimary({ to, href, children, large, className = '' }) {
   )
 
   if (to) return <Link to={to} className={cls}>{children}{icon}</Link>
-  return <a href={href || '#'} target={href ? '_blank' : undefined} rel="noopener noreferrer" className={cls}>{children}{icon}</a>
+  if (!href) return null
+  const isExternal = href.startsWith('http')
+  return (
+    <a href={href}
+      target={isExternal ? '_blank' : undefined}
+      rel={isExternal ? 'noopener noreferrer' : undefined}
+      className={cls}>
+      {children}{icon}
+    </a>
+  )
 }
 
 // ── GHOST BUTTON ──────────────────────────────────────────────────────────────
@@ -86,7 +95,16 @@ export function BtnGhost({ to, href, children, light, className = '' }) {
       : 'border-border-2 text-ink hover:border-navy/40 hover:bg-navy/5'
     } ${className}`
   if (to) return <Link to={to} className={cls}>{children}</Link>
-  return <a href={href || '#'} className={cls}>{children}</a>
+  if (!href) return null
+  const isExternal = href.startsWith('http')
+  return (
+    <a href={href}
+      target={isExternal ? '_blank' : undefined}
+      rel={isExternal ? 'noopener noreferrer' : undefined}
+      className={cls}>
+      {children}
+    </a>
+  )
 }
 
 // ── CARD (DOUBLE BEZEL) ──────────────────────────────────────────────────────

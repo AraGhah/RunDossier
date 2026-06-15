@@ -36,6 +36,14 @@ export default function Nav() {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
+  // Close mobile menu on Escape
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [menuOpen])
+
   return (
     <>
       {/* Progress bar */}
@@ -92,8 +100,10 @@ export default function Nav() {
           {/* Hamburger */}
           <button
             onClick={() => setMenuOpen(o => !o)}
-            className="md:hidden w-8 h-8 flex flex-col items-center justify-center gap-[5px]"
-            aria-label="Toggle menu"
+            className="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-[5px]"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
           >
             <span className={`w-4.5 h-[1.5px] bg-ink rounded-full transition-all duration-300 ${menuOpen ? 'translate-y-[3.25px] rotate-45' : ''}`} style={{width:'18px'}} />
             <span className={`h-[1.5px] bg-ink rounded-full transition-all duration-300 ${menuOpen ? '-translate-y-[3.25px] -rotate-45' : ''}`} style={{width:'18px'}} />
@@ -105,6 +115,7 @@ export default function Nav() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
+            id="mobile-menu"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -171,6 +182,8 @@ function LangSwitcher() {
         className="flex items-center gap-1.5 text-[0.78rem] font-semibold text-muted px-3 py-2 rounded-full
           hover:bg-black/[0.04] hover:text-ink transition-all duration-200"
         aria-label="Change language"
+        aria-haspopup="listbox"
+        aria-expanded={open}
       >
         <FlagIcon code={current.code} />
         <span className="uppercase tracking-wide">{current.code}</span>

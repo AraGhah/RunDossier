@@ -4,7 +4,7 @@
  */
 const DEFAULT_CAL_LINK = 'preframe/30min'
 
-export const CAL_MEETING_DURATION_LABEL = '20–30 minutes'
+export const CAL_MEETING_DURATION_LABEL = '30 minutes'
 
 export const CAL_HOST_NAME = 'Ara Ghahramanyan'
 export const CAL_HOST_ROLE = 'Founder, Dossier'

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { Building2, User, ClipboardList, TrendingUp, Rocket, HelpCircle, Hand, Search, PenLine, BarChart2 } from 'lucide-react'
 import CalBookingEmbed from '../components/CalBookingEmbed'
 import { calBookingUrl, CAL_MEETING_DURATION_LABEL } from '../lib/cal'
 import { Section, Container, ContainerSm, Eyebrow, BtnPrimary, Card, Divider, fadeUp, staggerContainer, staggerItem } from '../components/ui'
@@ -11,10 +12,10 @@ const agenda = [
 ]
 
 const forWho = [
-  { icon:'🏢', label:'Cold email agencies', desc:'Managing campaigns for multiple clients and needing to scale personalization across ICPs.' },
-  { icon:'👤', label:'B2B founders doing outbound', desc:'Running your own cold email and wanting to improve reply rates before hiring an SDR team.' },
-  { icon:'📋', label:'SDR teams', desc:'Sending 500 or more emails per week where reply rate is the metric that determines headcount.' },
-  { icon:'📈', label:'Lead gen operators', desc:'Running high-volume campaigns where generic openers have already stopped working.' },
+  { Icon: Building2,     label:'Cold email agencies', desc:'Managing campaigns for multiple clients and needing to scale personalization across ICPs.' },
+  { Icon: User,         label:'B2B founders doing outbound', desc:'Running your own cold email and wanting to improve reply rates before hiring an SDR team.' },
+  { Icon: ClipboardList, label:'SDR teams', desc:'Sending 500 or more emails per week where reply rate is the metric that determines headcount.' },
+  { Icon: TrendingUp,    label:'Lead gen operators', desc:'Running high-volume campaigns where generic openers have already stopped working.' },
 ]
 
 const faqs = [
@@ -89,9 +90,11 @@ export default function BookCall() {
           <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {forWho.map((item,i) => (
-              <motion.div key={i} variants={staggerItem}>
-                <Card hover>
-                  <span className="text-2xl block mb-3">{item.icon}</span>
+              <motion.div key={i} variants={staggerItem} className="h-full">
+                <Card hover className="h-full">
+                  <div className="w-10 h-10 rounded-xl bg-navy/[0.06] border border-navy/[0.04] flex items-center justify-center mb-4">
+                    <item.Icon className="w-5 h-5 text-navy" aria-hidden="true" />
+                  </div>
                   <h3 className="font-semibold text-ink mb-1.5 text-sm">{item.label}</h3>
                   <p className="text-xs text-muted leading-relaxed">{item.desc}</p>
                 </Card>
@@ -132,14 +135,16 @@ export default function BookCall() {
 
           <motion.div {...fadeUp} transition={{delay:0.2}} className="mt-10 bg-navy-dark rounded-xl3 p-6 text-white text-center">
             <p className="text-white/60 text-sm mb-4">After the call, one of three things happens:</p>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { emoji:'🚀', label:'Fit confirmed', desc:'We agree on the pilot and you send your list within 24 hours.' },
-                { emoji:'🤔', label:'Needs more info', desc:'We ask follow-up questions and schedule a second 10-minute check-in.' },
-                { emoji:'👋', label:'Not a fit', desc:'We say so directly. No pressure, no follow-up emails. Your time is respected.' },
+                { Icon: Rocket,    label:'Fit confirmed', desc:'We agree on the pilot and you send your list within 24 hours.' },
+                { Icon: HelpCircle, label:'Needs more info', desc:'We ask follow-up questions and schedule a second 10-minute check-in.' },
+                { Icon: Hand,      label:'Not a fit', desc:'We say so directly. No pressure, no follow-up emails. Your time is respected.' },
               ].map((o,i) => (
-                <div key={i} className="text-center">
-                  <span className="text-2xl block mb-2">{o.emoji}</span>
+                <div key={i} className="text-center flex flex-col items-center">
+                  <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center mb-3">
+                    <o.Icon className="w-5 h-5 text-gold" aria-hidden="true" />
+                  </div>
                   <p className="text-xs font-semibold text-white mb-1">{o.label}</p>
                   <p className="text-[0.72rem] text-white/40 leading-snug">{o.desc}</p>
                 </div>
@@ -163,13 +168,15 @@ export default function BookCall() {
           <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
             className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {[
-              { icon:'🔍', title:'Signal clarity on your ICP', body:'We identify what public signals exist for your target market and which ones tend to generate the strongest openers.' },
-              { icon:'✍️', title:'One live example', body:'We write or show an example opener for a real prospect in your niche during the call. You see what the research actually looks like.' },
-              { icon:'📊', title:'Honest baseline assessment', body:'We tell you whether your current reply rate problem is an opener problem, an ICP problem, or an offer problem. Only the opener problem is one we solve.' },
+              { Icon: Search,   title:'Signal clarity on your ICP', body:'We identify what public signals exist for your target market and which ones tend to generate the strongest openers.' },
+              { Icon: PenLine,  title:'One live example', body:'We write or show an example opener for a real prospect in your niche during the call. You see what the research actually looks like.' },
+              { Icon: BarChart2, title:'Honest baseline assessment', body:'We tell you whether your current reply rate problem is an opener problem, an ICP problem, or an offer problem. Only the opener problem is one we solve.' },
             ].map((item,i) => (
-              <motion.div key={i} variants={staggerItem}>
-                <Card hover>
-                  <span className="text-2xl block mb-3">{item.icon}</span>
+              <motion.div key={i} variants={staggerItem} className="h-full">
+                <Card hover className="h-full">
+                  <div className="w-10 h-10 rounded-xl bg-navy/[0.06] border border-navy/[0.04] flex items-center justify-center mb-4">
+                    <item.Icon className="w-5 h-5 text-navy" aria-hidden="true" />
+                  </div>
                   <h3 className="font-semibold text-ink mb-1.5">{item.title}</h3>
                   <p className="text-sm text-muted leading-relaxed">{item.body}</p>
                 </Card>
@@ -191,18 +198,23 @@ export default function BookCall() {
             </h2>
           </motion.div>
           <motion.div {...fadeUp} className="divide-y divide-border">
-            {faqs.map((faq,i) => (
+            {faqs.map((faq,i) => {
+              const isOpen = openFaq === i
+              return (
               <div key={i}>
-                <button onClick={()=>setOpenFaq(openFaq===i?null:i)}
+                <button onClick={()=>setOpenFaq(isOpen?null:i)}
+                  aria-expanded={isOpen}
+                  aria-controls={`bookcall-faq-${i}`}
                   className="w-full flex items-center justify-between gap-4 py-4 text-left font-semibold text-[0.97rem] hover:text-navy transition-colors group">
                   <span>{faq.q}</span>
-                  <span className={`w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${openFaq===i?'bg-navy text-white border-navy rotate-45':'border-border-2 text-muted'}`}>+</span>
+                  <span aria-hidden="true" className={`w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isOpen?'bg-navy text-white border-navy rotate-45':'border-border-2 text-muted'}`}>+</span>
                 </button>
-                <div className={`faq-body ${openFaq===i?'open':''}`}>
+                <div id={`bookcall-faq-${i}`} role="region" className={`faq-body ${isOpen?'open':''}`}>
                   <div><p className="pb-4 text-sm text-muted leading-relaxed pr-10">{faq.a}</p></div>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </motion.div>
         </ContainerSm>
       </Section>

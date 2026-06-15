@@ -77,7 +77,7 @@ const faqs = [
   { q: 'Is the 100 free lines pilot really free?', a: 'Yes. 100 prospects, no credit card, no commitment. We research and write three QA-scored openers per lead and deliver within 48 hours. If the openers beat your baseline, we talk about a paid plan. If not, there is no conversation to have.' },
   { q: 'What counts as a prospect toward my monthly limit?', a: 'Each row in your CSV counts as one prospect. We research each one and write three opener variants. Prospects flagged as low-confidence do not count toward your monthly limit.' },
   { q: 'Can I pause or cancel anytime?', a: 'Yes. Monthly plans can be paused or cancelled at any time. There are no annual contracts on the Starter or Growth plans unless you specifically request one for a discount.' },
-  { q: 'How does billing work for the Agency plan?', a: 'Agency pricing is based on volume, delivery speed, and integration requirements. Book a 20–30 minute call and we will put together a custom proposal within 24 hours.' },
+  { q: 'How does billing work for the Agency plan?', a: 'Agency pricing is based on volume, delivery speed, and integration requirements. Book a 30 minute call and we will put together a custom proposal within 24 hours.' },
   { q: 'What happens to prospects that get flagged as low-confidence?', a: 'They appear in your deliverable with a flag and a note explaining what signal was missing. You decide whether to pull them from the campaign, use the lower-confidence opener, or re-queue them.' },
 ]
 
@@ -215,18 +215,23 @@ export default function Pricing() {
             </h2>
           </motion.div>
           <motion.div {...fadeUp} className="divide-y divide-border">
-            {faqs.map((faq, i) => (
+            {faqs.map((faq, i) => {
+              const isOpen = openFaq === i
+              return (
               <div key={i}>
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                <button onClick={() => setOpenFaq(isOpen ? null : i)}
+                  aria-expanded={isOpen}
+                  aria-controls={`pricing-faq-${i}`}
                   className="w-full flex items-center justify-between gap-4 py-4 text-left font-semibold text-[0.97rem] hover:text-navy transition-colors group">
                   <span>{faq.q}</span>
-                  <span className={`w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${openFaq===i?'bg-navy text-white border-navy rotate-45':'border-border-2 text-muted'}`}>+</span>
+                  <span aria-hidden="true" className={`w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isOpen?'bg-navy text-white border-navy rotate-45':'border-border-2 text-muted'}`}>+</span>
                 </button>
-                <div className={`faq-body ${openFaq===i?'open':''}`}>
+                <div id={`pricing-faq-${i}`} role="region" className={`faq-body ${isOpen?'open':''}`}>
                   <div><p className="pb-4 text-sm text-muted leading-relaxed pr-10">{faq.a}</p></div>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </motion.div>
         </ContainerSm>
       </Section>
@@ -244,7 +249,7 @@ export default function Pricing() {
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               <BtnPrimary to="/free-lines" large>Claim 100 Free Lines</BtnPrimary>
-              <BtnGhost to="/book-call" light>Book a 20–30 min Call</BtnGhost>
+              <BtnGhost to="/book-call" light>Book a 30 Min Call</BtnGhost>
             </div>
           </motion.div>
         </Container>
