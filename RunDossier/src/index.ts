@@ -5,6 +5,8 @@ import { notify } from './notify.js';
 import { pool } from './db.js';
 import { registerDogfoodRoutes } from './routes/dogfood.js';
 import { registerSearchRoutes } from './routes/search.js';
+import { registerProspectRoutes } from './routes/prospects.js';
+import { registerJobRoutes } from './routes/jobs.js';
 import { handlePilotSubmit } from './routes/pilot.js';
 import { handleIntakeSubmit } from './routes/intake.js';
 import { handleAdminToken, handlePilotToken } from './routes/auth.js';
@@ -39,6 +41,7 @@ const limitPilotSubmit = rateLimit({
 const limitIntake = rateLimit({ keyPrefix: 'intake', windowMs: 60_000, max: 10 });
 const limitDogfood = rateLimit({ keyPrefix: 'dogfood', windowMs: 60_000, max: 60 });
 const limitSearch = rateLimit({ keyPrefix: 'search', windowMs: 60_000, max: 30 });
+const limitAdmin = rateLimit({ keyPrefix: 'admin-api', windowMs: 60_000, max: 120 });
 
 app.get('/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
 
@@ -63,6 +66,13 @@ registerDogfoodRoutes(app);
 
 app.use('/api/search', limitSearch);
 registerSearchRoutes(app);
+
+app.use('/api/prospects', limitAdmin);
+app.use('/api/batches', limitAdmin);
+registerProspectRoutes(app);
+
+app.use('/api/jobs', limitAdmin);
+registerJobRoutes(app);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: 'Not found' });

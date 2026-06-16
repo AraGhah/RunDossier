@@ -46,6 +46,13 @@ export function buildOrganizationSchema() {
     description: SITE_DESCRIPTION,
     email: CONTACT.email,
     ...(tel ? { telephone: tel } : {}),
+    logo: {
+      '@type': 'ImageObject',
+      '@id': `${SITE_URL}/#logo`,
+      url: `${SITE_URL}/favicon.svg`,
+      contentUrl: `${SITE_URL}/favicon.svg`,
+      caption: SITE_NAME,
+    },
     contactPoint,
     address: {
       '@type': 'PostalAddress',
@@ -170,14 +177,44 @@ export function buildServiceSchema() {
     areaServed: 'Worldwide',
     serviceType: 'B2B outbound personalization',
     url: absoluteUrl('/service'),
-    offers: {
-      '@type': 'Offer',
-      name: '100 Free Lines Pilot',
-      price: '0',
-      priceCurrency: 'USD',
-      url: absoluteUrl('/free-lines'),
-      description: '100 prospects researched with three QA-scored openers each. No credit card required.',
-    },
+    offers: [
+      {
+        '@type': 'Offer',
+        name: '100 Free Lines Pilot',
+        price: '0',
+        priceCurrency: 'USD',
+        url: absoluteUrl('/free-lines'),
+        description: '100 prospects researched with three QA-scored openers each. No credit card required.',
+      },
+      {
+        '@type': 'Offer',
+        name: 'Starter Plan',
+        price: '499',
+        priceCurrency: 'USD',
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: '499',
+          priceCurrency: 'USD',
+          unitCode: 'MON',
+        },
+        description: '500 prospects per month with three QA-scored opener variants each, delivered as CSV.',
+        url: absoluteUrl('/pricing'),
+      },
+      {
+        '@type': 'Offer',
+        name: 'Growth Plan',
+        price: '999',
+        priceCurrency: 'USD',
+        priceSpecification: {
+          '@type': 'UnitPriceSpecification',
+          price: '999',
+          priceCurrency: 'USD',
+          unitCode: 'MON',
+        },
+        description: '2,000 prospects per month with priority delivery and dedicated support.',
+        url: absoluteUrl('/pricing'),
+      },
+    ],
   }
 }
 

@@ -11,6 +11,12 @@ import { runProspectSearchJob } from './jobs/prospect-search.job.js';
 
 const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search'] as const;
 
+/** pg-boss retries for transient worker failures (API timeouts, network blips). */
+const TRANSIENT_JOB_OPTIONS = {
+  retryLimit: 3,
+  retryBackoff: true,
+} as const;
+
 let boss: PgBoss;
 
 export function getBoss(): PgBoss { return boss; }
@@ -27,12 +33,20 @@ export async function startQueue(): Promise<void> {
     await boss.createQueue(name);
   }
 
-  await boss.work<{ prospectId: string }>('research', { localConcurrency: 1 }, async (jobs) => {
-    for (const job of jobs) await handleResearch(job);
-  });
-  await boss.work<{ prospectId: string }>('personalize', { localConcurrency: 1 }, async (jobs) => {
-    for (const job of jobs) await handlePersonalize(job);
-  });
+  await boss.work<{ prospectId: string }>(
+    'research',
+    { localConcurrency: 1, ...TRANSIENT_JOB_OPTIONS },
+    async (jobs) => {
+      for (const job of jobs) await handleResearch(job);
+    }
+  );
+  await boss.work<{ prospectId: string }>(
+    'personalize',
+    { localConcurrency: 1, ...TRANSIENT_JOB_OPTIONS },
+    async (jobs) => {
+      for (const job of jobs) await handlePersonalize(job);
+    }
+  );
 
   await boss.schedule('scheduler', '*/5 * * * *');
   await boss.work('scheduler', async (jobs) => {

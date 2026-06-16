@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from '../context/LanguageContext'
@@ -14,6 +14,8 @@ export default function Nav() {
   const [menuOpen, setMenuOpen]   = useState(false)
   const location = useLocation()
   const { t } = useTranslation()
+  const menuRef = useRef(null)
+  const hamburgerRef = useRef(null)
 
   const links = [
     { label: t('nav.howItWorks'), to: '/#how-it-works' },
@@ -35,16 +37,49 @@ export default function Nav() {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
-  // Close mobile menu on Escape
+  // Focus trap + Escape handler for mobile menu
   useEffect(() => {
     if (!menuOpen) return
-    const onKey = (e) => { if (e.key === 'Escape') setMenuOpen(false) }
+
+    // Move focus to first interactive element when menu opens
+    const firstFocusable = menuRef.current?.querySelector('a, button')
+    firstFocusable?.focus()
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setMenuOpen(false)
+        hamburgerRef.current?.focus()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const focusable = Array.from(
+        menuRef.current?.querySelectorAll('a, button') ?? []
+      )
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last  = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [menuOpen])
 
   return (
     <>
+      {/* Skip link — visible on focus for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-navy focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-cta"
+      >
+        Skip to main content
+      </a>
+
       {/* Progress bar */}
       <ScrollProgress />
 
@@ -102,6 +137,7 @@ export default function Nav() {
 
           {/* Hamburger */}
           <button
+            ref={hamburgerRef}
             onClick={() => setMenuOpen(o => !o)}
             className="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-[5px]"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
@@ -118,7 +154,11 @@ export default function Nav() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
+            ref={menuRef}
             id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -185,7 +225,7 @@ function LangSwitcher() {
         className="flex items-center gap-1.5 text-[0.78rem] font-semibold text-muted px-3 py-2 rounded-full
           hover:bg-black/[0.04] hover:text-ink transition-all duration-200"
         aria-label="Change language"
-        aria-haspopup="listbox"
+        aria-haspopup="menu"
         aria-expanded={open}
       >
         <FlagIcon code={current.code} />
@@ -204,10 +244,12 @@ function LangSwitcher() {
             exit={{ opacity: 0, y: -6, scale: 0.96 }}
             transition={{ duration: 0.18, ease: [0.32,0.72,0,1] }}
             className="absolute top-full right-0 mt-2 bg-cream border border-border rounded-2xl shadow-card overflow-hidden z-50 min-w-[148px]"
+            role="menu"
           >
             {LANGS.map(l => (
               <button
                 key={l.code}
+                role="menuitem"
                 onClick={() => { setLanguage(l.code); setOpen(false) }}
                 className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-left
                   transition-colors duration-150

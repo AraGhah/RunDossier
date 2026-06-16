@@ -1,4 +1,30 @@
 User-agent: *
 Allow: /
 
+# Block high-volume bulk scrapers with no search or citation value
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+# Allow AI search citation crawlers (drives brand awareness + referral traffic)
+User-agent: PerplexityBot
+Allow: /
+
+# Allow OpenAI browsing + training (citations in ChatGPT are valuable)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+# Allow Anthropic training
+User-agent: ClaudeBot
+Allow: /
+
+# Allow Google AI (training separate from search indexing)
+User-agent: Google-Extended
+Allow: /
+
 Sitemap: https://rundossier.co/sitemap.xml
