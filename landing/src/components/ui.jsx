@@ -108,7 +108,7 @@ export function BtnGhost({ to, href, children, light, className = '' }) {
 }
 
 // ── CARD (DOUBLE BEZEL) ──────────────────────────────────────────────────────
-export function Card({ children, className = '', hover = true, dark }) {
+export function Card({ children, className = '', innerClassName = '', hover = true, dark }) {
   const outer = dark
     ? 'bg-white/[0.04] border border-white/[0.07] p-[5px] rounded-xl3'
     : 'bg-black/[0.025] border border-black/[0.05] p-[5px] rounded-xl3'
@@ -117,7 +117,7 @@ export function Card({ children, className = '', hover = true, dark }) {
     : 'bg-white rounded-[calc(1.5rem-4px)] p-6 h-full shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]'
   return (
     <div className={`${outer} ${hover ? 'transition-all duration-400 hover:-translate-y-1 hover:shadow-card' : ''} ${className}`}>
-      <div className={inner}>{children}</div>
+      <div className={`${inner} ${innerClassName}`}>{children}</div>
     </div>
   )
 }

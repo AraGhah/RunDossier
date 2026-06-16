@@ -14,14 +14,15 @@ export default function Pricing() {
 
   const plans = [
     {
-      name: isFr ? 'Starter' : 'Starter',
+      name: 'Starter',
       price: '499',
       unit: isFr ? '/mois' : '/mo',
       prospects: isFr ? '500 prospects/mois' : '500 prospects/month',
-      ideal: isFr ? 'Pour les fondateurs et petites équipes B2B qui démarrent l’outbound.' : 'For founders and small B2B teams starting outbound.',
+      perProspect: isFr ? '~1,00 $ par prospect' : '~$1.00 per prospect',
+      ideal: isFr ? 'Pour les fondateurs et petites équipes B2B qui démarrent l\'outbound.' : 'For founders and small B2B teams starting outbound.',
       features: isFr
         ? [
-            '3 variantes d’accroche notées QA par prospect',
+            '3 variantes d\'accroche notées QA par prospect',
             'Livraison CSV compatible avec tout séquenceur',
             'Délai 24 à 48 heures',
             'Score de confiance et source du signal inclus',
@@ -41,19 +42,21 @@ export default function Pricing() {
       highlight: false,
     },
     {
-      name: isFr ? 'Growth' : 'Growth',
+      name: 'Growth',
       price: '999',
       unit: isFr ? '/mois' : '/mo',
       prospects: isFr ? '2 000 prospects/mois' : '2,000 prospects/month',
+      perProspect: isFr ? '~0,50 $ par prospect · 2× moins cher' : '~$0.50 per prospect — 2× cheaper per lead',
+      badge: isFr ? 'Meilleure valeur' : 'Best value',
       ideal: isFr ? 'Pour les agences et équipes B2B qui scalent le cold email.' : 'For agencies and B2B teams scaling cold email campaigns.',
       features: isFr
         ? [
             'Tout ce qui est dans Starter',
             'File prioritaire',
-            'Planification par lots',
-            'Livraison API pour intégrations',
-            'Relecture QA dédiée',
-            'Support Slack',
+            'Planification par lots à intervalles personnalisés',
+            'Livraison API pour intégration CRM',
+            'Relecture QA dédiée pour vos campagnes',
+            'Canal Slack dédié',
           ]
         : [
             'Everything in Starter',
@@ -68,10 +71,11 @@ export default function Pricing() {
       highlight: true,
     },
     {
-      name: isFr ? 'Agency' : 'Agency',
+      name: 'Agency',
       price: isFr ? 'Sur devis' : 'Custom',
       unit: '',
       prospects: isFr ? 'Prospects illimités' : 'Unlimited prospects',
+      perProspect: isFr ? 'Tarification sur mesure au volume' : 'Volume-based pricing',
       ideal: isFr ? 'Pour les agences à gros volume qui gèrent plusieurs clients.' : 'For high-volume agencies managing multiple client campaigns.',
       features: isFr
         ? [
@@ -183,22 +187,37 @@ export default function Pricing() {
       <Section>
         <Container>
           <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true}}
-            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+            className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
             {plans.map((plan, i) => (
               <motion.div key={i} variants={staggerItem}
-                className={`relative ${plan.highlight ? 'md:-mt-4' : ''}`}
-                style={{ borderRadius: 'calc(1.5rem + 6px)' }}>
+                className={`relative flex flex-col ${plan.highlight ? 'md:-translate-y-5 z-10' : ''}`}>
+
+                {/* Most Popular badge — sits above the card */}
                 {plan.highlight && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-navy text-white text-[0.65rem] font-bold uppercase tracking-wider px-4 py-1.5 rounded-full z-10 shadow-cta">
-                    Most popular
+                  <div className="mb-2 flex items-center justify-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 bg-gold/10 border border-gold/30 text-gold text-[0.65rem] font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full">
+                      <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                        <path d="M6 1L7.545 4.13L11 4.635L8.5 7.07L9.09 10.51L6 8.885L2.91 10.51L3.5 7.07L1 4.635L4.455 4.13L6 1Z"/>
+                      </svg>
+                      {isFr ? 'Le plus populaire' : 'Most popular'}
+                    </span>
                   </div>
                 )}
-                <div className={`${plan.highlight ? 'ring-2 ring-navy rounded-xl3' : ''}`}>
-                  <Card hover>
+
+                {/* Card wrapper — gold ring for Growth, subtle ring for others */}
+                <div className={`flex flex-col flex-1 rounded-[calc(1.5rem+6px)] ${
+                  plan.highlight
+                    ? 'ring-2 ring-gold/50 shadow-[0_20px_60px_rgba(196,161,100,0.2)] border-t-[3px] border-t-gold'
+                    : ''
+                }`}>
+                  <Card hover className="flex-1 flex flex-col" innerClassName="flex flex-col">
+                    {/* Plan name */}
                     <p className="text-[0.7rem] font-bold uppercase tracking-wider text-muted mb-2">{plan.name}</p>
+
+                    {/* Price */}
                     <div className="flex items-baseline gap-1 mb-1">
-                      {plan.price === 'Custom' ? (
-                        <span className="font-display text-4xl font-bold text-ink">Custom</span>
+                      {plan.price === 'Custom' || plan.price === 'Sur devis' ? (
+                        <span className="text-3xl font-bold text-navy leading-none">{plan.price}</span>
                       ) : (
                         <>
                           <span className="font-display text-5xl font-bold text-ink">${plan.price}</span>
@@ -206,28 +225,49 @@ export default function Pricing() {
                         </>
                       )}
                     </div>
-                    <p className="text-xs text-gold font-semibold mb-3">{plan.prospects}</p>
-                    <p className="text-sm text-muted mb-6 leading-relaxed border-b border-border pb-5">{plan.ideal}</p>
-                    <ul className="space-y-3 mb-7">
+
+                    {/* Volume */}
+                    <p className="text-xs text-gold font-semibold">{plan.prospects}</p>
+
+                    {/* Per-prospect value anchor */}
+                    <div className="flex flex-wrap items-center gap-2 mt-1.5 mb-5">
+                      <span className="text-[0.7rem] text-muted leading-tight">{plan.perProspect}</span>
+                      {plan.badge && (
+                        <span className="inline-block text-[0.58rem] font-bold uppercase tracking-wide bg-gold/15 text-gold px-2 py-0.5 rounded-full">
+                          {plan.badge}
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-sm text-ink-2 leading-relaxed border-b border-border pb-5 mb-6">{plan.ideal}</p>
+
+                    {/* Features */}
+                    <ul className="space-y-3 mb-8 flex-1">
                       {plan.features.map(f => (
                         <li key={f} className="flex items-start gap-2.5 text-sm">
-                          <svg className="text-gold flex-shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                          <svg className="text-gold flex-shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                             <path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                           <span className="text-ink-2">{f}</span>
                         </li>
                       ))}
                     </ul>
-                    <BtnPrimary to={plan.ctaTo} className="w-full justify-center">{plan.cta}</BtnPrimary>
+
+                    {/* CTA pinned to bottom */}
+                    <div className="mt-auto">
+                      <BtnPrimary to={plan.ctaTo} className="w-full justify-center">{plan.cta}</BtnPrimary>
+                    </div>
                   </Card>
                 </div>
               </motion.div>
             ))}
           </motion.div>
 
-          <motion.div {...fadeUp} className="text-center mt-6">
+          <motion.div {...fadeUp} className="text-center mt-8">
             <p className="text-sm text-muted">
-              All plans include the free 100-prospect pilot. No credit card required to start.
+              {isFr
+                ? 'Tous les plans incluent le pilote gratuit de 100 prospects. Aucune carte de crédit requise.'
+                : 'All plans include the free 100-prospect pilot. No credit card required to start.'}
             </p>
           </motion.div>
         </Container>
