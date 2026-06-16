@@ -6,4 +6,5 @@
 /ai/service.json    /ai/service.json    200
 /robots.txt    /robots.txt    200
 /sitemap.xml    /sitemap.xml    200
+/cloudflare-beacon/*    https://static.cloudflareinsights.com/:splat    200
 /*    /index.html    200
