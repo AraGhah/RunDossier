@@ -48,6 +48,38 @@ const EXAMPLES_BY_LANG = {
         'It spots a pattern across multiple posts and treats it as strategy. That depth is hard to fake with a quick scrape.',
       qa: 4,
     },
+    {
+      id: 4,
+      signalType: 'Funding round',
+      signalMeta: 'Seed announced, March 2025',
+      signalSummary:
+        'Founder announced a seed round and said the capital goes into outbound and pipeline first, not headcount.',
+      role: 'Founder, B2B SaaS',
+      prospectSignal: 'Signal: funding round',
+      before:
+        '"Congrats on the raise. That is a huge milestone for the team. Would love to connect and hear more about your plans for the next stage of growth."',
+      after:
+        '"You said the seed goes into pipeline before headcount. That is the opposite of what most teams do after a raise, and the ones who grow revenue before cost are usually the ones still standing 18 months later."',
+      why:
+        'It quotes the exact decision the founder made public and reads it as strategy. The generic compliment is replaced by a point of view.',
+      qa: 5,
+    },
+    {
+      id: 5,
+      signalType: 'Hiring push',
+      signalMeta: '3 SDR roles posted in 30 days',
+      signalSummary:
+        'Company posted three SDR openings in a month, a clear signal they are scaling outbound capacity fast.',
+      role: 'Head of Sales, outbound agency',
+      prospectSignal: 'Signal: hiring push',
+      before:
+        '"I saw you are hiring for a few sales roles. Exciting times. I would love to show you how we help teams like yours hit their targets faster."',
+      after:
+        '"Three SDR openings in thirty days says you are betting on volume to fill pipeline. The teams that win that bet usually fix research quality first, because more reps sending weak openers just scales the noise."',
+      why:
+        'It counts the exact roles and connects the hiring pattern to a risk the prospect is about to face. Specific, and useful even if they never reply.',
+      qa: 4,
+    },
   ],
   fr: [
     {
@@ -96,6 +128,38 @@ const EXAMPLES_BY_LANG = {
         '"Le passage de “tool outbound” à “pipeline system” sur vos trois derniers posts est volontaire. Ce n’est pas un ajustement de wording. C’est un changement de catégorie avant que le marché vous y force."',
       why:
         "La ligne détecte un pattern sur plusieurs posts et le traite comme un signal stratégique. Cette profondeur est difficile à imiter avec un simple scrape.",
+      qa: 4,
+    },
+    {
+      id: 4,
+      signalType: 'Levée de fonds',
+      signalMeta: 'Seed annoncé, mars 2025',
+      signalSummary:
+        "Le fondateur a annoncé une levée seed et précisé que les fonds vont d’abord dans l’outbound et le pipeline, pas dans les recrutements.",
+      role: 'Fondateur, SaaS B2B',
+      prospectSignal: 'Signal : levée de fonds',
+      before:
+        '"Bravo pour la levée. C’est une étape énorme pour l’équipe. J’aimerais échanger sur vos prochains objectifs de croissance."',
+      after:
+        '"Vous avez dit que le seed va dans le pipeline avant les recrutements. C’est l’inverse de ce que font la plupart des équipes après une levée, et ce sont souvent celles qui font passer le revenu avant le coût qui tiennent les 18 mois suivants."',
+      why:
+        "La ligne cite la décision rendue publique par le fondateur et la lit comme une stratégie. Le compliment laisse place à un point de vue.",
+      qa: 5,
+    },
+    {
+      id: 5,
+      signalType: 'Vague de recrutement',
+      signalMeta: '3 postes SDR en 30 jours',
+      signalSummary:
+        "L’entreprise a publié trois offres SDR en un mois, un signal clair d’une montée en puissance rapide de l’outbound.",
+      role: 'Directeur commercial, agence outbound',
+      prospectSignal: 'Signal : vague de recrutement',
+      before:
+        '"J’ai vu que vous recrutez plusieurs profils commerciaux. Belle dynamique. J’aimerais vous montrer comment on aide les équipes comme la vôtre à atteindre leurs objectifs plus vite."',
+      after:
+        '"Trois postes SDR en trente jours, c’est un pari sur le volume pour remplir le pipeline. Les équipes qui gagnent ce pari corrigent d’abord la qualité de la recherche, car plus de reps qui envoient des accroches faibles ne fait que multiplier le bruit."',
+      why:
+        "La ligne compte les postes exacts et relie la vague de recrutement à un risque réel et imminent. Précis, et utile même sans réponse.",
       qa: 4,
     },
   ],

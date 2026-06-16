@@ -83,7 +83,7 @@ export default function FreeLines() {
     e.preventDefault()
     setSubmit(true)
 
-    // Client-side guard — never send if validation fails
+    // Client-side guard, never send if validation fails
     if (!isValid) {
       // Move focus to the first error field for accessibility
       setTimeout(() => {
@@ -108,8 +108,7 @@ export default function FreeLines() {
         `Company: ${form.company}`,
         form.sequencer ? `Sequencer: ${form.sequencer}` : '',
         `LinkedIn/Website: ${form.url}`,
-        `\nMessage:\n${form.message}`,
-      ].filter(Boolean).join('\n')
+        `\nMessage:\n${form.message}`].filter(Boolean).join('\n')
       window.open(`mailto:ara@getdossier.co?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
       setSubmitting(false)
       setSubmitted(true)
@@ -135,8 +134,7 @@ export default function FreeLines() {
       'transition-colors duration-200',
       hasError
         ? 'border-red-400 bg-red-50/40 focus:ring-red-200 focus:border-red-400'
-        : 'border-border focus:ring-navy/20 focus:border-navy/40',
-    ].join(' ')
+        : 'border-border focus:ring-navy/20 focus:border-navy/40'].join(' ')
   }
 
   return (
@@ -202,7 +200,7 @@ export default function FreeLines() {
                       aria-label={c.form.ariaLabel}
                       className="flex flex-col gap-4"
                     >
-                      {/* Honeypot — invisible to real users */}
+                      {/* Honeypot, invisible to real users */}
                       <div className="absolute opacity-0 pointer-events-none h-0 overflow-hidden" aria-hidden="true">
                         <label htmlFor="fl-website">Website</label>
                         <input
@@ -284,7 +282,7 @@ export default function FreeLines() {
                         <FieldError id="err-company" message={visibleError('company')} />
                       </div>
 
-                      {/* LinkedIn or website — now required */}
+                      {/* LinkedIn or website, now required */}
                       <div>
                         <label htmlFor="fl-url" className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
                           {c.form.fields.url} <span aria-hidden="true" className="text-red-500">*</span>
@@ -306,7 +304,7 @@ export default function FreeLines() {
                         <FieldError id="err-url" message={visibleError('url')} />
                       </div>
 
-                      {/* Current sequencer — optional */}
+                      {/* Current sequencer, optional */}
                       <div>
                         <label htmlFor="fl-sequencer" className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
                           {c.form.fields.sequencer} <span className="ml-1 font-normal normal-case tracking-normal text-muted-2">{c.form.fields.sequencerOptional}</span>
@@ -322,7 +320,7 @@ export default function FreeLines() {
                         />
                       </div>
 
-                      {/* Message / ICP details — required */}
+                      {/* Message / ICP details, required */}
                       <div>
                         <label htmlFor="fl-message" className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
                           {c.form.fields.message} <span aria-hidden="true" className="text-red-500">*</span>

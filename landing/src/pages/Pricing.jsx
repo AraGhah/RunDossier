@@ -27,16 +27,14 @@ export default function Pricing() {
             'Délai 24 à 48 heures',
             'Score de confiance et source du signal inclus',
             'Signal faible : prospects signalés, pas masqués',
-            'Support par email',
-          ]
+            'Support par email']
         : [
             '3 QA-scored opener variants per lead',
             'CSV delivery compatible with any sequencer',
             '24 to 48 hour turnaround',
             'Confidence scoring and signal source included',
             'Thin-profile flagging included',
-            'Email support',
-          ],
+            'Email support'],
       cta: isFr ? 'Commencer avec 100 gratuits' : 'Start with 100 Free',
       ctaTo: '/free-lines',
       highlight: false,
@@ -46,7 +44,7 @@ export default function Pricing() {
       price: '999',
       unit: isFr ? '/mois' : '/mo',
       prospects: isFr ? '2 000 prospects/mois' : '2,000 prospects/month',
-      perProspect: isFr ? '~0,50 $ par prospect · 2× moins cher' : '~$0.50 per prospect — 2× cheaper per lead',
+      perProspect: isFr ? '~0,50 $ par prospect · 2× moins cher' : '~$0.50 per prospect, 2× cheaper per lead',
       badge: isFr ? 'Meilleure valeur' : 'Best value',
       ideal: isFr ? 'Pour les agences et équipes B2B qui scalent le cold email.' : 'For agencies and B2B teams scaling cold email campaigns.',
       features: isFr
@@ -56,16 +54,14 @@ export default function Pricing() {
             'Planification par lots à intervalles personnalisés',
             'Livraison API pour intégration CRM',
             'Relecture QA dédiée pour vos campagnes',
-            'Canal Slack dédié',
-          ]
+            'Canal Slack dédié']
         : [
             'Everything in Starter',
             'Priority processing queue',
             'Batch scheduling at custom intervals',
             'API delivery for CRM integration',
             'Dedicated QA reviewer for your campaigns',
-            'Slack support channel',
-          ],
+            'Slack support channel'],
       cta: isFr ? 'Commencer avec 100 gratuits' : 'Start with 100 Free',
       ctaTo: '/free-lines',
       highlight: true,
@@ -84,21 +80,18 @@ export default function Pricing() {
             'Lots segmentés par client',
             'Garantie de délai (SLA)',
             'Account manager dédié',
-            'Intégrations sur demande',
-          ]
+            'Intégrations sur demande']
         : [
             'Everything in Growth',
             'White-label CSV delivery',
             'Client-segmented batch processing',
             'SLA turnaround guarantee',
             'Dedicated account manager',
-            'Custom integrations on request',
-          ],
+            'Custom integrations on request'],
       cta: isFr ? 'Réserver un appel' : 'Book a Call',
       ctaTo: '/book-call',
       highlight: false,
-    },
-  ]
+    }]
 
   const comparison = [
     { feature: isFr ? 'Prospects par mois' : 'Prospects per month', starter: '500', growth: '2,000', agency: isFr ? 'Illimité' : 'Unlimited' },
@@ -111,8 +104,7 @@ export default function Pricing() {
     { feature: isFr ? 'Relecture QA dédiée' : 'Dedicated QA reviewer', starter: false, growth: true, agency: true },
     { feature: isFr ? 'Marque blanche' : 'White-label delivery', starter: false, growth: false, agency: true },
     { feature: isFr ? 'Garantie SLA' : 'SLA guarantee', starter: false, growth: false, agency: true },
-    { feature: isFr ? 'Support Slack' : 'Slack support', starter: false, growth: true, agency: true },
-  ]
+    { feature: isFr ? 'Support Slack' : 'Slack support', starter: false, growth: true, agency: true }]
 
   const faqs = isFr
     ? [
@@ -135,8 +127,7 @@ export default function Pricing() {
         {
           q: 'Que faites-vous des leads “low confidence” ?',
           a: 'Ils restent visibles dans le livrable avec un flag et la raison. Vous décidez de les exclure, de les retenter, ou d’utiliser une variante plus prudente.',
-        },
-      ]
+        }]
     : [
         {
           q: 'Is the 100 free lines pilot really free?',
@@ -157,8 +148,7 @@ export default function Pricing() {
         {
           q: 'What happens to prospects that get flagged as low-confidence?',
           a: 'They remain visible in your deliverable with a flag and the reason. You decide whether to exclude them, retry later, or use a safer opener variant.',
-        },
-      ]
+        }]
   return (
     <>
       {/* Hero */}
@@ -174,7 +164,7 @@ export default function Pricing() {
             </p>
             <p className="mt-4 text-muted text-sm leading-relaxed max-w-xl mx-auto">
               {isFr
-                ? 'Starter (499$/mois) couvre 500 prospects. Growth (999$/mois) monte à 2 000 avec livraison API et QA prioritaire. Agency : marque blanche, SLA, intégrations. Tous les plans livrent 3 variantes notées QA et un délai 24–48 h.'
+                ? 'Starter (499$/mois) couvre 500 prospects. Growth (999$/mois) monte à 2 000 avec livraison API et QA prioritaire. Agency : marque blanche, SLA, intégrations. Tous les plans livrent 3 variantes notées QA et un délai 24 to 48 h.'
                 : 'Starter ($499/mo) covers 500 researched prospects per month. Growth ($999/mo) scales to 2,000 prospects with API delivery and priority QA. Agency teams get white-label CSVs, SLAs, and custom integrations. All plans include three QA-scored opener variants per lead and 24 to 48 hour delivery.'}
             </p>
           </motion.div>
@@ -192,7 +182,7 @@ export default function Pricing() {
               <motion.div key={i} variants={staggerItem}
                 className={`relative flex flex-col ${plan.highlight ? 'md:-translate-y-5 z-10' : ''}`}>
 
-                {/* Most Popular badge — sits above the card */}
+                {/* Most Popular badge, sits above the card */}
                 {plan.highlight && (
                   <div className="mb-2 flex items-center justify-center gap-2">
                     <span className="inline-flex items-center gap-1.5 bg-gold/10 border border-gold/30 text-gold text-[0.65rem] font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full">
@@ -204,7 +194,7 @@ export default function Pricing() {
                   </div>
                 )}
 
-                {/* Card wrapper — gold ring for Growth, subtle ring for others */}
+                {/* Card wrapper, gold ring for Growth, subtle ring for others */}
                 <div className={`flex flex-col flex-1 rounded-[calc(1.5rem+6px)] ${
                   plan.highlight
                     ? 'ring-2 ring-gold/50 shadow-[0_20px_60px_rgba(196,161,100,0.2)] border-t-[3px] border-t-gold'

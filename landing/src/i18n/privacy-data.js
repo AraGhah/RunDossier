@@ -10,28 +10,24 @@ function privacySectionsEn(v) {
           segments: [
             { text: `${v.entity} ("we," "us," or "our") is a B2B prospect research and email-personalization service operated by ${v.operator}, based in Canada. Our website is ` },
             { text: v.websiteHost, href: v.website },
-            { text: '.' },
-          ],
+            { text: '.' }],
         },
         {
           type: 'p',
           segments: [
             { text: 'This Privacy Policy describes how we collect, use, disclose, and protect personal information in accordance with Canadian privacy law, including the ' },
             { text: 'Personal Information Protection and Electronic Documents Act', em: true },
-            { text: ' (PIPEDA), and — where applicable — Quebec\'s ' },
+            { text: ' (PIPEDA), and, where applicable, Quebec\'s ' },
             { text: 'Act respecting the protection of personal information in the private sector', em: true },
-            { text: ' (Law 25), Alberta\'s Personal Information Protection Act (PIPA), and British Columbia\'s Personal Information Protection Act (PIPA).' },
-          ],
+            { text: ' (Law 25), Alberta\'s Personal Information Protection Act (PIPA), and British Columbia\'s Personal Information Protection Act (PIPA).' }],
         },
         {
           type: 'p',
           segments: [
             { text: 'Privacy inquiries and requests: ' },
             { text: v.email, href: `mailto:${v.email}` },
-            { text: '.' },
-          ],
-        },
-      ],
+            { text: '.' }],
+        }],
     },
     {
       title: '2. What personal information we collect',
@@ -45,8 +41,7 @@ function privacySectionsEn(v) {
             'LinkedIn profile URL or website URL submitted with a pilot request.',
             'Name, email, and scheduling details when you book a call through Cal.com.',
             'Messages you send us by email or through our contact channels.',
-            'Billing and account information for paid plans (payment card data is handled by our payment processor, not stored by us).',
-          ],
+            'Billing and account information for paid plans (payment card data is handled by our payment processor, not stored by us).'],
         },
         { type: 'h3', text: 'Prospect data you upload (about third parties)' },
         {
@@ -54,18 +49,15 @@ function privacySectionsEn(v) {
           items: [
             'CSV files or lists containing business prospect names, job titles, companies, LinkedIn URLs, and related business contact data.',
             'This information relates to your prospects, not to you. We treat it as confidential client data and use it only to fulfill your order.',
-            'You are responsible for having a lawful basis to provide this data to us and to use our deliverables (see our Terms of Service).',
-          ],
+            'You are responsible for having a lawful basis to provide this data to us and to use our deliverables (see our Terms of Service).'],
         },
         { type: 'h3', text: 'Technical information' },
         {
           type: 'ul',
           items: [
             'IP address, browser type, device type, and approximate region from web server logs.',
-            'Pages visited and referral source, if we use privacy-respecting analytics.',
-          ],
-        },
-      ],
+            'Pages visited and referral source, if we use privacy-respecting analytics.'],
+        }],
     },
     {
       title: '3. How we use personal information',
@@ -79,14 +71,12 @@ function privacySectionsEn(v) {
             'Processing payments and preventing fraud.',
             'Sending transactional messages (confirmations, delivery notices, scheduling updates).',
             'Improving service quality using aggregated, non-identifying feedback.',
-            'Complying with legal obligations and responding to lawful requests.',
-          ],
+            'Complying with legal obligations and responding to lawful requests.'],
         },
         {
           type: 'p',
           text: 'We do not sell personal information. We do not use your prospect lists for any purpose other than fulfilling your order. We do not run advertising retargeting or sell data to data brokers.',
-        },
-      ],
+        }],
     },
     {
       title: '4. Consent and legal authority (PIPEDA)',
@@ -101,10 +91,8 @@ function privacySectionsEn(v) {
             'When you submit a form, book a call, or purchase a plan, you consent to the collection and use described in this policy for that purpose.',
             'We may rely on implied consent for follow-up communications directly related to a request you initiated.',
             'For commercial electronic messages (marketing email), we follow Canada\'s Anti-Spam Legislation (CASL) and obtain express consent where required, or rely on a permitted form of implied consent (for example, an existing business relationship). Every marketing message includes identification and an unsubscribe mechanism.',
-            'We may process information without consent where required or authorized by law (for example, fraud prevention or responding to a court order).',
-          ],
-        },
-      ],
+            'We may process information without consent where required or authorized by law (for example, fraud prevention or responding to a court order).'],
+        }],
     },
     {
       title: '5. Cookies and website analytics',
@@ -115,9 +103,8 @@ function privacySectionsEn(v) {
         },
         {
           type: 'p',
-          text: 'If we use optional analytics cookies or similar technologies, we will describe them here and — where required by Canadian or provincial law — obtain your consent before activating non-essential tracking. We do not use Google Analytics advertising features or ad-retargeting pixels.',
-        },
-      ],
+          text: 'If we use optional analytics cookies or similar technologies, we will describe them here and, where required by Canadian or provincial law, obtain your consent before activating non-essential tracking. We do not use Google Analytics advertising features or ad-retargeting pixels.',
+        }],
     },
     {
       title: '6. Service providers and cross-border processing',
@@ -129,20 +116,18 @@ function privacySectionsEn(v) {
         {
           type: 'ul',
           items: [
-            'Cal.com — scheduling; processes name and email when you book a call.',
-            'Cloudflare — website hosting and security (Pages, CDN).',
-            'Payment processor (e.g. Stripe) — billing; we do not store full payment card numbers.',
-            'Email delivery provider — transactional email.',
-            'Anthropic — AI processing for research and opener generation on prospect data you submit.',
-            'Apify — automated retrieval of publicly available LinkedIn profile information for research.',
-            'Database hosting — secure storage of order and account records.',
-          ],
+            'Cal.com, scheduling; processes name and email when you book a call.',
+            'Cloudflare, website hosting and security (Pages, CDN).',
+            'Payment processor (e.g. Stripe), billing; we do not store full payment card numbers.',
+            'Email delivery provider, transactional email.',
+            'Anthropic, AI processing for research and opener generation on prospect data you submit.',
+            'Apify, automated retrieval of publicly available LinkedIn profile information for research.',
+            'Database hosting, secure storage of order and account records.'],
         },
         {
           type: 'p',
           text: 'Each provider maintains its own privacy policy. We share only what is necessary for them to perform services on our behalf.',
-        },
-      ],
+        }],
     },
     {
       title: '7. Retention',
@@ -154,10 +139,8 @@ function privacySectionsEn(v) {
             'Order data and prospect CSVs: up to 90 days after delivery, then securely deleted unless you request earlier deletion or a longer period is agreed in writing.',
             'Pilot intake records: up to 12 months after last contact, unless you request deletion sooner.',
             'Billing and tax records: up to 7 years, as required under Canadian tax and commercial record-keeping rules.',
-            'Server logs: typically up to 90 days, unless needed for security investigations.',
-          ],
-        },
-      ],
+            'Server logs: typically up to 90 days, unless needed for security investigations.'],
+        }],
     },
     {
       title: '8. Safeguards',
@@ -169,14 +152,12 @@ function privacySectionsEn(v) {
             'HTTPS/TLS encryption in transit.',
             'Access controls limiting prospect data to personnel fulfilling your order.',
             'No public storage of client prospect files.',
-            'PCI-compliant payment processing — card numbers are not stored on our servers.',
-          ],
+            'PCI-compliant payment processing, card numbers are not stored on our servers.'],
         },
         {
           type: 'p',
-          text: 'No method of transmission or storage is completely secure. If a breach creates a real risk of significant harm to you, we will notify you and — where required — the Office of the Privacy Commissioner of Canada and/or the Commission d\'accès à l\'information du Québec, in line with applicable law.',
-        },
-      ],
+          text: 'No method of transmission or storage is completely secure. If a breach creates a real risk of significant harm to you, we will notify you and, where required, the Office of the Privacy Commissioner of Canada and/or the Commission d\'accès à l\'information du Québec, in line with applicable law.',
+        }],
     },
     {
       title: '9. Your rights',
@@ -189,8 +170,7 @@ function privacySectionsEn(v) {
             'Request correction of inaccurate or incomplete information.',
             'Request deletion, subject to legal retention obligations.',
             'Withdraw consent to optional processing (for example, marketing), without affecting prior lawful processing.',
-            'Receive information about how your data is used and with whom it is shared.',
-          ],
+            'Receive information about how your data is used and with whom it is shared.'],
         },
         {
           type: 'p',
@@ -201,8 +181,7 @@ function privacySectionsEn(v) {
           segments: [
             { text: 'To exercise your rights, email ' },
             { text: v.email, href: `mailto:${v.email}` },
-            { text: '. We will respond within 30 days (or the shorter period required by applicable provincial law). We may need to verify your identity before fulfilling a request.' },
-          ],
+            { text: '. We will respond within 30 days (or the shorter period required by applicable provincial law). We may need to verify your identity before fulfilling a request.' }],
         },
         { type: 'p', text: 'If you are not satisfied with our response, you may contact:' },
         {
@@ -211,10 +190,8 @@ function privacySectionsEn(v) {
             'Office of the Privacy Commissioner of Canada (federal): priv.gc.ca',
             'Commission d\'accès à l\'information du Québec (Quebec): cai.gouv.qc.ca',
             'Office of the Information and Privacy Commissioner of Alberta (Alberta): oipc.ab.ca',
-            'Office of the Information and Privacy Commissioner for British Columbia (BC): oipc.bc.ca',
-          ],
-        },
-      ],
+            'Office of the Information and Privacy Commissioner for British Columbia (BC): oipc.bc.ca'],
+        }],
     },
     {
       title: '10. International visitors',
@@ -222,8 +199,7 @@ function privacySectionsEn(v) {
         {
           type: 'p',
           text: 'Our service is offered from Canada. If you access our website from outside Canada, your information may be transferred to and processed in Canada and in other countries where our service providers operate. By using our service, you acknowledge that protections may differ from those in your country. Where GDPR or UK GDPR applies to you in addition to Canadian law, we process your data on bases including contract performance, legitimate interests, legal obligation, and consent where required.',
-        },
-      ],
+        }],
     },
     {
       title: '11. Children',
@@ -231,8 +207,7 @@ function privacySectionsEn(v) {
         {
           type: 'p',
           text: 'Our service is directed at businesses and professionals. We do not knowingly collect personal information from anyone under 18. If you believe we have collected such information, contact us and we will delete it promptly.',
-        },
-      ],
+        }],
     },
     {
       title: '12. Changes',
@@ -240,8 +215,7 @@ function privacySectionsEn(v) {
         {
           type: 'p',
           text: 'We may update this Privacy Policy from time to time. The "Last updated" date at the top will change when we do. Material changes will be communicated to active clients by email or a prominent notice on our website.',
-        },
-      ],
+        }],
     },
     {
       title: '13. Contact',
@@ -251,17 +225,14 @@ function privacySectionsEn(v) {
           segments: [
             { text: 'Questions or complaints about privacy: ' },
             { text: v.email, href: `mailto:${v.email}` },
-            { text: `. You may also book a call through our scheduling page at ${v.bookCallUrl}.` },
-          ],
+            { text: `. You may also book a call through our scheduling page at ${v.bookCallUrl}.` }],
         },
         {
           type: 'p',
           className: 'text-muted-2 text-xs mt-4',
           text: 'This policy is provided for transparency and does not constitute legal advice. Consult qualified counsel for advice specific to your situation.',
-        },
-      ],
-    },
-  ]
+        }],
+    }]
 }
 
 function privacySectionsFr(v) {
@@ -274,28 +245,24 @@ function privacySectionsFr(v) {
           segments: [
             { text: `${v.entity} (« nous », « notre ») est un service de recherche de prospects B2B et de personnalisation d’e-mails exploité par ${v.operator}, basé au Canada. Notre site est ` },
             { text: v.websiteHost, href: v.website },
-            { text: '.' },
-          ],
+            { text: '.' }],
         },
         {
           type: 'p',
           segments: [
             { text: 'La présente politique de confidentialité décrit comment nous collectons, utilisons, divulguons et protégeons les renseignements personnels conformément au droit canadien en matière de vie privée, notamment la ' },
             { text: 'Loi sur la protection des renseignements personnels et les documents électroniques', em: true },
-            { text: ' (LPRPDE), et — le cas échéant — la ' },
+            { text: ' (LPRPDE), et, le cas échéant, la ' },
             { text: 'Loi sur la protection des renseignements personnels dans le secteur privé', em: true },
-            { text: ' du Québec (Loi 25), la Personal Information Protection Act (PIPA) de l’Alberta et la Personal Information Protection Act (PIPA) de la Colombie-Britannique.' },
-          ],
+            { text: ' du Québec (Loi 25), la Personal Information Protection Act (PIPA) de l’Alberta et la Personal Information Protection Act (PIPA) de la Colombie-Britannique.' }],
         },
         {
           type: 'p',
           segments: [
             { text: 'Demandes et questions relatives à la confidentialité : ' },
             { text: v.email, href: `mailto:${v.email}` },
-            { text: '.' },
-          ],
-        },
-      ],
+            { text: '.' }],
+        }],
     },
     {
       title: '2. Quels renseignements personnels nous collectons',
@@ -309,8 +276,7 @@ function privacySectionsFr(v) {
             'URL de profil LinkedIn ou URL de site web soumise avec une demande pilote.',
             'Nom, e-mail et détails de planification lorsque vous réservez un appel via Cal.com.',
             'Messages que vous nous envoyez par e-mail ou via nos canaux de contact.',
-            'Renseignements de facturation et de compte pour les forfaits payants (les données de carte sont traitées par notre processeur de paiement, pas stockées par nous).',
-          ],
+            'Renseignements de facturation et de compte pour les forfaits payants (les données de carte sont traitées par notre processeur de paiement, pas stockées par nous).'],
         },
         { type: 'h3', text: 'Données prospects que vous téléversez (concernant des tiers)' },
         {
@@ -318,18 +284,15 @@ function privacySectionsFr(v) {
           items: [
             'Fichiers CSV ou listes contenant noms de prospects, titres de poste, entreprises, URL LinkedIn et coordonnées professionnelles connexes.',
             'Ces renseignements concernent vos prospects, pas vous. Nous les traitons comme des données client confidentielles et les utilisons uniquement pour exécuter votre commande.',
-            'Vous êtes responsable d’avoir une base légale pour nous fournir ces données et pour utiliser nos livrables (voir nos Conditions d’utilisation).',
-          ],
+            'Vous êtes responsable d’avoir une base légale pour nous fournir ces données et pour utiliser nos livrables (voir nos Conditions d’utilisation).'],
         },
         { type: 'h3', text: 'Renseignements techniques' },
         {
           type: 'ul',
           items: [
             'Adresse IP, type de navigateur, type d’appareil et région approximative à partir des journaux serveur.',
-            'Pages visitées et source de référence, si nous utilisons des analyses respectueuses de la vie privée.',
-          ],
-        },
-      ],
+            'Pages visitées et source de référence, si nous utilisons des analyses respectueuses de la vie privée.'],
+        }],
     },
     {
       title: '3. Comment nous utilisons les renseignements personnels',
@@ -343,14 +306,12 @@ function privacySectionsFr(v) {
             'Traiter les paiements et prévenir la fraude.',
             'Envoyer des messages transactionnels (confirmations, avis de livraison, mises à jour de planification).',
             'Améliorer la qualité du service à partir de retours agrégés et non identifiants.',
-            'Respecter les obligations légales et répondre aux demandes légitimes.',
-          ],
+            'Respecter les obligations légales et répondre aux demandes légitimes.'],
         },
         {
           type: 'p',
           text: 'Nous ne vendons pas de renseignements personnels. Nous n’utilisons pas vos listes de prospects à d’autres fins que l’exécution de votre commande. Nous ne faisons pas de reciblage publicitaire ni ne vendons de données à des courtiers.',
-        },
-      ],
+        }],
     },
     {
       title: '4. Consentement et fondement juridique (LPRPDE)',
@@ -365,10 +326,8 @@ function privacySectionsFr(v) {
             'Lorsque vous soumettez un formulaire, réservez un appel ou achetez un forfait, vous consentez à la collecte et à l’utilisation décrites dans la présente politique pour cette fin.',
             'Nous pouvons nous appuyer sur un consentement implicite pour les suivis directement liés à une demande que vous avez initiée.',
             'Pour les messages électroniques commerciaux, nous respectons la Loi canadienne anti-pourriel (LCAP) et obtenons un consentement exprès lorsque requis, ou nous appuyons sur une forme de consentement implicite permise (par exemple, une relation d’affaires existante). Chaque message marketing inclut une identification et un mécanisme de désabonnement.',
-            'Nous pouvons traiter des renseignements sans consentement lorsque la loi l’exige ou l’autorise (par exemple, prévention de la fraude ou réponse à une ordonnance judiciaire).',
-          ],
-        },
-      ],
+            'Nous pouvons traiter des renseignements sans consentement lorsque la loi l’exige ou l’autorise (par exemple, prévention de la fraude ou réponse à une ordonnance judiciaire).'],
+        }],
     },
     {
       title: '5. Témoins (cookies) et analyses web',
@@ -379,9 +338,8 @@ function privacySectionsFr(v) {
         },
         {
           type: 'p',
-          text: 'Si nous utilisons des témoins d’analyse facultatifs ou des technologies similaires, nous les décrirons ici et — lorsque la loi canadienne ou provinciale l’exige — obtiendrons votre consentement avant d’activer un suivi non essentiel. Nous n’utilisons pas les fonctions publicitaires de Google Analytics ni de pixels de reciblage.',
-        },
-      ],
+          text: 'Si nous utilisons des témoins d’analyse facultatifs ou des technologies similaires, nous les décrirons ici et, lorsque la loi canadienne ou provinciale l’exige, obtiendrons votre consentement avant d’activer un suivi non essentiel. Nous n’utilisons pas les fonctions publicitaires de Google Analytics ni de pixels de reciblage.',
+        }],
     },
     {
       title: '6. Fournisseurs de services et traitement transfrontalier',
@@ -393,20 +351,18 @@ function privacySectionsFr(v) {
         {
           type: 'ul',
           items: [
-            'Cal.com — planification ; traite nom et e-mail lorsque vous réservez un appel.',
-            'Cloudflare — hébergement et sécurité du site (Pages, CDN).',
-            'Processeur de paiement (p. ex. Stripe) — facturation ; nous ne stockons pas les numéros de carte complets.',
-            'Fournisseur d’envoi d’e-mails — courriels transactionnels.',
-            'Anthropic — traitement IA pour la recherche et la génération d’accroches sur les données prospects que vous soumettez.',
-            'Apify — récupération automatisée d’informations publiques de profils LinkedIn pour la recherche.',
-            'Hébergement de base de données — stockage sécurisé des commandes et comptes.',
-          ],
+            'Cal.com, planification ; traite nom et e-mail lorsque vous réservez un appel.',
+            'Cloudflare, hébergement et sécurité du site (Pages, CDN).',
+            'Processeur de paiement (p. ex. Stripe), facturation ; nous ne stockons pas les numéros de carte complets.',
+            'Fournisseur d’envoi d’e-mails, courriels transactionnels.',
+            'Anthropic, traitement IA pour la recherche et la génération d’accroches sur les données prospects que vous soumettez.',
+            'Apify, récupération automatisée d’informations publiques de profils LinkedIn pour la recherche.',
+            'Hébergement de base de données, stockage sécurisé des commandes et comptes.'],
         },
         {
           type: 'p',
           text: 'Chaque fournisseur maintient sa propre politique de confidentialité. Nous ne partageons que ce qui est nécessaire pour qu’il exécute des services pour notre compte.',
-        },
-      ],
+        }],
     },
     {
       title: '7. Conservation',
@@ -418,10 +374,8 @@ function privacySectionsFr(v) {
             'Données de commande et CSV prospects : jusqu’à 90 jours après livraison, puis suppression sécurisée sauf demande de suppression anticipée ou période plus longue convenue par écrit.',
             'Dossiers d’admission pilote : jusqu’à 12 mois après le dernier contact, sauf demande de suppression plus tôt.',
             'Dossiers de facturation et fiscaux : jusqu’à 7 ans, conformément aux règles canadiennes de conservation commerciale et fiscale.',
-            'Journaux serveur : généralement jusqu’à 90 jours, sauf besoin pour des enquêtes de sécurité.',
-          ],
-        },
-      ],
+            'Journaux serveur : généralement jusqu’à 90 jours, sauf besoin pour des enquêtes de sécurité.'],
+        }],
     },
     {
       title: '8. Mesures de protection',
@@ -433,14 +387,12 @@ function privacySectionsFr(v) {
             'Chiffrement HTTPS/TLS en transit.',
             'Contrôles d’accès limitant les données prospects au personnel exécutant votre commande.',
             'Aucun stockage public des fichiers prospects clients.',
-            'Traitement des paiements conforme PCI — les numéros de carte ne sont pas stockés sur nos serveurs.',
-          ],
+            'Traitement des paiements conforme PCI, les numéros de carte ne sont pas stockés sur nos serveurs.'],
         },
         {
           type: 'p',
-          text: 'Aucune méthode de transmission ou de stockage n’est totalement sécurisée. Si une violation crée un risque réel de préjudice important pour vous, nous vous en informerons et — lorsque requis — le Commissariat à la protection de la vie privée du Canada et/ou la Commission d’accès à l’information du Québec, conformément à la loi applicable.',
-        },
-      ],
+          text: 'Aucune méthode de transmission ou de stockage n’est totalement sécurisée. Si une violation crée un risque réel de préjudice important pour vous, nous vous en informerons et, lorsque requis, le Commissariat à la protection de la vie privée du Canada et/ou la Commission d’accès à l’information du Québec, conformément à la loi applicable.',
+        }],
     },
     {
       title: '9. Vos droits',
@@ -453,8 +405,7 @@ function privacySectionsFr(v) {
             'Demander la correction de renseignements inexacts ou incomplets.',
             'Demander la suppression, sous réserve des obligations légales de conservation.',
             'Retirer votre consentement au traitement facultatif (par exemple, marketing), sans affecter le traitement licite antérieur.',
-            'Recevoir des informations sur l’utilisation de vos données et les tiers avec qui elles sont partagées.',
-          ],
+            'Recevoir des informations sur l’utilisation de vos données et les tiers avec qui elles sont partagées.'],
         },
         {
           type: 'p',
@@ -465,8 +416,7 @@ function privacySectionsFr(v) {
           segments: [
             { text: 'Pour exercer vos droits, écrivez à ' },
             { text: v.email, href: `mailto:${v.email}` },
-            { text: '. Nous répondrons sous 30 jours (ou le délai plus court exigé par la loi provinciale applicable). Nous pouvons devoir vérifier votre identité avant de traiter une demande.' },
-          ],
+            { text: '. Nous répondrons sous 30 jours (ou le délai plus court exigé par la loi provinciale applicable). Nous pouvons devoir vérifier votre identité avant de traiter une demande.' }],
         },
         { type: 'p', text: 'Si vous n’êtes pas satisfait de notre réponse, vous pouvez contacter :' },
         {
@@ -475,10 +425,8 @@ function privacySectionsFr(v) {
             'Commissariat à la protection de la vie privée du Canada (fédéral) : priv.gc.ca',
             'Commission d’accès à l’information du Québec : cai.gouv.qc.ca',
             'Office of the Information and Privacy Commissioner of Alberta : oipc.ab.ca',
-            'Office of the Information and Privacy Commissioner for British Columbia : oipc.bc.ca',
-          ],
-        },
-      ],
+            'Office of the Information and Privacy Commissioner for British Columbia : oipc.bc.ca'],
+        }],
     },
     {
       title: '10. Visiteurs internationaux',
@@ -486,8 +434,7 @@ function privacySectionsFr(v) {
         {
           type: 'p',
           text: 'Notre service est offert depuis le Canada. Si vous accédez à notre site depuis l’étranger, vos renseignements peuvent être transférés et traités au Canada et dans d’autres pays où nos fournisseurs opèrent. En utilisant notre service, vous reconnaissez que les protections peuvent différer de celles de votre pays. Lorsque le RGPD ou le UK GDPR s’applique à vous en plus du droit canadien, nous traitons vos données sur des bases incluant l’exécution contractuelle, les intérêts légitimes, l’obligation légale et le consentement lorsque requis.',
-        },
-      ],
+        }],
     },
     {
       title: '11. Mineurs',
@@ -495,8 +442,7 @@ function privacySectionsFr(v) {
         {
           type: 'p',
           text: 'Notre service s’adresse aux entreprises et professionnels. Nous ne collectons pas sciemment de renseignements personnels auprès de personnes de moins de 18 ans. Si vous croyez que nous avons collecté de tels renseignements, contactez-nous et nous les supprimerons rapidement.',
-        },
-      ],
+        }],
     },
     {
       title: '12. Modifications',
@@ -504,8 +450,7 @@ function privacySectionsFr(v) {
         {
           type: 'p',
           text: 'Nous pouvons mettre à jour la présente politique de confidentialité de temps à autre. La date « Dernière mise à jour » en haut sera modifiée en conséquence. Les changements importants seront communiqués aux clients actifs par e-mail ou par un avis visible sur notre site.',
-        },
-      ],
+        }],
     },
     {
       title: '13. Contact',
@@ -515,17 +460,14 @@ function privacySectionsFr(v) {
           segments: [
             { text: 'Questions ou plaintes relatives à la confidentialité : ' },
             { text: v.email, href: `mailto:${v.email}` },
-            { text: `. Vous pouvez aussi réserver un appel via notre page de planification : ${v.bookCallUrl}.` },
-          ],
+            { text: `. Vous pouvez aussi réserver un appel via notre page de planification : ${v.bookCallUrl}.` }],
         },
         {
           type: 'p',
           className: 'text-muted-2 text-xs mt-4',
           text: 'Cette politique est fournie à titre de transparence et ne constitue pas un avis juridique. Consultez un conseiller qualifié pour des conseils adaptés à votre situation.',
-        },
-      ],
-    },
-  ]
+        }],
+    }]
 }
 
 const PRIVACY_META = {

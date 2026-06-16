@@ -17,7 +17,7 @@ import PageH1 from '../components/PageH1'
 import { getPageH1 } from '../lib/page-headings'
 import { getExamples, getOpenerCards } from '../i18n/examples-data'
 
-// ── ICON BOX — consistent icon container ─────────────────────────────────────
+// ── ICON BOX, consistent icon container ─────────────────────────────────────
 function IconBox({ Icon, dark }) {
   return dark ? (
     <div className="w-10 h-10 rounded-xl bg-white/[0.08] border border-white/[0.06] flex items-center justify-center mb-4 flex-shrink-0">
@@ -168,13 +168,11 @@ function Problem() {
   const cards = [
     { Icon: LayoutTemplate, title: t('problem.c1.title'), body: t('problem.c1.body') },
     { Icon: Bot,            title: t('problem.c2.title'), body: t('problem.c2.body') },
-    { Icon: Clock,          title: t('problem.c3.title'), body: t('problem.c3.body') },
-  ]
+    { Icon: Clock,          title: t('problem.c3.title'), body: t('problem.c3.body') }]
   const stats = [
     { label: t('problem.stat1.label'), val:'2.1%' },
     { label: t('problem.stat2.label'), val:'9.6%' },
-    { label: t('problem.stat3.label'), val:'4,200' },
-  ]
+    { label: t('problem.stat3.label'), val:'4,200' }]
   return (
     <Section className="bg-navy-dark text-white overflow-hidden" id="problem">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -224,8 +222,7 @@ function Agitation() {
     { stat:'68%',  label: t('agitation.s1.label') },
     { stat:'3 sec', label: t('agitation.s2.label') },
     { stat:'$0',   label: t('agitation.s3.label') },
-    { stat:'2 wks', label: t('agitation.s4.label') },
-  ]
+    { stat:'2 wks', label: t('agitation.s4.label') }]
   return (
     <Section className="bg-cream-2">
       <ContainerSm className="text-center">
@@ -258,8 +255,7 @@ function Solution() {
   const features = [
     { Icon: Search,      title: t('solution.f1.title'), body: t('solution.f1.body') },
     { Icon: PenLine,     title: t('solution.f2.title'), body: t('solution.f2.body') },
-    { Icon: ShieldCheck, title: t('solution.f3.title'), body: t('solution.f3.body') },
-  ]
+    { Icon: ShieldCheck, title: t('solution.f3.title'), body: t('solution.f3.body') }]
   return (
     <Section id="solution">
       <Container>
@@ -310,8 +306,7 @@ function Solution() {
                 {[
                   { name:'J. Whitmore', co:'LeadFlow', opener:'Your breakdown of why cold email collapsed 2023 to 2025 is the most precise articulation I\'ve seen published...', qa:4, conf:'High' },
                   { name:'M. Okafor', co:'Apex Outbound', opener:'Saw you launched in February and positioned around removing friction that every other tool buries in 5-step workflows...', qa:5, conf:'High' },
-                  { name:'R. Castillo', co:'Clearpath B2B', opener:'Your thread on why SDR-to-AE handoffs break under 50 people is something I\'ve seen play out at 3 agencies this year...', qa:3, conf:'Med' },
-                ].map((row, i) => (
+                  { name:'R. Castillo', co:'Clearpath B2B', opener:'Your thread on why SDR-to-AE handoffs break under 50 people is something I\'ve seen play out at 3 agencies this year...', qa:3, conf:'Med' }].map((row, i) => (
                   <div key={i} className={`px-4 py-3 border-b border-border last:border-0 ${i%2===1?'bg-cream/60':''}`}>
                     <div className="flex gap-3 items-start">
                       <div className="flex-shrink-0 w-20">
@@ -343,8 +338,7 @@ function HowItWorks() {
   const steps = [
     { n:'01', title: t('hiw.s1.title'), body: t('hiw.s1.body') },
     { n:'02', title: t('hiw.s2.title'), body: t('hiw.s2.body') },
-    { n:'03', title: t('hiw.s3.title'), body: t('hiw.s3.body') },
-  ]
+    { n:'03', title: t('hiw.s3.title'), body: t('hiw.s3.body') }]
   return (
     <Section className="bg-cream-2" id="how-it-works">
       <Container>
@@ -518,8 +512,7 @@ function Benefits() {
     { Icon: BarChart2,   title: t('benefits.b3.title'), body: t('benefits.b3.body') },
     { Icon: Plug,        title: t('benefits.b4.title'), body: t('benefits.b4.body') },
     { Icon: Shield,      title: t('benefits.b5.title'), body: t('benefits.b5.body') },
-    { Icon: TrendingUp,  title: t('benefits.b6.title'), body: t('benefits.b6.body') },
-  ]
+    { Icon: TrendingUp,  title: t('benefits.b6.title'), body: t('benefits.b6.body') }]
   const spans = ['sm:col-span-2','sm:col-span-1','sm:col-span-1','sm:col-span-2','sm:col-span-1','sm:col-span-2']
   return (
     <Section className="bg-cream-2">
@@ -553,16 +546,14 @@ function WhyUs() {
   const features = [
     { title: t('whyus.f1.title'), body: t('whyus.f1.body') },
     { title: t('whyus.f2.title'), body: t('whyus.f2.body') },
-    { title: t('whyus.f3.title'), body: t('whyus.f3.body') },
-  ]
+    { title: t('whyus.f3.title'), body: t('whyus.f3.body') }]
   const grid = [
     { Icon: Search,      label: t('whyus.g1') },
     { Icon: PenLine,     label: t('whyus.g2') },
     { Icon: ShieldCheck, label: t('whyus.g3') },
     { Icon: BarChart2,   label: t('whyus.g4') },
     { Icon: Plug,        label: t('whyus.g5') },
-    { Icon: Shield,      label: t('whyus.g6') },
-  ]
+    { Icon: Shield,      label: t('whyus.g6') }]
   return (
     <Section className="bg-navy-dark text-white">
       <Container>
@@ -609,8 +600,7 @@ function Credibility() {
     { val:'3.1%',  label: t('cred.s1.label') },
     { val:'9.6%',  label: t('cred.s2.label') },
     { val:'4,200', label: t('cred.s3.label') },
-    { val:'48h',   label: t('cred.s4.label') },
-  ]
+    { val:'48h',   label: t('cred.s4.label') }]
   return (
     <Section>
       <Container>
@@ -667,8 +657,7 @@ function PricingPreview() {
       prospects: t('pricing.agency.prospects'), desc: t('pricing.agency.desc'),
       features: [t('pricing.agency.f1'), t('pricing.agency.f2'), t('pricing.agency.f3'), t('pricing.agency.f4'), t('pricing.agency.f5')],
       cta: t('pricing.cta.call'), ctaTo: '/book-call', highlight: false,
-    },
-  ]
+    }]
   return (
     <Section className="bg-cream-2">
       <Container>
@@ -734,8 +723,7 @@ function FAQ() {
     { q: t('faq.q3.q'), a: t('faq.q3.a') },
     { q: t('faq.q4.q'), a: t('faq.q4.a') },
     { q: t('faq.q5.q'), a: t('faq.q5.a') },
-    { q: t('faq.q6.q'), a: t('faq.q6.a') },
-  ]
+    { q: t('faq.q6.q'), a: t('faq.q6.a') }]
   return (
     <Section id="faq">
       <ContainerSm>

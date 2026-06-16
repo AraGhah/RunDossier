@@ -6,8 +6,7 @@ import FlagIcon from './FlagIcon'
 
 const LANGS = [
   { code: 'en', label: 'English' },
-  { code: 'fr', label: 'Français' },
-]
+  { code: 'fr', label: 'Français' }]
 
 export default function Nav() {
   const [scrolled, setScrolled]   = useState(false)
@@ -21,8 +20,7 @@ export default function Nav() {
     { label: t('nav.howItWorks'), to: '/#how-it-works' },
     { label: t('nav.examples'),   to: '/#examples' },
     { label: t('nav.pricing'),    to: '/pricing' },
-    { label: t('nav.about'),      to: '/about' },
-  ]
+    { label: t('nav.about'),      to: '/about' }]
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50)
@@ -72,7 +70,7 @@ export default function Nav() {
 
   return (
     <>
-      {/* Skip link — visible on focus for keyboard users */}
+      {/* Skip link, visible on focus for keyboard users */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-navy focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-cta"

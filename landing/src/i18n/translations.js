@@ -10,7 +10,7 @@ export const translations = {
 
     // HERO
     'hero.eyebrow': 'For outbound agencies and B2B founders',
-    'hero.title': 'Dossier — Personalized outbound openers that get replies',
+    'hero.title': 'Dossier, Personalized outbound openers that get replies',
     'hero.hook': 'Your reps sound like they never did the homework.',
     'hero.subtitle': 'Dossier researches each prospect and delivers three QA-scored openers in a ready-to-import CSV. Your team sends.',
     'hero.italic': 'Prospects reply.',
@@ -28,7 +28,7 @@ export const translations = {
 
     // SEO INTRO (home)
     'seoIntro.title': 'Personalized outbound openers for B2B cold email',
-    'seoIntro.p1': 'Dossier is a done-for-you research service for outbound agencies and B2B founders. We review public signals per prospect — LinkedIn posts, product launches, hiring moves, and company news — then write three QA-scored first lines you import into your sequencer.',
+    'seoIntro.p1': 'Dossier is a done-for-you research service for outbound agencies and B2B founders. We review public signals per prospect, LinkedIn posts, product launches, hiring moves, and company news, then write three QA-scored first lines you import into your sequencer.',
     'seoIntro.p2': 'Every delivery includes the research signal, confidence scoring, and thin-profile flags. Typical pilot turnaround is 24 to 48 hours for 100 prospects. No inbox access, no campaign permissions, and no credit card required to start.',
     'seoIntro.quote': 'Dossier does not send emails on your behalf. You keep full control of volume, offer, and deliverability while we handle prospect research and opener QA.',
 
@@ -50,15 +50,15 @@ export const translations = {
     'contact.phoneLabel': 'Phone:',
 
     // PAGE H1
-    'page.home.h1': 'Dossier — Personalized outbound openers that get replies',
-    'page.pricing.h1': 'Dossier Pricing — Start free, scale when it works',
-    'page.about.h1': 'About Dossier — Research-backed outbound openers',
-    'page.freeLines.h1': 'Dossier — 100 Free Personalized Openers',
-    'page.bookCall.h1': 'Book a Call with Dossier — 30-Minute Fit Assessment',
-    'page.service.h1': 'Dossier Service — Personalized outbound openers',
-    'page.contact.h1': 'Contact Dossier — Email, phone, and scheduling',
-    'page.privacy.h1': 'Dossier — Privacy Policy',
-    'page.terms.h1': 'Dossier — Terms of Service',
+    'page.home.h1': 'Dossier, Personalized outbound openers that get replies',
+    'page.pricing.h1': 'Dossier Pricing, Start free, scale when it works',
+    'page.about.h1': 'About Dossier, Research-backed outbound openers',
+    'page.freeLines.h1': 'Dossier, 100 Free Personalized Openers',
+    'page.bookCall.h1': 'Book a Call with Dossier, 30-Minute Fit Assessment',
+    'page.service.h1': 'Dossier Service, Personalized outbound openers',
+    'page.contact.h1': 'Contact Dossier, Email, phone, and scheduling',
+    'page.privacy.h1': 'Dossier, Privacy Policy',
+    'page.terms.h1': 'Dossier, Terms of Service',
 
     'problem.eyebrow': 'The problem',
     'problem.title1': 'Generic openers are',
@@ -264,7 +264,7 @@ export const translations = {
     'nav.bookCall': 'Réserver un Appel',
 
     'hero.eyebrow': 'Pour les agences d\'outbound et les fondateurs B2B',
-    'hero.title': 'Dossier — des accroches outbound personnalisées qui obtiennent des réponses',
+    'hero.title': 'Dossier, des accroches outbound personnalisées qui obtiennent des réponses',
     'hero.hook': 'Vos équipes donnent l\'impression de n\'avoir jamais fait de recherches.',
     'hero.subtitle': 'Dossier recherche chaque prospect et rédige trois accroches personnalisées avec scoring QA. Votre équipe les intègre dans son séquenceur.',
     'hero.italic': 'Les taux de réponse augmentent.',
@@ -281,7 +281,7 @@ export const translations = {
     'hero.preview.stat': 'taux de réponse moyen avec les accroches Dossier',
 
     'seoIntro.title': 'Accroches outbound personnalisées pour le cold email B2B',
-    'seoIntro.p1': 'Dossier est un service de recherche clé en main pour les agences outbound et les fondateurs B2B. Nous analysons les signaux publics par prospect — publications LinkedIn, lancements produit, recrutements et actualités — puis rédigeons trois premières lignes notées QA à importer dans votre séquenceur.',
+    'seoIntro.p1': 'Dossier est un service de recherche clé en main pour les agences outbound et les fondateurs B2B. Nous analysons les signaux publics par prospect, publications LinkedIn, lancements produit, recrutements et actualités, puis rédigeons trois premières lignes notées QA à importer dans votre séquenceur.',
     'seoIntro.p2': 'Chaque livraison inclut le signal de recherche, un score de confiance et des indicateurs de profil mince. Délai pilote typique : 24 à 48 h pour 100 prospects. Aucun accès boîte mail, aucune permission campagne, aucune carte de crédit pour commencer.',
     'seoIntro.quote': 'Dossier n\'envoie pas d\'emails à votre place. Vous gardez le contrôle du volume, de l\'offre et de la délivrabilité ; nous gérons la recherche prospect et le QA des accroches.',
 
@@ -300,15 +300,15 @@ export const translations = {
     'contact.emailLabel': 'Courriel :',
     'contact.phoneLabel': 'Téléphone :',
 
-    'page.home.h1': 'Dossier — des accroches outbound personnalisées qui obtiennent des réponses',
-    'page.pricing.h1': 'Tarifs Dossier — Commencez gratuitement, montez en volume',
-    'page.about.h1': 'À propos de Dossier — Accroches outbound basées sur la recherche',
-    'page.freeLines.h1': 'Dossier — 100 accroches personnalisées gratuites',
-    'page.bookCall.h1': 'Réserver un appel Dossier — Évaluation de 30 minutes',
-    'page.service.h1': 'Service Dossier — Accroches outbound personnalisées',
-    'page.contact.h1': 'Contacter Dossier — Courriel, téléphone et rendez-vous',
-    'page.privacy.h1': 'Dossier — Politique de confidentialité',
-    'page.terms.h1': 'Dossier — Conditions d\'utilisation',
+    'page.home.h1': 'Dossier, des accroches outbound personnalisées qui obtiennent des réponses',
+    'page.pricing.h1': 'Tarifs Dossier, Commencez gratuitement, montez en volume',
+    'page.about.h1': 'À propos de Dossier, Accroches outbound basées sur la recherche',
+    'page.freeLines.h1': 'Dossier, 100 accroches personnalisées gratuites',
+    'page.bookCall.h1': 'Réserver un appel Dossier, Évaluation de 30 minutes',
+    'page.service.h1': 'Service Dossier, Accroches outbound personnalisées',
+    'page.contact.h1': 'Contacter Dossier, Courriel, téléphone et rendez-vous',
+    'page.privacy.h1': 'Dossier, Politique de confidentialité',
+    'page.terms.h1': 'Dossier, Conditions d\'utilisation',
 
     'problem.eyebrow': 'Le problème',
     'problem.title1': 'Les accroches génériques',

@@ -8,8 +8,7 @@ const ABOUT_EN = {
     { value: 9.6, suffix: '%', label: 'Reply rate, first pilot cohort', isDecimal: true },
     { value: 48, suffix: 'h', label: 'Standard delivery turnaround' },
     { value: 3, suffix: '', label: 'QA-scored openers per prospect' },
-    { value: 100, suffix: '', label: 'Free openers to start. No card needed.' },
-  ],
+    { value: 100, suffix: '', label: 'Free openers to start. No card needed.' }],
   founder: {
     eyebrow: 'The founder',
     title: 'The person behind Dossier.',
@@ -54,8 +53,7 @@ const ABOUT_EN = {
         tag: 'Public launch',
         title: 'Open to everyone, starting with 100 free lines',
         body: 'Dossier is now available for cold email agencies, B2B founders, and SDR teams. Every new customer starts with 100 free, QA-scored openers. No credit card required. No campaign access needed. Prove it works first, then decide.',
-      },
-    ],
+      }],
   },
   whatWeDo: {
     eyebrow: 'What we do',
@@ -72,8 +70,7 @@ const ABOUT_EN = {
       {
         label: 'The result',
         body: 'A CSV of research-backed openers, QA-scored and ready for your sequencer. Pilot reply rates landed at 9.6 percent. Delivered in 48 hours. No campaign access. No credit card to start.',
-      },
-    ],
+      }],
   },
   values: {
     eyebrow: 'Our principles',
@@ -94,8 +91,7 @@ const ABOUT_EN = {
       {
         title: 'Honest about fit',
         body: 'We tell you when Dossier is not the right tool. We would rather lose the deal than overpromise. Reputation is the only moat that compounds.',
-      },
-    ],
+      }],
   },
   fit: {
     eyebrow: 'Who we work with',
@@ -108,15 +104,13 @@ const ABOUT_EN = {
       'B2B founders running their own outbound motion',
       'SDR teams sending 50 to 500 personalised emails per week',
       'Growth teams that know personalisation starts with research',
-      'Anyone who would rather send ten great emails than a thousand generic ones',
-    ],
+      'Anyone who would rather send ten great emails than a thousand generic ones'],
     bad: [
       'B2C outreach or consumer product campaigns',
       'Companies that want to blast high-volume sequences with no research',
       'Teams without a sequencer or sending infrastructure in place',
       'Anyone unwilling to provide a clean, enriched prospect list',
-      'Businesses that expect overnight results without a testing phase',
-    ],
+      'Businesses that expect overnight results without a testing phase'],
   },
   contact: {
     eyebrow: 'Get in touch',
@@ -126,8 +120,7 @@ const ABOUT_EN = {
       { title: 'Email', desc: 'Direct line to Ara', action: null },
       { title: 'Phone', desc: 'Business line', action: null },
       { title: 'Book a call', desc: '30 minute Zoom or Teams', action: 'Pick a time' },
-      { title: 'LinkedIn', desc: 'Follow for updates', action: 'Connect' },
-    ],
+      { title: 'LinkedIn', desc: 'Follow for updates', action: 'Connect' }],
   },
   cta: {
     eyebrow: 'Ready to start?',
@@ -143,15 +136,14 @@ const ABOUT_EN = {
 const ABOUT_FR = {
   hero: {
     eyebrow: 'À propos de Dossier',
-    p1: 'Dossier est un moteur de personnalisation basé sur la recherche pour l\'outbound B2B. Nous analysons les signaux de vos prospects — publications LinkedIn, podcasts, lancements produit et annonces — et les transformons en accroches de cold email qui obtiennent des réponses.',
+    p1: 'Dossier est un moteur de personnalisation basé sur la recherche pour l\'outbound B2B. Nous analysons les signaux de vos prospects, publications LinkedIn, podcasts, lancements produit et annonces, et les transformons en accroches de cold email qui obtiennent des réponses.',
     p2: 'Pas un outil de templates. Pas une machine à spam par prompt. Un pipeline de recherche avec couche de scoring QA, conçu pour les agences et fondateurs qui savent que la première ligne est la seule qui compte.',
   },
   stats: [
     { value: 9.6, suffix: '%', label: 'Taux de réponse, première cohorte pilote', isDecimal: true },
     { value: 48, suffix: 'h', label: 'Délai de livraison standard' },
     { value: 3, suffix: '', label: 'Accroches notées QA par prospect' },
-    { value: 100, suffix: '', label: 'Accroches gratuites pour commencer. Sans carte.' },
-  ],
+    { value: 100, suffix: '', label: 'Accroches gratuites pour commencer. Sans carte.' }],
   founder: {
     eyebrow: 'Le fondateur',
     title: 'La personne derrière Dossier.',
@@ -196,8 +188,7 @@ const ABOUT_FR = {
         tag: 'Lancement public',
         title: 'Ouvert à tous, à partir de 100 lignes gratuites',
         body: 'Dossier est maintenant disponible pour les agences cold email, fondateurs B2B et équipes SDR. Chaque nouveau client commence avec 100 accroches gratuites notées QA. Sans carte de crédit. Sans accès aux campagnes. Prouvez que ça marche, puis décidez.',
-      },
-    ],
+      }],
   },
   whatWeDo: {
     eyebrow: 'Ce que nous faisons',
@@ -214,8 +205,7 @@ const ABOUT_FR = {
       {
         label: 'Le résultat',
         body: 'Un CSV d\'accroches fondées sur la recherche, notées QA et prêtes pour votre séquenceur. Taux de réponse pilote à 9,6 %. Livré en 48 h. Sans accès campagne. Sans carte de crédit pour commencer.',
-      },
-    ],
+      }],
   },
   values: {
     eyebrow: 'Nos principes',
@@ -231,13 +221,12 @@ const ABOUT_FR = {
       },
       {
         title: 'Humain et machine, en toute transparence',
-        body: 'L\'IA rédige à l\'échelle. Les humains conçoivent le pipeline de recherche et les critères QA. Nous sommes transparents sur ce que chaque couche fait — et ne fait pas.',
+        body: 'L\'IA rédige à l\'échelle. Les humains conçoivent le pipeline de recherche et les critères QA. Nous sommes transparents sur ce que chaque couche fait, et ne fait pas.',
       },
       {
         title: 'Honnêtes sur l\'adéquation',
         body: 'Nous vous disons quand Dossier n\'est pas le bon outil. Nous préférons perdre le deal que surpromettre. La réputation est le seul fossé qui se compose.',
-      },
-    ],
+      }],
   },
   fit: {
     eyebrow: 'Avec qui nous travaillons',
@@ -250,15 +239,13 @@ const ABOUT_FR = {
       'Fondateurs B2B qui gèrent leur propre outbound',
       'Équipes SDR envoyant 50 à 500 emails personnalisés par semaine',
       'Équipes growth qui savent que la personnalisation commence par la recherche',
-      'Toute personne qui préfère envoyer dix excellents emails plutôt que mille génériques',
-    ],
+      'Toute personne qui préfère envoyer dix excellents emails plutôt que mille génériques'],
     bad: [
       'Outreach B2C ou campagnes produits grand public',
       'Entreprises voulant des séquences massives sans recherche',
       'Équipes sans séquenceur ou infrastructure d\'envoi en place',
       'Toute personne refusant de fournir une liste de prospects propre et enrichie',
-      'Entreprises attendant des résultats du jour au lendemain sans phase de test',
-    ],
+      'Entreprises attendant des résultats du jour au lendemain sans phase de test'],
   },
   contact: {
     eyebrow: 'Nous contacter',
@@ -268,8 +255,7 @@ const ABOUT_FR = {
       { title: 'Courriel', desc: 'Ligne directe vers Ara', action: null },
       { title: 'Téléphone', desc: 'Ligne professionnelle', action: null },
       { title: 'Réserver un appel', desc: '30 min sur Zoom ou Teams', action: 'Choisir un créneau' },
-      { title: 'LinkedIn', desc: 'Suivre les actualités', action: 'Se connecter' },
-    ],
+      { title: 'LinkedIn', desc: 'Suivre les actualités', action: 'Se connecter' }],
   },
   cta: {
     eyebrow: 'Prêt à commencer ?',

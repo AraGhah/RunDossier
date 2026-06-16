@@ -165,7 +165,7 @@ export function buildServiceSchema() {
   return {
     '@type': 'Service',
     '@id': `${SITE_URL}/#service`,
-    name: `${SITE_NAME} — Personalized Outbound Openers`,
+    name: `${SITE_NAME}, Personalized Outbound Openers`,
     description:
       'Done-for-you prospect research and QA-scored personalized first lines for cold email, delivered as a CSV for your sequencer.',
     provider: {
@@ -265,6 +265,6 @@ export function buildJsonLdGraph({
 }
 
 export function pageTitle(suffix) {
-  if (!suffix) return `${SITE_NAME} — ${SITE_TAGLINE}`
+  if (!suffix) return `${SITE_NAME}, ${SITE_TAGLINE}`
   return `${suffix} | ${SITE_NAME}`
 }

@@ -20,9 +20,9 @@ export function buildGlobalStaticGraph() {
     buildServiceSchema(),
     buildWebPageSchema({
       path: '/',
-      title: 'Dossier — Personalized outbound openers that get replies',
+      title: 'Dossier, Personalized outbound openers that get replies',
       description:
-        'Research-backed first lines for outbound agencies and B2B founders. Structured prospect research, QA-scored openers, CSV delivery in 24–48 hours.',
+        'Research-backed first lines for outbound agencies and B2B founders. Structured prospect research, QA-scored openers, CSV delivery in 24 to 48 hours.',
     }),
     buildFaqSchema(HOME_FAQ, '/'),
   ].filter(Boolean)

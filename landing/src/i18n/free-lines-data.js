@@ -7,8 +7,7 @@ const FREE_LINES_EN = {
       'Research signal and confidence score included',
       'Delivered as CSV in 24 to 48 hours',
       'Works with Smartlead, Instantly, Lemlist, and more',
-      'No inboxes, no credentials, no campaign access',
-    ],
+      'No inboxes, no credentials, no campaign access'],
     bulletsAria: 'What is included',
   },
   form: {
@@ -37,7 +36,7 @@ const FREE_LINES_EN = {
     footer: 'No credit card · No campaign access · No commitment',
     validationSummary: 'Please fill in all required fields above before submitting.',
     serverError: 'Something went wrong. Please try again.',
-    mailtoSubject: (company) => `Pilot Request — ${company}`,
+    mailtoSubject: (company) => `Pilot Request, ${company}`,
   },
   success: {
     title: 'You are in.',
@@ -63,8 +62,7 @@ const FREE_LINES_EN = {
       { title: 'Confidence score and reasoning', body: 'Each opener is rated on a 1 to 5 scale with a short note on why we scored it that way. Low-confidence leads are flagged, not shipped.' },
       { title: 'Ready-to-import CSV', body: 'The deliverable lands in your inbox as a formatted CSV. Load it into Smartlead, Instantly, Lemlist, EmailBison, or any sequencer that accepts CSV imports.' },
       { title: 'Delivered in 24 to 48 hours', body: 'Most pilot batches are delivered within one business day. Complex ICPs may take 48 hours if the research depth requires it.' },
-      { title: 'No campaign access needed', body: 'We never ask for your inboxes, your sequencer login, or your campaign settings. You keep full control of everything except the opener itself.' },
-    ],
+      { title: 'No campaign access needed', body: 'We never ask for your inboxes, your sequencer login, or your campaign settings. You keep full control of everything except the opener itself.' }],
   },
   csv: {
     eyebrow: 'The deliverable',
@@ -85,8 +83,7 @@ const FREE_LINES_EN = {
     items: [
       { quote: "Your breakdown of why cold email collapsed between 2023 and 2025 is the most precise articulation of the problem I've seen published. GPT filler is exactly the right framing.", role: 'Founder, Outbound Consultancy', signal: 'LinkedIn article, Q3 2024', qa: 4 },
       { quote: 'Saw you shipped a new leads product in February and positioned it around removing the friction that every other tool buries in five-step workflows. Smart wedge for where the market is heading.', role: 'Co-Founder, Outbound SaaS', signal: 'ProductHunt launch review', qa: 5 },
-      { quote: 'Most founders bury their best result in a case study nobody reads. You put it in your headline — smart move, and probably why your inbound is converting above what your size would suggest.', role: 'Founder, B2B Lead Gen Agency', signal: 'Website hero copy analysis', qa: 4 },
-    ],
+      { quote: 'Most founders bury their best result in a case study nobody reads. You put it in your headline, smart move, and probably why your inbound is converting above what your size would suggest.', role: 'Founder, B2B Lead Gen Agency', signal: 'Website hero copy analysis', qa: 4 }],
   },
   faq: {
     eyebrow: 'Pilot FAQ',
@@ -96,8 +93,7 @@ const FREE_LINES_EN = {
       { q: 'Do you need access to my email sequencer?', a: 'No. We never ask for inboxes, sequencer logins, or campaign settings. You import the CSV yourself.' },
       { q: 'Which sequencers work with the CSV?', a: 'Smartlead, Instantly, Lemlist, EmailBison, and any tool that accepts CSV imports for personalized first lines.' },
       { q: 'How long does delivery take?', a: 'Most 100-prospect pilots are delivered within 24 to 48 hours after we receive your list. Complex ICPs may take the full 48 hours.' },
-      { q: 'What counts as one prospect?', a: 'Each row in your CSV counts as one prospect. We research that lead and write three opener variants. Thin-profile leads are flagged, not hidden.' },
-    ],
+      { q: 'What counts as one prospect?', a: 'Each row in your CSV counts as one prospect. We research that lead and write three opener variants. Thin-profile leads are flagged, not hidden.' }],
   },
   cta: {
     eyebrow: 'No risk. No commitment.',
@@ -108,9 +104,8 @@ const FREE_LINES_EN = {
   },
   csvRows: [
     { n: 'J. Whitmore', co: 'LeadFlow Inc.', signal: 'LinkedIn article on cold email decay', a: "Your breakdown of why cold email collapsed 2023 to 2025 is the most precise articulation I've seen...", b: 'The part about confusing volume with signal is something most agencies still haven\'t admitted...', qa: '4/5', confKey: 'high' },
-    { n: 'M. Okafor', co: 'Apex Outbound', signal: 'ProductHunt launch, Feb 2025', a: 'Saw you launched in February and positioned around removing friction everyone else buries in 5-step flows...', b: 'Your PH launch framing — one CSV in, one campaign out — is the clearest positioning in leads tooling this year...', qa: '5/5', confKey: 'high' },
-    { n: 'R. Castillo', co: 'Clearpath B2B', signal: 'Twitter thread, 2.4k engagements', a: "Your thread on why SDR handoffs break under 50 people is something I've seen play out at 3 agencies...", b: 'The nuance about handoffs breaking before the CRM even exists usually gets lost when people write about this...', qa: '3/5', confKey: 'medium' },
-  ],
+    { n: 'M. Okafor', co: 'Apex Outbound', signal: 'ProductHunt launch, Feb 2025', a: 'Saw you launched in February and positioned around removing friction everyone else buries in 5-step flows...', b: 'Your PH launch framing, one CSV in, one campaign out, is the clearest positioning in leads tooling this year...', qa: '5/5', confKey: 'high' },
+    { n: 'R. Castillo', co: 'Clearpath B2B', signal: 'Twitter thread, 2.4k engagements', a: "Your thread on why SDR handoffs break under 50 people is something I've seen play out at 3 agencies...", b: 'The nuance about handoffs breaking before the CRM even exists usually gets lost when people write about this...', qa: '3/5', confKey: 'medium' }],
 }
 
 const FREE_LINES_FR = {
@@ -122,8 +117,7 @@ const FREE_LINES_FR = {
       'Signal de recherche et score de confiance inclus',
       'Livraison en CSV sous 24 à 48 h',
       'Compatible Smartlead, Instantly, Lemlist, etc.',
-      'Pas d’accès boîtes mail, identifiants ou campagnes',
-    ],
+      'Pas d’accès boîtes mail, identifiants ou campagnes'],
     bulletsAria: 'Ce qui est inclus',
   },
   form: {
@@ -152,7 +146,7 @@ const FREE_LINES_FR = {
     footer: 'Sans carte bancaire · Sans accès campagne · Sans engagement',
     validationSummary: 'Veuillez remplir tous les champs obligatoires avant d’envoyer.',
     serverError: 'Une erreur s’est produite. Veuillez réessayer.',
-    mailtoSubject: (company) => `Demande pilote — ${company}`,
+    mailtoSubject: (company) => `Demande pilote, ${company}`,
   },
   success: {
     title: 'C’est enregistré.',
@@ -178,8 +172,7 @@ const FREE_LINES_FR = {
       { title: 'Score de confiance et justification', body: 'Chaque accroche est notée de 1 à 5 avec une courte explication. Les leads à faible confiance sont signalés, pas livrés en silence.' },
       { title: 'CSV prêt à importer', body: 'La livraison arrive par e-mail au format CSV. Importez dans Smartlead, Instantly, Lemlist, EmailBison ou tout outil acceptant les CSV.' },
       { title: 'Livré sous 24 à 48 h', body: 'La plupart des lots pilote sont livrés en un jour ouvré. Les ICP complexes peuvent prendre 48 h si la recherche l’exige.' },
-      { title: 'Aucun accès campagne requis', body: 'Nous ne demandons jamais vos boîtes mail, identifiants séquenceur ou paramètres de campagne. Vous gardez le contrôle de tout sauf l’accroche elle-même.' },
-    ],
+      { title: 'Aucun accès campagne requis', body: 'Nous ne demandons jamais vos boîtes mail, identifiants séquenceur ou paramètres de campagne. Vous gardez le contrôle de tout sauf l’accroche elle-même.' }],
   },
   csv: {
     eyebrow: 'La livraison',
@@ -200,8 +193,7 @@ const FREE_LINES_FR = {
     items: [
       { quote: 'Votre analyse de l’effondrement du cold email entre 2023 et 2025 est la formulation la plus précise du problème que j’ai vue publiée. Le terme « remplissage GPT » est exactement le bon cadrage.', role: 'Fondatrice, conseil outbound', signal: 'Article LinkedIn, T3 2024', qa: 4 },
       { quote: 'J’ai vu que vous avez lancé un produit leads en février en le positionnant sur la suppression des frictions que les autres outils enterrent dans des workflows en cinq étapes. Bon angle pour l’évolution du marché.', role: 'Co-fondateur, SaaS outbound', signal: 'Avis lancement ProductHunt', qa: 5 },
-      { quote: 'La plupart des fondateurs enterrent leur meilleur résultat dans une étude de cas que personne ne lit. Vous l’avez mis en titre — bon choix, et probablement pourquoi votre inbound convertit au-dessus de ce qu’on attendrait à votre taille.', role: 'Fondatrice, agence lead gen B2B', signal: 'Analyse hero du site', qa: 4 },
-    ],
+      { quote: 'La plupart des fondateurs enterrent leur meilleur résultat dans une étude de cas que personne ne lit. Vous l’avez mis en titre, bon choix, et probablement pourquoi votre inbound convertit au-dessus de ce qu’on attendrait à votre taille.', role: 'Fondatrice, agence lead gen B2B', signal: 'Analyse hero du site', qa: 4 }],
   },
   faq: {
     eyebrow: 'FAQ pilote',
@@ -211,8 +203,7 @@ const FREE_LINES_FR = {
       { q: 'Avez-vous besoin d’accéder à mon outil d’e-mail ?', a: 'Non. Nous ne demandons jamais les boîtes mail, identifiants séquenceur ou paramètres de campagne. Vous importez le CSV vous-même.' },
       { q: 'Quels séquenceurs acceptent le CSV ?', a: 'Smartlead, Instantly, Lemlist, EmailBison et tout outil acceptant les imports CSV pour des premières lignes personnalisées.' },
       { q: 'Combien de temps prend la livraison ?', a: 'La plupart des pilotes de 100 prospects sont livrés sous 24 à 48 h après réception de votre liste. Les ICP complexes peuvent prendre 48 h.' },
-      { q: 'Qu’est-ce qui compte comme un prospect ?', a: 'Chaque ligne de votre CSV compte pour un prospect. Nous recherchons ce lead et rédigeons trois variantes. Les profils fins sont signalés, pas masqués.' },
-    ],
+      { q: 'Qu’est-ce qui compte comme un prospect ?', a: 'Chaque ligne de votre CSV compte pour un prospect. Nous recherchons ce lead et rédigeons trois variantes. Les profils fins sont signalés, pas masqués.' }],
   },
   cta: {
     eyebrow: 'Sans risque. Sans engagement.',

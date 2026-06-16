@@ -14,7 +14,7 @@ const SEO_DESCRIPTIONS = {
     '/pricing':
       'Simple pricing for personalized outbound openers. Start with 100 free prospects, then scale with Starter ($499/mo), Growth ($999/mo), or Agency plans.',
     '/about':
-      'Dossier helps outbound agencies and B2B founders ship research-backed first lines that sound human — built by operators who care about reply rate.',
+      'Dossier helps outbound agencies and B2B founders ship research-backed first lines that sound human, built by operators who care about reply rate.',
     '/free-lines':
       'Claim 100 free personalized openers. Three QA-scored variants per prospect, research signals included, CSV delivered in 24 to 48 hours.',
     '/book-call':
@@ -23,8 +23,8 @@ const SEO_DESCRIPTIONS = {
       'Dossier researches each B2B prospect, writes QA-scored cold email openers, and delivers a CSV for Smartlead, Instantly, Lemlist, and other sequencers.',
     '/contact':
       'Contact Dossier by email, phone, or scheduling link. Pilot requests, pricing questions, and partnership inquiries.',
-    '/privacy': 'Privacy Policy for Dossier — how we collect, use, and protect your data.',
-    '/terms': 'Terms of Service for Dossier — usage terms for our personalized opener service.',
+    '/privacy': 'Privacy Policy for Dossier, how we collect, use, and protect your data.',
+    '/terms': 'Terms of Service for Dossier, usage terms for our personalized opener service.',
   },
   fr: {
     '/':
@@ -32,7 +32,7 @@ const SEO_DESCRIPTIONS = {
     '/pricing':
       'Tarifs simples pour des accroches outbound personnalisées. 100 prospects gratuits, puis forfaits Starter (499 $/mois), Growth (999 $/mois) ou Agency.',
     '/about':
-      'Dossier aide agences outbound et fondateurs B2B à livrer des premières lignes fondées sur la recherche — par des opérateurs obsédés par le taux de réponse.',
+      'Dossier aide agences outbound et fondateurs B2B à livrer des premières lignes fondées sur la recherche, par des opérateurs obsédés par le taux de réponse.',
     '/free-lines':
       'Réclamez 100 accroches personnalisées gratuites. Trois variantes notées QA par prospect, signaux de recherche inclus, CSV sous 24 à 48 h.',
     '/book-call':
@@ -42,9 +42,9 @@ const SEO_DESCRIPTIONS = {
     '/contact':
       'Contactez Dossier par e-mail, téléphone ou lien de planification. Demandes pilote, questions tarifaires et partenariats.',
     '/privacy':
-      'Politique de confidentialité de Dossier — comment nous collectons, utilisons et protégeons vos données.',
+      'Politique de confidentialité de Dossier, comment nous collectons, utilisons et protégeons vos données.',
     '/terms':
-      'Conditions d’utilisation de Dossier — termes d’usage de notre service d’accroches personnalisées.',
+      'Conditions d’utilisation de Dossier, termes d’usage de notre service d’accroches personnalisées.',
   },
 }
 

@@ -12,7 +12,7 @@ export const SITE_URL = 'https://rundossier.co'
 export const SITE_NAME = 'Dossier'
 export const SITE_TAGLINE = 'Personalized outbound openers that get replies'
 export const SITE_DESCRIPTION =
-  'Research-backed first lines for outbound agencies and B2B founders. Structured prospect research, QA-scored openers, CSV delivery in 24–48 hours.'
+  'Research-backed first lines for outbound agencies and B2B founders. Structured prospect research, QA-scored openers, CSV delivery in 24 to 48 hours.'
 export const SITE_LAST_UPDATED = '2026-06-16'
 
 export const SOCIAL_LINKS = [
@@ -332,11 +332,11 @@ export const SERVICE_FACTS = [
   },
   {
     term: 'Free pilot',
-    detail: '100 prospects researched with 3 QA-scored opener variants each (1–5 scale). No credit card.',
+    detail: '100 prospects researched with 3 QA-scored opener variants each (1 to 5 scale). No credit card.',
   },
   {
     term: 'Delivery SLA',
-    detail: 'Ready-to-import CSV in 24–48 hours after prospect list intake (pilot batches).',
+    detail: 'Ready-to-import CSV in 24 to 48 hours after prospect list intake (pilot batches).',
   },
   {
     term: 'Plans (USD)',

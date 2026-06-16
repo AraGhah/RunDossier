@@ -14,11 +14,11 @@ const FACTS_EN = [
   },
   {
     term: 'Free pilot',
-    detail: '100 prospects researched with 3 QA-scored opener variants each (1–5 scale). No credit card.',
+    detail: '100 prospects researched with 3 QA-scored opener variants each (1 to 5 scale). No credit card.',
   },
   {
     term: 'Delivery SLA',
-    detail: 'Ready-to-import CSV in 24–48 hours after prospect list intake (pilot batches).',
+    detail: 'Ready-to-import CSV in 24 to 48 hours after prospect list intake (pilot batches).',
   },
   {
     term: 'Plans (USD)',
@@ -49,8 +49,7 @@ const FACTS_EN = [
     detail: LEGAL_PHONE
       ? `Email ${LEGAL_EMAIL} or phone ${LEGAL_PHONE}. Contact page: rundossier.co/contact. Book a fit call at rundossier.co/book-call.`
       : `Email ${LEGAL_EMAIL}. Contact page: rundossier.co/contact. Book a 30-minute fit call at rundossier.co/book-call.`,
-  },
-]
+  }]
 
 const FACTS_FR = [
   {
@@ -59,7 +58,7 @@ const FACTS_FR = [
   },
   {
     term: 'Pilote gratuit',
-    detail: '100 prospects recherchés avec 3 variantes notées QA chacun (échelle 1–5). Sans carte de crédit.',
+    detail: '100 prospects recherchés avec 3 variantes notées QA chacun (échelle 1 to 5). Sans carte de crédit.',
   },
   {
     term: 'Délai de livraison',
@@ -94,8 +93,7 @@ const FACTS_FR = [
     detail: LEGAL_PHONE
       ? `Courriel ${LEGAL_EMAIL} ou téléphone ${LEGAL_PHONE}. Page contact : rundossier.co/contact. Réserver un appel : rundossier.co/book-call.`
       : `Courriel ${LEGAL_EMAIL}. Page contact : rundossier.co/contact. Réserver un appel de 30 min : rundossier.co/book-call.`,
-  },
-]
+  }]
 
 export function getServiceFacts(lang) {
   return lang === 'fr' ? FACTS_FR : FACTS_EN

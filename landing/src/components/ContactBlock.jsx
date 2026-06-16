@@ -1,7 +1,7 @@
 import { LEGAL_EMAIL, LEGAL_PHONE, legalPhoneDisplay, legalPhoneTel } from '../lib/legal'
 import { useTranslation } from '../context/LanguageContext'
 
-/** Structured public contact — keeps email/phone separate for crawlers and audits. */
+/** Structured public contact, keeps email/phone separate for crawlers and audits. */
 export default function ContactBlock({ className = '', showLocation = true }) {
   const { t } = useTranslation()
 

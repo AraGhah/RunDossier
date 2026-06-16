@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import ContactBlock from './ContactBlock'
 import { useTranslation } from '../context/LanguageContext'
 
-// Hash links must use plain <a href> — React Router's <Link> does not scroll to anchors reliably
+// Hash links must use plain <a href>, React Router's <Link> does not scroll to anchors reliably
 function FooterLink({ to, children, newTab }) {
   const isHash = to.includes('#')
   const isExternal = to.startsWith('http')
@@ -25,21 +25,17 @@ export default function Footer() {
       { l: t('footer.link.hiw'), to: '/#how-it-works' },
       { l: t('footer.link.examples'), to: '/#examples' },
       { l: t('footer.link.pricing'), to: '/pricing' },
-      { l: t('footer.link.faq'), to: '/#faq' },
-    ],
+      { l: t('footer.link.faq'), to: '/#faq' }],
     [t('footer.col.offers')]: [
       { l: t('footer.link.service'), to: '/service' },
       { l: t('footer.link.freeLines'), to: '/free-lines' },
-      { l: t('footer.link.bookCall'), to: '/book-call' },
-    ],
+      { l: t('footer.link.bookCall'), to: '/book-call' }],
     [t('footer.col.company')]: [
       { l: t('footer.link.about'), to: '/about' },
-      { l: t('footer.link.contact'), to: '/contact' },
-    ],
+      { l: t('footer.link.contact'), to: '/contact' }],
     [t('footer.col.legal')]: [
       { l: t('footer.link.privacy'), to: '/privacy', newTab: true },
-      { l: t('footer.link.terms'), to: '/terms', newTab: true },
-    ],
+      { l: t('footer.link.terms'), to: '/terms', newTab: true }],
   }
 
   return (

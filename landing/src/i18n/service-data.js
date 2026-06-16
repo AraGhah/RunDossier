@@ -18,13 +18,12 @@ const SERVICE_EN = {
       },
       {
         title: 'QA scoring',
-        body: 'Each opener is scored 1–5 on specificity, autonomy, repetition density, and factual density. Low-scoring lines are revised or flagged before delivery.',
+        body: 'Each opener is scored 1 to 5 on specificity, autonomy, repetition density, and factual density. Low-scoring lines are revised or flagged before delivery.',
       },
       {
         title: 'CSV delivery',
-        body: 'You receive a ready-to-import CSV for Smartlead, Instantly, Lemlist, EmailBison, or any sequencer that accepts custom first lines. Typical pilot turnaround: 24–48 hours.',
-      },
-    ],
+        body: 'You receive a ready-to-import CSV for Smartlead, Instantly, Lemlist, EmailBison, or any sequencer that accepts custom first lines. Typical pilot turnaround: 24 to 48 hours.',
+      }],
   },
   deliverables: {
     eyebrow: 'Deliverables',
@@ -35,8 +34,7 @@ const SERVICE_EN = {
       'Confidence score with reviewer notes',
       'Thin-profile flags for low-signal leads',
       'CSV formatted for major cold email sequencers',
-      'No inbox access or campaign permissions required',
-    ],
+      'No inbox access or campaign permissions required'],
     cta1: 'Start with 100 free lines',
     cta2: 'See pricing',
     cta3: 'Contact us',
@@ -68,8 +66,7 @@ const SERVICE_FR = {
       {
         title: 'Livraison CSV',
         body: 'Vous recevez un CSV prêt à importer pour Smartlead, Instantly, Lemlist, EmailBison ou tout séquenceur acceptant des premières lignes personnalisées. Délai pilote typique : 24 à 48 h.',
-      },
-    ],
+      }],
   },
   deliverables: {
     eyebrow: 'Livrables',
@@ -80,8 +77,7 @@ const SERVICE_FR = {
       'Score de confiance avec notes du relecteur',
       'Indicateurs de profil mince pour les leads à faible signal',
       'CSV formaté pour les principaux séquenceurs cold email',
-      'Aucun accès boîte mail ni permission campagne requis',
-    ],
+      'Aucun accès boîte mail ni permission campagne requis'],
     cta1: 'Commencer avec 100 lignes gratuites',
     cta2: 'Voir les tarifs',
     cta3: 'Nous contacter',
