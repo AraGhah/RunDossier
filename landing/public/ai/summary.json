@@ -1,0 +1,39 @@
+{
+  "name": "Dossier",
+  "tagline": "Personalized outbound openers that get replies",
+  "url": "https://rundossier.co",
+  "description": "Research-backed personalized first lines for outbound agencies and B2B founders. Structured prospect research, QA-scored openers, CSV delivery in 24 to 48 hours.",
+  "category": "B2B sales personalization",
+  "languages": ["en", "fr"],
+  "operator": {
+    "name": "Ara Ghahramanyan",
+    "email": "ara@getdossier.co",
+    "location": "Montreal, Quebec, Canada",
+    "linkedin": "https://www.linkedin.com/in/ara-ghahramanyan-086261405/"
+  },
+  "metrics": {
+    "pilotReplyRatePercent": 3.1,
+    "genericBaselineReplyRatePercent": 2.1,
+    "pilotProspectCount": 100,
+    "openersPerProspect": 3,
+    "deliveryHours": "24-48"
+  },
+  "offers": [
+    {
+      "name": "100 Free Lines Pilot",
+      "price": "0 USD",
+      "url": "https://rundossier.co/free-lines",
+      "description": "100 prospects with three QA-scored openers each. No credit card."
+    }
+  ],
+  "pages": [
+    { "path": "/", "title": "Home" },
+    { "path": "/service", "title": "Service" },
+    { "path": "/pricing", "title": "Pricing" },
+    { "path": "/about", "title": "About" },
+    { "path": "/free-lines", "title": "100 Free Lines" },
+    { "path": "/book-call", "title": "Book a Call" },
+    { "path": "/contact", "title": "Contact" }
+  ],
+  "lastUpdated": "2026-06-16"
+}

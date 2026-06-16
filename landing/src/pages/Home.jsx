@@ -12,52 +12,10 @@ import {
   OpenerCard,
 } from '../components/ui'
 import { useTranslation } from '../context/LanguageContext'
-
-// ── EXAMPLE DATA — stay in English (product output, no dashes) ────────────────
-const examples = [
-  {
-    id: 1,
-    signalType: 'LinkedIn Article',
-    signalMeta: 'Published Q3 2024 · 4.2k views',
-    signalSummary: 'Founder published a detailed analysis of why cold email reply rates collapsed across the industry from 2023 onward.',
-    role: 'Founder, Outbound Consultancy',
-    before: '"Hi [First Name], I noticed you are in the outbound space and thought I would reach out. Your work looks really impressive. Would love to connect and potentially jump on a quick call."',
-    after: '"Your piece on why cold email reply rates collapsed from 2023 onward is the clearest diagnosis I have seen published on the topic. You named the actual cause before most people in this space were willing to say it out loud."',
-    why: 'References a specific published piece. Validates the prospect as a credible analyst. No generic compliments or vague flattery. The prospect knows immediately that someone actually read what they wrote.',
-    qa: 5,
-  },
-  {
-    id: 2,
-    signalType: 'ProductHunt Launch',
-    signalMeta: 'February 2025 · Top 5 of the day',
-    signalSummary: 'Co-founder shipped a B2B leads product positioned around one CSV input, one ready-to-send campaign as output.',
-    role: 'Co-Founder, Outbound SaaS',
-    before: '"Congratulations on the recent launch. It looks like you are building something really exciting in the leads space. Would love to learn more about what you are working on and explore if there is any overlap."',
-    after: '"Saw you launched in February and built the positioning around one CSV in, one campaign out. That removes the five-step setup that buries every other tool in this category. Clearest product angle I have seen in leads tooling this year."',
-    why: 'Uses the prospect\'s own positioning language. Makes a competitive observation from public product copy. Shows the opener writer understood what makes the product different, not just that a launch happened.',
-    qa: 5,
-  },
-  {
-    id: 3,
-    signalType: 'LinkedIn Post Series',
-    signalMeta: '3 posts · 6.1k combined views',
-    signalSummary: 'CEO published a series gradually reframing positioning from outbound tool to pipeline system, signaling a deliberate market shift.',
-    role: 'CEO, GTM Consulting Firm',
-    before: '"Hi [First Name], I came across your profile and noticed your company is doing some impressive work in GTM consulting. Would love to connect and see if there is any common ground between what we are each working on."',
-    after: '"The repositioning from outbound tool to pipeline system across your last three posts is deliberate. That is not a messaging adjustment. That signals you are entering a different competitive category entirely. Most teams do not make that move until a client forces them into it."',
-    why: 'Identifies a pattern across multiple posts rather than reacting to a single one. Treats the repositioning as a strategic signal. Shows analytical depth the prospect can recognize as genuine research rather than a LinkedIn scrape.',
-    qa: 4,
-  },
-]
-
-const openers = [
-  { quote: 'Your piece on why cold email reply rates collapsed from 2023 onward is the clearest diagnosis I have seen published. You named the actual cause before most people in this space were willing to say it.', role: 'Founder, Outbound Consultancy', signal: 'LinkedIn article, 4.2k views', qa: 5 },
-  { quote: 'Saw you launched in February and built positioning around one CSV in, one campaign out. That clears the five-step setup every other tool in this category buries the result behind.', role: 'Co-Founder, Outbound SaaS', signal: 'ProductHunt launch, Feb 2025', qa: 5 },
-  { quote: 'Your thread on why SDR to AE handoffs break at companies under 50 people is something I have watched play out at three agencies this year. The framing you used is exactly right.', role: 'VP Sales, B2B SaaS', signal: 'Twitter thread, 2.4k engagements', qa: 4 },
-  { quote: 'Noticed you moved your minimum deal size to 250 seats in Q4. That is not a pricing adjustment. That is a full go-to-market rebuild. Most agencies do not talk about that transition publicly because the middle period is difficult.', role: 'Founder, Outbound Agency', signal: 'LinkedIn pricing announcement', qa: 5 },
-  { quote: 'You put your strongest result in the headline instead of burying it in a case study nobody reads. That is probably why your inbound is converting above what your company size would suggest.', role: 'Founder, B2B Lead Gen Agency', signal: 'Website hero copy analysis', qa: 4 },
-  { quote: 'The repositioning from outbound tool to pipeline system across your last three posts is deliberate. That is not a messaging change. That signals you are entering a different competitive frame entirely.', role: 'CEO, GTM Consulting Firm', signal: 'LinkedIn post series analysis', qa: 4 },
-]
+import ServiceFacts from '../components/ServiceFacts'
+import PageH1 from '../components/PageH1'
+import { getPageH1 } from '../lib/page-headings'
+import { getExamples, getOpenerCards } from '../i18n/examples-data'
 
 // ── ICON BOX — consistent icon container ─────────────────────────────────────
 function IconBox({ Icon, dark }) {
@@ -74,14 +32,15 @@ function IconBox({ Icon, dark }) {
 
 // ── HERO ─────────────────────────────────────────────────────────────────────
 function Hero() {
-  const { t } = useTranslation()
-  const titleRef = useRef(null)
-  const titleText = t('hero.title')
+  const { t, lang } = useTranslation()
+  const hookRef = useRef(null)
+  const hookText = t('hero.hook')
+  const seoH1 = getPageH1('/', lang)
 
   useEffect(() => {
-    const el = titleRef.current
+    const el = hookRef.current
     if (!el) return
-    const words = titleText.trim().split(/\s+/)
+    const words = hookText.trim().split(/\s+/)
     el.innerHTML = ''
     words.forEach((word, i) => {
       if (i > 0) el.appendChild(document.createTextNode(' '))
@@ -98,7 +57,7 @@ function Hero() {
       el.querySelectorAll('.word-inner').forEach(w => w.classList.add('up'))
     }, 80)
     return () => clearTimeout(timer)
-  }, [titleText])
+  }, [hookText])
 
   return (
     <section className="relative pt-28 sm:pt-36 pb-20 sm:pb-28 overflow-hidden">
@@ -118,14 +77,16 @@ function Hero() {
               {t('hero.eyebrow')}
             </p>
 
-            <h1
-              ref={titleRef}
-              className="font-display text-[clamp(2.4rem,4.5vw,4rem)] font-bold leading-[1.08] tracking-[-0.025em] text-ink mb-6"
-            >
-              {titleText}
-            </h1>
+            <PageH1 className="mb-4">{seoH1}</PageH1>
 
-            <motion.p {...fadeUp} transition={{ delay: 0.25, duration: 0.75, ease:[0.32,0.72,0,1] }}
+            <h2
+              ref={hookRef}
+              className="font-display text-[clamp(1.6rem,3.2vw,2.4rem)] font-bold leading-[1.12] tracking-[-0.02em] text-ink mb-4"
+            >
+              {hookText}
+            </h2>
+
+            <motion.p {...fadeUp} transition={{ delay: 0.15, duration: 0.7, ease:[0.32,0.72,0,1] }}
               className="text-lg sm:text-xl text-muted leading-relaxed mb-4">
               {t('hero.subtitle')}{' '}
               <span className="font-display italic font-semibold text-ink">{t('hero.italic')}</span>
@@ -166,17 +127,17 @@ function Hero() {
               <div className="bg-white border border-border rounded-xl3 p-5 sm:p-7 shadow-card relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold via-gold/50 to-transparent" />
                 <p className="text-[0.65rem] sm:text-[0.68rem] font-bold uppercase tracking-[0.12em] text-emerald-700 flex items-center gap-2 mb-4">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Dossier opener
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> {t('hero.preview.label')}
                 </p>
                 <p className="font-display italic text-[clamp(0.9rem,2.5vw,1rem)] leading-relaxed text-ink mb-5">
-                  "Your breakdown of why cold email collapsed between 2023 and 2025 is the most precise articulation I've seen published. GPT filler is exactly the right framing."
+                  &ldquo;{t('hero.preview.quote')}&rdquo;
                 </p>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-border">
                   <div className="min-w-0">
-                    <p className="text-[0.78rem] font-semibold text-ink-2">Founder, Outbound Consultancy</p>
-                    <p className="text-[0.72rem] text-muted italic mt-0.5">Signal: LinkedIn article, Q3 2024</p>
+                    <p className="text-[0.78rem] font-semibold text-ink-2">{t('hero.preview.role')}</p>
+                    <p className="text-[0.72rem] text-muted italic mt-0.5">{t('hero.preview.signal')}</p>
                   </div>
-                  <div className="flex gap-1 flex-shrink-0" aria-label="QA score: 5 out of 5">
+                  <div className="flex gap-1 flex-shrink-0" aria-label={t('hero.preview.qa')}>
                     {[1,2,3,4,5].map(d => <span key={d} className="w-2 h-2 rounded-full bg-gold" />)}
                   </div>
                 </div>
@@ -184,13 +145,13 @@ function Hero() {
 
               <div className="absolute -top-1 right-3 sm:right-6 bg-navy text-white text-[0.65rem] sm:text-[0.72rem] font-semibold px-3 sm:px-3.5 py-1.5 rounded-full shadow-cta flex items-center gap-2 max-w-[calc(100%-1.5rem)]">
                 <span className="w-[5px] h-[5px] rounded-full bg-gold animate-pulse-dot flex-shrink-0" />
-                <span className="truncate">Signal sourced automatically</span>
+                <span className="truncate">{t('hero.preview.badge')}</span>
               </div>
 
               {/* Fixed: shows the Dossier result (9.6%), not the pre-Dossier baseline */}
               <div className="absolute -bottom-3 left-3 sm:left-8 bg-white border border-border rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-card flex items-center gap-2 sm:gap-3 max-w-[calc(100%-1.5rem)]">
                 <div className="font-display text-xl sm:text-2xl font-bold text-navy flex-shrink-0">9.6%</div>
-                <p className="text-[0.68rem] sm:text-[0.72rem] text-muted leading-tight">avg reply rate with Dossier openers</p>
+                <p className="text-[0.68rem] sm:text-[0.72rem] text-muted leading-tight">{t('hero.preview.stat')}</p>
               </div>
             </div>
           </motion.div>
@@ -422,6 +383,7 @@ function HowItWorks() {
 
 // ── EXAMPLE BLOCK ─────────────────────────────────────────────────────────────
 function ExampleBlock({ ex, index }) {
+  const { t } = useTranslation()
   return (
     <motion.div
       initial={{ opacity: 0, y: 28 }}
@@ -449,13 +411,13 @@ function ExampleBlock({ ex, index }) {
           <div className="p-5 sm:p-7 border-b sm:border-b-0 sm:border-r border-border/60">
             <p className="text-[0.59rem] font-bold uppercase tracking-[0.15em] text-red-500 flex items-center gap-1.5 mb-4">
               <span className="w-[5px] h-[5px] rounded-full bg-red-400 flex-shrink-0" aria-hidden="true" />
-              Generic opener
+              {t('examples.genericLabel')}
             </p>
             <p className="font-display italic text-[0.87rem] sm:text-[0.91rem] leading-relaxed text-ink/50">
               {ex.before}
             </p>
             <p className="text-[0.63rem] text-muted-2 mt-4 leading-snug">
-              Applies to thousands of similar profiles. Deleted in under 3 seconds.
+              {t('examples.genericHelper')}
             </p>
           </div>
 
@@ -464,7 +426,7 @@ function ExampleBlock({ ex, index }) {
             <div className="absolute top-0 left-0 w-[3px] h-full bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" aria-hidden="true" />
             <p className="text-[0.59rem] font-bold uppercase tracking-[0.15em] text-emerald-600 flex items-center gap-1.5 mb-4">
               <span className="w-[5px] h-[5px] rounded-full bg-emerald-500 flex-shrink-0" aria-hidden="true" />
-              Dossier opener
+              {t('examples.dossierLabel')}
             </p>
             <p className="font-display italic text-[0.87rem] sm:text-[0.91rem] leading-relaxed text-ink">
               {ex.after}
@@ -487,7 +449,7 @@ function ExampleBlock({ ex, index }) {
             <path d="M7 6.5V9.5M7 4.5V5.1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
           </svg>
           <p className="text-[0.75rem] text-muted leading-relaxed">
-            <strong className="text-ink font-semibold">Why this converts: </strong>
+            <strong className="text-ink font-semibold">{t('examples.whyPrefix')}</strong>
             {ex.why}
           </p>
         </div>
@@ -499,7 +461,9 @@ function ExampleBlock({ ex, index }) {
 
 // ── EXAMPLES ─────────────────────────────────────────────────────────────────
 function Examples() {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
+  const examples = getExamples(lang)
+  const openers = getOpenerCards(lang)
   return (
     <Section id="examples">
       <Container>
@@ -532,11 +496,11 @@ function Examples() {
         {/* CTA */}
         <motion.div {...fadeUp} transition={{ delay: 0.3 }} className="mt-12 text-center">
           <p className="text-sm text-muted mb-5">
-            Every opener above came from a publicly available signal. No guessing. No templates.
+            {t('examples.ctaNote')}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <BtnPrimary to="/free-lines" large>Claim 100 Free Openers</BtnPrimary>
-            <BtnGhost to="/book-call">Book a 30 Minute Call</BtnGhost>
+            <BtnPrimary to="/free-lines" large>{t('examples.cta1')}</BtnPrimary>
+            <BtnGhost to="/book-call">{t('examples.cta2')}</BtnGhost>
           </div>
         </motion.div>
 
@@ -846,10 +810,36 @@ function FinalCTA() {
 }
 
 // ── PAGE ──────────────────────────────────────────────────────────────────────
+function HomeSeoIntro() {
+  const { t } = useTranslation()
+  return (
+    <Section>
+      <ContainerSm>
+        <motion.article {...fadeUp} className="max-w-3xl mx-auto text-center">
+          <h2 className="font-display text-[clamp(1.5rem,3vw,2rem)] font-bold text-ink mb-5">
+            {t('seoIntro.title')}
+          </h2>
+          <p className="text-muted leading-relaxed mb-4">
+            {t('seoIntro.p1')}
+          </p>
+          <p className="text-muted leading-relaxed mb-4">
+            {t('seoIntro.p2')}
+          </p>
+          <blockquote className="border-l-2 border-gold pl-4 text-left text-ink-2 text-sm leading-relaxed italic">
+            {t('seoIntro.quote')}
+          </blockquote>
+        </motion.article>
+      </ContainerSm>
+    </Section>
+  )
+}
+
 export default function Home() {
   return (
     <>
       <Hero />
+      <ServiceFacts titleKey="serviceFacts.title.home" className="bg-cream-2 py-12 sm:py-16" />
+      <HomeSeoIntro />
       <Divider />
       <Problem />
       <Divider />

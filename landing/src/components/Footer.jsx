@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { calBookingUrl } from '../lib/cal'
+import ContactBlock from './ContactBlock'
+import { useTranslation } from '../context/LanguageContext'
 
 // Hash links must use plain <a href> — React Router's <Link> does not scroll to anchors reliably
 function FooterLink({ to, children, newTab }) {
@@ -17,28 +18,30 @@ function FooterLink({ to, children, newTab }) {
   return <Link to={to} className={cls}>{children}</Link>
 }
 
-const nav = {
-  Product: [
-    { l: 'How it works', to: '/#how-it-works' },
-    { l: 'Examples',     to: '/#examples' },
-    { l: 'Pricing',      to: '/pricing' },
-    { l: 'FAQ',          to: '/#faq' },
-  ],
-  Offers: [
-    { l: '100 Free Lines',      to: '/free-lines' },
-    { l: 'Book a 30 Min Call', to: '/book-call' },
-  ],
-  Company: [
-    { l: 'About',   to: '/about' },
-    { l: 'Contact', to: '/book-call' },
-  ],
-  Legal: [
-    { l: 'Privacy Policy',   to: '/privacy',  newTab: true },
-    { l: 'Terms of Service', to: '/terms',    newTab: true },
-  ],
-}
-
 export default function Footer() {
+  const { t } = useTranslation()
+  const nav = {
+    [t('footer.col.product')]: [
+      { l: t('footer.link.hiw'), to: '/#how-it-works' },
+      { l: t('footer.link.examples'), to: '/#examples' },
+      { l: t('footer.link.pricing'), to: '/pricing' },
+      { l: t('footer.link.faq'), to: '/#faq' },
+    ],
+    [t('footer.col.offers')]: [
+      { l: t('footer.link.service'), to: '/service' },
+      { l: t('footer.link.freeLines'), to: '/free-lines' },
+      { l: t('footer.link.bookCall'), to: '/book-call' },
+    ],
+    [t('footer.col.company')]: [
+      { l: t('footer.link.about'), to: '/about' },
+      { l: t('footer.link.contact'), to: '/contact' },
+    ],
+    [t('footer.col.legal')]: [
+      { l: t('footer.link.privacy'), to: '/privacy', newTab: true },
+      { l: t('footer.link.terms'), to: '/terms', newTab: true },
+    ],
+  }
+
   return (
     <footer className="border-t border-border bg-cream-2">
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16">
@@ -46,7 +49,7 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="col-span-2">
-            <Link to="/" className="flex items-center gap-2.5 mb-4">
+            <Link to="/" className="flex items-center gap-2.5 mb-4" onClick={() => window.scrollTo({ top: 0, left: 0 })}>
               <span className="w-7 h-7 rounded-md bg-navy flex items-center justify-center flex-shrink-0">
                 <span className="w-2.5 h-2.5 rounded-full bg-gold" />
               </span>
@@ -55,20 +58,34 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-muted leading-relaxed max-w-xs">
-              Research-backed personalized openers for outbound agencies and B2B founders who refuse to send the same line to everyone.
+              {t('footer.brand')}
             </p>
-            <div className="mt-6">
+            <div className="mt-5">
+              <ContactBlock />
+            </div>
+            <div className="mt-5">
               <a
-                href={calBookingUrl('zoom')}
+                href="https://www.linkedin.com/in/ara-ghahramanyan-086261405/"
                 target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-navy text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-cta hover:bg-navy-2 transition-all duration-200"
+                rel="noopener noreferrer me"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-navy underline underline-offset-[3px] decoration-navy/40 hover:decoration-navy transition-colors"
               >
-                Book a free 30 minute call
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                {t('footer.linkedin')}
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
                   <path d="M2 8L8 2M8 2H4M8 2V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </a>
+            </div>
+            <div className="mt-6">
+              <Link
+                to="/book-call"
+                className="inline-flex items-center gap-2 bg-navy text-white text-xs font-semibold px-5 py-3 rounded-full shadow-cta hover:bg-navy-2 transition-all duration-200"
+              >
+                {t('footer.cta')}
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                  <path d="M2 8L8 2M8 2H4M8 2V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
             </div>
           </div>
 
@@ -87,12 +104,11 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="border-t border-border mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-muted-2">© {new Date().getFullYear()} Dossier. All rights reserved.</p>
+        <div className="border-t border-border mt-12 pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <p className="text-xs text-muted-2">© {new Date().getFullYear()} Dossier. {t('footer.rights')}</p>
           <p className="text-xs text-muted-2">
-            Questions?{' '}
             <Link to="/book-call" className="text-navy hover:underline">
-              Book a call →
+              {t('footer.schedule')}
             </Link>
           </p>
         </div>

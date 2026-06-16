@@ -1,0 +1,21 @@
+# Dossier — AI discovery
+
+Site: https://rundossier.co
+Brand: Dossier
+Contact: ara@getdossier.co
+
+## Machine-readable endpoints
+
+- /ai/summary.json — company and product summary
+- /ai/faq.json — frequently asked questions
+- /ai/service.json — service description and offer details
+- /llms.txt — concise LLM-oriented site map
+- /llms-full.txt — extended context for AI assistants
+
+## Primary pages
+
+- / — homepage
+- /free-lines — 100 free personalized openers pilot
+- /pricing — plans and pricing
+- /book-call — schedule a fit call
+- /about — founder and company story

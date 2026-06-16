@@ -1,0 +1,31 @@
+{
+  "organization": "Dossier",
+  "url": "https://rundossier.co",
+  "lastUpdated": "2026-06-16",
+  "faqs": [
+    {
+      "question": "Is Dossier just ChatGPT with a LinkedIn scrape?",
+      "answer": "No. Dossier uses structured lead research, signal selection, multi-variant generation, and a separate QA scoring pass. Openers that fail QA are rejected before delivery."
+    },
+    {
+      "question": "Does Dossier send emails for us?",
+      "answer": "No. Dossier only delivers personalized first lines in a ready-to-import CSV. You keep full control of inboxes, sequencers, and campaigns."
+    },
+    {
+      "question": "How fast is the 100-prospect pilot?",
+      "answer": "Typically 24 to 48 hours after we receive your prospect list."
+    },
+    {
+      "question": "Which sequencers work with the CSV?",
+      "answer": "Smartlead, Instantly, Lemlist, EmailBison, and any tool that accepts CSV imports for personalized first lines."
+    },
+    {
+      "question": "Who gets the best results from Dossier?",
+      "answer": "Outbound agencies, B2B founders doing cold email, and SDR teams targeting decision-makers at 10 to 200 person companies."
+    },
+    {
+      "question": "What happens after the free pilot?",
+      "answer": "You review results together with the team. If openers beat your baseline, you can discuss a paid plan. No automatic billing from the pilot."
+    }
+  ]
+}

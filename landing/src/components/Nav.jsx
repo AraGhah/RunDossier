@@ -7,7 +7,6 @@ import FlagIcon from './FlagIcon'
 const LANGS = [
   { code: 'en', label: 'English' },
   { code: 'fr', label: 'Français' },
-  { code: 'es', label: 'Español' },
 ]
 
 export default function Nav() {
@@ -59,7 +58,11 @@ export default function Nav() {
           }`}>
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+          <Link
+            to="/"
+            className="flex items-center gap-2 flex-shrink-0"
+            onClick={() => window.scrollTo({ top: 0, left: 0 })}
+          >
             <span className="w-6 h-6 rounded-md bg-navy flex items-center justify-center">
               <span className="w-2 h-2 rounded-full bg-gold animate-pulse-dot" />
             </span>

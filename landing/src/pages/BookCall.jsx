@@ -2,32 +2,62 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Building2, User, ClipboardList, TrendingUp, Rocket, HelpCircle, Hand, Search, PenLine, BarChart2 } from 'lucide-react'
 import CalBookingEmbed from '../components/CalBookingEmbed'
+import ContactBlock from '../components/ContactBlock'
+import ServiceFacts from '../components/ServiceFacts'
+import PageH1 from '../components/PageH1'
+import { getPageH1 } from '../lib/page-headings'
+import { LEGAL_CITY } from '../lib/legal'
 import { calBookingUrl, CAL_MEETING_DURATION_LABEL } from '../lib/cal'
 import { Section, Container, ContainerSm, Eyebrow, BtnPrimary, Card, Divider, fadeUp, staggerContainer, staggerItem } from '../components/ui'
-
-const agenda = [
-  { n:'01', title:'Understand your ICP and current results', body:'We ask about your target market, your current sequencer, your average reply rate, and what you have already tried. Five minutes.' },
-  { n:'02', title:'Walk through a live example from your niche', body:'We pull up a sample prospect from your ICP and show you what a real Dossier opener would look like for them. You see the research process, not just the output.' },
-  { n:'03', title:'Confirm whether the pilot makes sense', body:'If Dossier is not a fit for your use case, we say so directly and save everyone time. If it is a fit, we agree on the next step: starting your free 100-prospect pilot.' },
-]
-
-const forWho = [
-  { Icon: Building2,     label:'Cold email agencies', desc:'Managing campaigns for multiple clients and needing to scale personalization across ICPs.' },
-  { Icon: User,         label:'B2B founders doing outbound', desc:'Running your own cold email and wanting to improve reply rates before hiring an SDR team.' },
-  { Icon: ClipboardList, label:'SDR teams', desc:'Sending 500 or more emails per week where reply rate is the metric that determines headcount.' },
-  { Icon: TrendingUp,    label:'Lead gen operators', desc:'Running high-volume campaigns where generic openers have already stopped working.' },
-]
-
-const faqs = [
-  { q:'Is this a sales call?', a:'It is a fit assessment. We ask about your current results and your ICP, show you a live example from your niche, and confirm whether the pilot makes sense for you. If Dossier is not a fit, we say so.' },
-  { q:'What do I need to prepare?', a:'Nothing formal. It helps to have a rough idea of your current reply rate and a sense of who you are targeting. We will do the rest.' },
-  { q:'What happens after the call?', a:'If we agree the pilot makes sense, you send us your prospect list within 24 hours and we deliver the first 100 openers within 48 hours of receiving it.' },
-  { q:'What if I cannot attend the scheduled time?', a:'You can reschedule anytime through the Cal.com booking calendar. There is no penalty for rescheduling.' },
-  { q:'Is the 100 free lines offer still available after the call?', a:'Yes. The pilot offer is available whether or not you book a call first. The call just helps us understand your ICP so the pilot batch is better calibrated.' },
-]
+import { useTranslation } from '../context/LanguageContext'
 
 export default function BookCall() {
+  const { lang } = useTranslation()
+  const isFr = lang === 'fr'
+  const h1 = getPageH1('/book-call', lang)
   const [openFaq, setOpenFaq] = useState(null)
+
+  const agenda = isFr
+    ? [
+        { n: '01', title: 'Comprendre votre ICP et vos résultats', body: 'On parle cible, séquenceur, baseline de reply rate et ce que vous avez déjà testé. Cinq minutes.' },
+        { n: '02', title: 'Montrer un exemple live de votre niche', body: 'On prend un prospect réel et on montre à quoi ressemble une accroche Dossier (recherche incluse). Pas seulement un rendu.' },
+        { n: '03', title: 'Décider si le pilote a du sens', body: 'Si ce n’est pas un bon fit, on le dit. Si c’est un fit, on cale la prochaine étape : votre pilote gratuit de 100 prospects.' },
+      ]
+    : [
+        { n: '01', title: 'Understand your ICP and current results', body: 'We ask about your target market, your sequencer, your baseline reply rate, and what you have already tried. Five minutes.' },
+        { n: '02', title: 'Walk through a live example from your niche', body: 'We pull up a real prospect and show what a Dossier opener looks like (including the research), not just the output.' },
+        { n: '03', title: 'Confirm whether the pilot makes sense', body: 'If Dossier is not a fit, we say so. If it is, we align on the next step: your free 100-prospect pilot.' },
+      ]
+
+  const forWho = isFr
+    ? [
+        { Icon: Building2, label: 'Agences cold email', desc: 'Vous gérez plusieurs clients et vous devez scaler la personnalisation sur plusieurs ICP.' },
+        { Icon: User, label: 'Fondateurs B2B en outbound', desc: 'Vous faites du cold email vous-même et voulez améliorer le reply rate avant de recruter.' },
+        { Icon: ClipboardList, label: 'Équipes SDR', desc: 'Vous envoyez 500+ emails/semaine et le reply rate pilote la perf.' },
+        { Icon: TrendingUp, label: 'Ops / lead gen', desc: 'Vous faites du volume et les accroches génériques ne marchent plus.' },
+      ]
+    : [
+        { Icon: Building2, label: 'Cold email agencies', desc: 'Managing campaigns for multiple clients and needing to scale personalization across ICPs.' },
+        { Icon: User, label: 'B2B founders doing outbound', desc: 'Running your own cold email and wanting to improve reply rates before hiring an SDR team.' },
+        { Icon: ClipboardList, label: 'SDR teams', desc: 'Sending 500 or more emails per week where reply rate is the metric that determines headcount.' },
+        { Icon: TrendingUp, label: 'Lead gen operators', desc: 'Running high-volume campaigns where generic openers have already stopped working.' },
+      ]
+
+  const faqs = isFr
+    ? [
+        { q: 'C’est un call de vente ?', a: 'Non. C’est une évaluation de fit. On regarde vos résultats, votre ICP, et on vous montre un exemple concret.' },
+        { q: 'Je dois préparer quelque chose ?', a: 'Rien de formel. Avoir une idée de votre reply rate et de votre cible aide, mais on guide le reste.' },
+        { q: 'Que se passe-t-il après ?', a: 'Si on valide le fit, vous envoyez la liste sous 24 h et on livre 100 accroches sous 48 h.' },
+        { q: 'Et si je dois déplacer le créneau ?', a: 'Vous pouvez replanifier à tout moment via le calendrier Cal.com. Aucun frais.' },
+        { q: 'Le pilote gratuit est-il disponible sans call ?', a: 'Oui. Le call aide juste à calibrer la recherche et le premier lot.' },
+      ]
+    : [
+        { q: 'Is this a sales call?', a: 'No. It is a fit assessment. We review your ICP and results and show a real example from your niche.' },
+        { q: 'What do I need to prepare?', a: 'Nothing formal. A rough reply-rate baseline and who you target helps, but we will guide the rest.' },
+        { q: 'What happens after the call?', a: 'If we agree the pilot makes sense, you send your list within 24 hours and we deliver 100 openers within 48 hours.' },
+        { q: 'What if I cannot attend the scheduled time?', a: 'You can reschedule anytime through the Cal.com booking calendar. There is no penalty.' },
+        { q: 'Is the 100 free lines offer available without a call?', a: 'Yes. The call just helps us calibrate the first batch.' },
+      ]
 
   return (
     <>
@@ -39,21 +69,34 @@ export default function BookCall() {
         <Container className="relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div {...fadeUp}>
-              <Eyebrow>Book a {CAL_MEETING_DURATION_LABEL} call</Eyebrow>
-              <h1 className="font-display text-[clamp(2.4rem,5vw,3.8rem)] font-bold leading-[1.1] tracking-tight mb-5">
-                {CAL_MEETING_DURATION_LABEL} to find out if Dossier is <em className="italic text-gold">the right fit.</em>
-              </h1>
-              <p className="text-muted text-lg leading-relaxed mb-8">
-                We confirm your ICP, show you a live example from your niche, and agree on a pilot plan. No pitch deck. No pressure. Just a direct conversation about whether this works for your campaign.
+              <Eyebrow>{isFr ? `Réserver un appel de ${CAL_MEETING_DURATION_LABEL}` : `Book a ${CAL_MEETING_DURATION_LABEL} call`}</Eyebrow>
+              <PageH1 className="mb-5">{h1}</PageH1>
+              <p className="text-muted text-lg leading-relaxed mb-4">
+                {isFr
+                  ? 'On confirme votre ICP, on montre un exemple live de votre niche, puis on décide du pilote. Pas de deck. Pas de pression. Juste une conversation utile.'
+                  : 'We confirm your ICP, show you a live example from your niche, and agree on a pilot plan. No pitch deck. No pressure. Just a direct conversation about whether this works for your campaign.'}
+              </p>
+              <p className="text-muted text-sm leading-relaxed mb-8">
+                {isFr
+                  ? `Dossier opère depuis ${LEGAL_CITY}, Canada, et sert des équipes outbound B2B partout. On passe en revue votre séquenceur, votre baseline, et si un pilote de 100 prospects est la bonne étape.`
+                  : `Dossier is operated from ${LEGAL_CITY}, Canada, and serves B2B outbound agencies and founders worldwide. On this call we review your sequencer, reply-rate baseline, and whether a 100-prospect pilot is the right next step. You can also email us before booking if you prefer async intake.`}
               </p>
               <div className="flex flex-col gap-3 text-sm">
-                {[
-                  `${CAL_MEETING_DURATION_LABEL} via Zoom or Microsoft Teams`,
-                  'Live example from your specific niche',
-                  'Direct fit assessment, no fluff',
-                  'Pilot plan agreed by end of call if there is a fit',
-                  'No commitment to move forward',
-                ].map((item,i) => (
+                {(isFr
+                  ? [
+                      `${CAL_MEETING_DURATION_LABEL} via Zoom ou Microsoft Teams`,
+                      'Exemple live depuis votre niche',
+                      'Évaluation de fit directe, sans blabla',
+                      'Décision pilote en fin de call si c’est un fit',
+                      'Aucun engagement',
+                    ]
+                  : [
+                      `${CAL_MEETING_DURATION_LABEL} via Zoom or Microsoft Teams`,
+                      'Live example from your specific niche',
+                      'Direct fit assessment, no fluff',
+                      'Pilot plan agreed by end of call if there is a fit',
+                      'No commitment to move forward',
+                    ]).map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <svg className="text-gold flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M3 8L6.5 11.5L13 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -82,9 +125,10 @@ export default function BookCall() {
       <Section className="bg-cream-2">
         <Container>
           <motion.div {...fadeUp} className="text-center mb-12">
-            <Eyebrow>Who this call is for</Eyebrow>
+            <Eyebrow>{isFr ? 'Pour qui' : 'Who this call is for'}</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
-              The call makes sense if you are <em className="italic text-gold">one of these.</em>
+              {isFr ? 'Ce call a du sens si vous êtes ' : 'The call makes sense if you are '}
+              <em className="italic text-gold">{isFr ? 'dans ce cas.' : 'one of these.'}</em>
             </h2>
           </motion.div>
           <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
@@ -110,12 +154,15 @@ export default function BookCall() {
       <Section>
         <ContainerSm>
           <motion.div {...fadeUp} className="text-center mb-12">
-            <Eyebrow>What we cover</Eyebrow>
+            <Eyebrow>{isFr ? 'Agenda' : 'What we cover'}</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
-              Exactly what happens <em className="italic text-gold">during the call.</em>
+              {isFr ? 'Ce qui se passe ' : 'Exactly what happens '}
+              <em className="italic text-gold">{isFr ? 'pendant le call.' : 'during the call.'}</em>
             </h2>
             <p className="mt-3 text-muted max-w-lg mx-auto">
-              {CAL_MEETING_DURATION_LABEL}. No deck. No pitch. Three things, then we decide if a pilot makes sense.
+              {isFr
+                ? `${CAL_MEETING_DURATION_LABEL}. Pas de deck. Pas de pitch. Trois points, puis on décide si le pilote a du sens.`
+                : `${CAL_MEETING_DURATION_LABEL}. No deck. No pitch. Three things, then we decide if a pilot makes sense.`}
             </p>
           </motion.div>
 
@@ -192,9 +239,10 @@ export default function BookCall() {
       <Section>
         <ContainerSm>
           <motion.div {...fadeUp} className="text-center mb-10">
-            <Eyebrow>Questions about the call</Eyebrow>
+            <Eyebrow>{isFr ? 'Questions sur le call' : 'Questions about the call'}</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
-              Quick <em className="italic text-gold">answers.</em>
+              {isFr ? 'Réponses ' : 'Quick '}
+              <em className="italic text-gold">{isFr ? 'rapides.' : 'answers.'}</em>
             </h2>
           </motion.div>
           <motion.div {...fadeUp} className="divide-y divide-border">
@@ -218,6 +266,8 @@ export default function BookCall() {
           </motion.div>
         </ContainerSm>
       </Section>
+
+      <ServiceFacts titleKey="serviceFacts.title.bookCall" className="bg-cream-2 py-12 sm:py-16" />
 
       {/* Final CTA */}
       <Section className="bg-navy-dark">
@@ -243,6 +293,9 @@ export default function BookCall() {
               <BtnPrimary to="/free-lines">Or claim 100 free lines first</BtnPrimary>
             </div>
             <p className="text-white/25 text-xs mt-5">No commitment · No credit card · Zoom or Teams · {CAL_MEETING_DURATION_LABEL}</p>
+            <div className="mt-8 flex justify-center">
+              <ContactBlock className="text-left text-white/60 [&_a]:text-white/90" showLocation={false} />
+            </div>
           </motion.div>
         </Container>
       </Section>

@@ -2,11 +2,15 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Nav from './components/Nav'
 import Footer from './components/Footer'
+import SeoHead from './components/SeoHead'
+import ScrollManager from './components/ScrollManager'
 import Home from './pages/Home'
 import Pricing from './pages/Pricing'
 import About from './pages/About'
 import FreeLines from './pages/FreeLines'
 import BookCall from './pages/BookCall'
+import Contact from './pages/Contact'
+import Service from './pages/Service'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 
@@ -28,6 +32,8 @@ export default function App() {
   const location = useLocation()
   return (
     <div className="font-sans bg-cream text-ink-2 antialiased">
+      <ScrollManager />
+      <SeoHead />
       <Nav />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
@@ -36,6 +42,8 @@ export default function App() {
           <Route path="/about"      element={<PageWrapper><About /></PageWrapper>} />
           <Route path="/free-lines" element={<PageWrapper><FreeLines /></PageWrapper>} />
           <Route path="/book-call"  element={<PageWrapper><BookCall /></PageWrapper>} />
+          <Route path="/contact"   element={<PageWrapper><Contact /></PageWrapper>} />
+          <Route path="/service"   element={<PageWrapper><Service /></PageWrapper>} />
           <Route path="/privacy"    element={<PageWrapper><Privacy /></PageWrapper>} />
           <Route path="/terms"      element={<PageWrapper><Terms /></PageWrapper>} />
         </Routes>

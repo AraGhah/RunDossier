@@ -2,65 +2,17 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PenLine, Search, BarChart2, FileSpreadsheet, Clock, Shield, CheckCircle, AlertCircle } from 'lucide-react'
 import {
-  Section, Container, Eyebrow, BtnPrimary, Card, Divider,
+  Section, Container, Eyebrow, BtnPrimary, Card, Divider, ContainerSm,
   fadeUp, staggerContainer, staggerItem, OpenerCard,
 } from '../components/ui'
 import { submitPilotRequest } from '../lib/api'
+import ServiceFacts from '../components/ServiceFacts'
+import PageH1 from '../components/PageH1'
+import { getPageH1 } from '../lib/page-headings'
+import { useTranslation } from '../context/LanguageContext'
+import { getFreeLinesContent, validateFreeLinesForm } from '../i18n/free-lines-data'
 
-// ── STATIC DATA ───────────────────────────────────────────────────────────────
-
-const included = [
-  { Icon: PenLine,         title:'3 opener variants per prospect',   body:'Each lead gets three QA-scored first lines, each with a different angle and framing. You pick the one that fits your campaign.' },
-  { Icon: Search,          title:'Research signal included',          body:'Every opener comes with the source signal used: the LinkedIn article, product launch, pricing change, or public content that grounded the line.' },
-  { Icon: BarChart2,       title:'Confidence score and reasoning',    body:'Each opener is rated on a 1 to 5 scale with a short note on why we scored it that way. Low-confidence leads are flagged, not shipped.' },
-  { Icon: FileSpreadsheet, title:'Ready-to-import CSV',               body:'The deliverable lands in your inbox as a formatted CSV. Load it into Smartlead, Instantly, Lemlist, EmailBison, or any sequencer that accepts CSV imports.' },
-  { Icon: Clock,           title:'Delivered in 24 to 48 hours',       body:'Most pilot batches are delivered within one business day. Complex ICPs may take 48 hours if the research depth requires it.' },
-  { Icon: Shield,          title:'No campaign access needed',         body:'We never ask for your inboxes, your sequencer login, or your campaign settings. You keep full control of everything except the opener itself.' },
-]
-
-const sampleOpeners = [
-  { quote: 'Your breakdown of why cold email collapsed between 2023 and 2025 is the most precise articulation of the problem I\'ve seen published. GPT filler is exactly the right framing.', role: 'Founder, Outbound Consultancy', signal: 'LinkedIn article, Q3 2024', qa: 4 },
-  { quote: 'Saw you shipped a new leads product in February and positioned it around removing the friction that every other tool buries in five-step workflows. Smart wedge for where the market is heading.', role: 'Co-Founder, Outbound SaaS', signal: 'ProductHunt launch review', qa: 5 },
-  { quote: 'Most founders bury their best result in a case study nobody reads. You put it in your headline — smart move, and probably why your inbound is converting above what your size would suggest.', role: 'Founder, B2B Lead Gen Agency', signal: 'Website hero copy analysis', qa: 4 },
-]
-
-const csvRows = [
-  { n:'J. Whitmore', co:'LeadFlow Inc.', signal:'LinkedIn article on cold email decay', a:'Your breakdown of why cold email collapsed 2023 to 2025 is the most precise articulation I\'ve seen...', b:'The part about confusing volume with signal is something most agencies still haven\'t admitted...', qa:'4/5', conf:'High' },
-  { n:'M. Okafor', co:'Apex Outbound', signal:'ProductHunt launch, Feb 2025', a:'Saw you launched in February and positioned around removing friction everyone else buries in 5-step flows...', b:'Your PH launch framing — one CSV in, one campaign out — is the clearest positioning in leads tooling this year...', qa:'5/5', conf:'High' },
-  { n:'R. Castillo', co:'Clearpath B2B', signal:'Twitter thread, 2.4k engagements', a:'Your thread on why SDR handoffs break under 50 people is something I\'ve seen play out at 3 agencies...', b:'The nuance about handoffs breaking before the CRM even exists usually gets lost when people write about this...', qa:'3/5', conf:'Medium' },
-]
-
-// ── VALIDATION ────────────────────────────────────────────────────────────────
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-const URL_RE   = /^(https?:\/\/)|(www\.)|(linkedin\.com)/i
-
-function validate(form) {
-  const e = {}
-
-  if (!form.name.trim())
-    e.name = 'Full name is required.'
-
-  if (!form.email.trim())
-    e.email = 'Work email is required.'
-  else if (!EMAIL_RE.test(form.email.trim()))
-    e.email = 'Enter a valid business email address.'
-
-  if (!form.company.trim())
-    e.company = 'Company name is required.'
-
-  if (!form.url.trim())
-    e.url = 'LinkedIn profile or website URL is required.'
-  else if (!URL_RE.test(form.url.trim()))
-    e.url = 'Enter a full URL (https://…) or a LinkedIn profile link.'
-
-  if (!form.message.trim())
-    e.message = 'Please describe your ICP and current outbound setup.'
-  else if (form.message.trim().length < 20)
-    e.message = 'Please provide a bit more detail (at least 20 characters).'
-
-  return e
-}
+const INCLUDED_ICONS = [PenLine, Search, BarChart2, FileSpreadsheet, Clock, Shield]
 
 // ── FIELD ERROR COMPONENT ─────────────────────────────────────────────────────
 
@@ -90,6 +42,8 @@ function FieldError({ id, message }) {
 const EMPTY_FORM = { name: '', email: '', company: '', sequencer: '', url: '', message: '', website: '' }
 
 export default function FreeLines() {
+  const { lang } = useTranslation()
+  const c = getFreeLinesContent(lang)
   const [form, setForm]                 = useState(EMPTY_FORM)
   const [touched, setTouched]           = useState({})
   const [fieldErrors, setFieldErrors]   = useState({})
@@ -97,11 +51,12 @@ export default function FreeLines() {
   const [submitted, setSubmitted]       = useState(false)
   const [submitting, setSubmitting]     = useState(false)
   const [serverError, setServerError]   = useState('')
+  const [openFaq, setOpenFaq]           = useState(null)
+  const h1 = getPageH1('/free-lines', lang)
   const successRef = useRef(null)
   const firstErrorRef = useRef(null)
 
-  // Recompute errors on every form change
-  const currentErrors = validate(form)
+  const currentErrors = validateFreeLinesForm(form, c.validation)
   const isValid = Object.keys(currentErrors).length === 0
 
   // Visible error for a field: only shown after the field was touched or submit was attempted
@@ -146,7 +101,7 @@ export default function FreeLines() {
 
     // When no backend is configured, fall back to mailto so the form always works
     if (!import.meta.env.VITE_API_URL) {
-      const subject = `Pilot Request — ${form.company}`
+      const subject = c.form.mailtoSubject(form.company)
       const body = [
         `Name: ${form.name}`,
         `Email: ${form.email}`,
@@ -165,7 +120,7 @@ export default function FreeLines() {
       await submitPilotRequest({ ...form })
       setSubmitted(true)
     } catch (err) {
-      setServerError(err.message || 'Something went wrong. Please try again.')
+      setServerError(err.message || c.form.serverError)
     } finally {
       setSubmitting(false)
     }
@@ -199,22 +154,14 @@ export default function FreeLines() {
             <motion.div {...fadeUp}>
               <div className="inline-flex items-center gap-2 bg-gold/10 border border-gold/25 rounded-full px-4 py-2 text-[0.8rem] font-semibold text-gold mb-6">
                 <span className="w-[5px] h-[5px] rounded-full bg-gold animate-pulse-dot" aria-hidden="true" />
-                Limited pilot spots available
+                {c.hero.badge}
               </div>
-              <h1 className="font-display text-[clamp(2.4rem,5vw,3.8rem)] font-bold leading-[1.1] tracking-tight mb-5">
-                100 personalized openers. <em className="italic text-gold">Completely free.</em>
-              </h1>
+              <PageH1 className="mb-5">{h1}</PageH1>
               <p className="text-muted text-lg leading-relaxed mb-8">
-                Send us your prospect list. We research each lead, write three QA-scored first lines, and return a ready-to-import CSV within 48 hours. No credit card. No campaign access. No commitment.
+                {c.hero.intro}
               </p>
-              <ul className="flex flex-col gap-3 text-sm" aria-label="What is included">
-                {[
-                  'Three QA-scored openers per prospect',
-                  'Research signal and confidence score included',
-                  'Delivered as CSV in 24 to 48 hours',
-                  'Works with Smartlead, Instantly, Lemlist, and more',
-                  'No inboxes, no credentials, no campaign access',
-                ].map((item, i) => (
+              <ul className="flex flex-col gap-3 text-sm" aria-label={c.hero.bulletsAria}>
+                {c.hero.bullets.map((item, i) => (
                   <li key={i} className="flex items-center gap-3">
                     <svg className="text-gold flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                       <path d="M3 8L6.5 11.5L13 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -238,21 +185,21 @@ export default function FreeLines() {
                   <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-5">
                     <CheckCircle className="w-8 h-8 text-emerald-400" />
                   </div>
-                  <h2 className="font-display text-2xl font-bold text-white mb-3">You are in.</h2>
+                  <h2 className="font-display text-2xl font-bold text-white mb-3">{c.success.title}</h2>
                   <p className="text-white/50 text-sm leading-relaxed">
-                    We will reach out within 24 hours to confirm your ICP and get your prospect list. Openers land in your inbox within 48 hours of receiving the list.
+                    {c.success.body}
                   </p>
                 </div>
               ) : (
                 <div className="bg-black/[0.025] border border-black/[0.05] p-1.5 rounded-xl4">
                   <div className="bg-white rounded-[calc(2rem-5px)] p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-                    <h2 className="font-display text-xl font-semibold text-ink mb-1">Claim your 100 free lines</h2>
-                    <p className="text-sm text-muted mb-6">We confirm fit, get your list, and deliver within 48 hours.</p>
+                    <h2 className="font-display text-xl font-semibold text-ink mb-1">{c.form.title}</h2>
+                    <p className="text-sm text-muted mb-6">{c.form.subtitle}</p>
 
                     <form
                       onSubmit={handleSubmit}
                       noValidate
-                      aria-label="Pilot request form"
+                      aria-label={c.form.ariaLabel}
                       className="flex flex-col gap-4"
                     >
                       {/* Honeypot — invisible to real users */}
@@ -272,13 +219,13 @@ export default function FreeLines() {
                       {/* Full name */}
                       <div>
                         <label htmlFor="fl-name" className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
-                          Full name <span aria-hidden="true" className="text-red-500">*</span>
+                          {c.form.fields.name} <span aria-hidden="true" className="text-red-500">*</span>
                         </label>
                         <input
                           id="fl-name"
                           type="text"
                           name="name"
-                          placeholder="Sarah Chen"
+                          placeholder={c.form.placeholders.name}
                           autoComplete="name"
                           required
                           aria-required="true"
@@ -295,13 +242,13 @@ export default function FreeLines() {
                       {/* Work email */}
                       <div>
                         <label htmlFor="fl-email" className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
-                          Work email <span aria-hidden="true" className="text-red-500">*</span>
+                          {c.form.fields.email} <span aria-hidden="true" className="text-red-500">*</span>
                         </label>
                         <input
                           id="fl-email"
                           type="email"
                           name="email"
-                          placeholder="sarah@youragency.com"
+                          placeholder={c.form.placeholders.email}
                           autoComplete="email"
                           required
                           aria-required="true"
@@ -318,13 +265,13 @@ export default function FreeLines() {
                       {/* Company name */}
                       <div>
                         <label htmlFor="fl-company" className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
-                          Company name <span aria-hidden="true" className="text-red-500">*</span>
+                          {c.form.fields.company} <span aria-hidden="true" className="text-red-500">*</span>
                         </label>
                         <input
                           id="fl-company"
                           type="text"
                           name="company"
-                          placeholder="Apex Outbound"
+                          placeholder={c.form.placeholders.company}
                           required
                           aria-required="true"
                           aria-invalid={!!visibleError('company')}
@@ -340,13 +287,13 @@ export default function FreeLines() {
                       {/* LinkedIn or website — now required */}
                       <div>
                         <label htmlFor="fl-url" className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
-                          LinkedIn or website <span aria-hidden="true" className="text-red-500">*</span>
+                          {c.form.fields.url} <span aria-hidden="true" className="text-red-500">*</span>
                         </label>
                         <input
                           id="fl-url"
                           type="url"
                           name="url"
-                          placeholder="https://linkedin.com/in/yourprofile"
+                          placeholder={c.form.placeholders.url}
                           required
                           aria-required="true"
                           aria-invalid={!!visibleError('url')}
@@ -362,13 +309,13 @@ export default function FreeLines() {
                       {/* Current sequencer — optional */}
                       <div>
                         <label htmlFor="fl-sequencer" className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
-                          Current sequencer <span className="ml-1 font-normal normal-case tracking-normal text-muted-2">(optional)</span>
+                          {c.form.fields.sequencer} <span className="ml-1 font-normal normal-case tracking-normal text-muted-2">{c.form.fields.sequencerOptional}</span>
                         </label>
                         <input
                           id="fl-sequencer"
                           type="text"
                           name="sequencer"
-                          placeholder="Smartlead, Instantly, Lemlist…"
+                          placeholder={c.form.placeholders.sequencer}
                           value={form.sequencer}
                           onChange={e => handleChange('sequencer', e.target.value)}
                           className={inputCls('sequencer')}
@@ -378,12 +325,12 @@ export default function FreeLines() {
                       {/* Message / ICP details — required */}
                       <div>
                         <label htmlFor="fl-message" className="block text-xs font-semibold uppercase tracking-wider text-muted mb-1.5">
-                          Your ICP and current outbound setup <span aria-hidden="true" className="text-red-500">*</span>
+                          {c.form.fields.message} <span aria-hidden="true" className="text-red-500">*</span>
                         </label>
                         <textarea
                           id="fl-message"
                           name="message"
-                          placeholder="Who do you target, what sequencer do you use, and what reply rate are you currently getting?"
+                          placeholder={c.form.placeholders.message}
                           rows={3}
                           required
                           aria-required="true"
@@ -413,10 +360,10 @@ export default function FreeLines() {
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                             </svg>
-                            Sending…
+                            {c.form.submitting}
                           </>
                         ) : (
-                          'Claim 100 Free Lines →'
+                          c.form.submit
                         )}
                       </button>
 
@@ -448,13 +395,13 @@ export default function FreeLines() {
                             exit={{ opacity: 0 }}
                             className="text-center text-xs text-red-600 font-medium"
                           >
-                            Please fill in all required fields above before submitting.
+                            {c.form.validationSummary}
                           </motion.p>
                         )}
                       </AnimatePresence>
 
                       <p className="text-center text-xs text-muted-2">
-                        No credit card · No campaign access · No commitment
+                        {c.form.footer}
                       </p>
                     </form>
                   </div>
@@ -466,30 +413,32 @@ export default function FreeLines() {
         </Container>
       </Section>
 
-      <Divider />
+      <ServiceFacts titleKey="serviceFacts.title.freeLines" className="bg-cream-2 py-12 sm:py-16" />
 
-      {/* ── WHAT IS INCLUDED ────────────────────────────────────────────── */}
+      <Divider />
       <Section>
         <Container>
           <motion.div {...fadeUp} className="text-center mb-12">
-            <Eyebrow>What you get</Eyebrow>
+            <Eyebrow>{c.included.eyebrow}</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
-              Exactly what lands <em className="italic text-gold">in your inbox.</em>
+              {c.included.title}<em className="italic text-gold">{c.included.titleEm}</em>
             </h2>
           </motion.div>
           <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{ once:true, margin:'-60px' }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {included.map((item, i) => (
+            {c.included.items.map((item, i) => {
+              const Icon = INCLUDED_ICONS[i]
+              return (
               <motion.div key={i} variants={staggerItem}>
                 <Card hover>
                   <div className="w-10 h-10 rounded-xl bg-navy/[0.06] border border-navy/[0.04] flex items-center justify-center mb-4">
-                    <item.Icon className="w-5 h-5 text-navy" aria-hidden="true" />
+                    <Icon className="w-5 h-5 text-navy" aria-hidden="true" />
                   </div>
                   <h3 className="font-semibold text-ink mb-1.5">{item.title}</h3>
                   <p className="text-sm text-muted leading-relaxed">{item.body}</p>
                 </Card>
               </motion.div>
-            ))}
+            )})}
           </motion.div>
         </Container>
       </Section>
@@ -500,34 +449,37 @@ export default function FreeLines() {
       <Section className="bg-cream-2">
         <Container>
           <motion.div {...fadeUp} className="text-center mb-10">
-            <Eyebrow>The deliverable</Eyebrow>
+            <Eyebrow>{c.csv.eyebrow}</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
-              What the CSV actually <em className="italic text-gold">looks like.</em>
+              {c.csv.title}<em className="italic text-gold">{c.csv.titleEm}</em>
             </h2>
           </motion.div>
 
           {/* Mobile: card layout */}
           <motion.div {...fadeUp} transition={{ delay: 0.1 }} className="md:hidden flex flex-col gap-4">
-            {csvRows.map((row, i) => (
+            {c.csvRows.map((row, i) => {
+              const confLabel = c.confLabels[row.confKey]
+              const confHigh = row.confKey === 'high'
+              return (
               <div key={i} className="bg-white border border-border rounded-xl2 p-4 sm:p-5 shadow-card">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="min-w-0">
                     <p className="font-semibold text-ink">{row.n}</p>
                     <p className="text-sm text-muted">{row.co}</p>
                   </div>
-                  <span className={`text-[0.68rem] font-bold px-2 py-1 rounded-full flex-shrink-0 ${row.conf==='High'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}`}>{row.conf}</span>
+                  <span className={`text-[0.68rem] font-bold px-2 py-1 rounded-full flex-shrink-0 ${confHigh?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}`}>{confLabel}</span>
                 </div>
-                <p className="text-[0.72rem] text-muted mb-3"><span className="font-semibold text-ink-2">Signal:</span> {row.signal}</p>
-                <p className="text-[0.78rem] italic text-ink leading-snug mb-2"><span className="not-italic font-semibold text-[0.65rem] uppercase tracking-wider text-muted block mb-1">Opener A</span>{row.a}</p>
-                <p className="text-[0.78rem] italic text-ink leading-snug mb-3"><span className="not-italic font-semibold text-[0.65rem] uppercase tracking-wider text-muted block mb-1">Opener B</span>{row.b}</p>
+                <p className="text-[0.72rem] text-muted mb-3"><span className="font-semibold text-ink-2">{c.csv.signal}</span> {row.signal}</p>
+                <p className="text-[0.78rem] italic text-ink leading-snug mb-2"><span className="not-italic font-semibold text-[0.65rem] uppercase tracking-wider text-muted block mb-1">{c.csv.openerA}</span>{row.a}</p>
+                <p className="text-[0.78rem] italic text-ink leading-snug mb-3"><span className="not-italic font-semibold text-[0.65rem] uppercase tracking-wider text-muted block mb-1">{c.csv.openerB}</span>{row.b}</p>
                 <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <span className="text-[0.68rem] font-semibold uppercase tracking-wider text-muted">QA score</span>
-                  <div className="flex gap-0.5" aria-label={`QA score ${row.qa}`}>
+                  <span className="text-[0.68rem] font-semibold uppercase tracking-wider text-muted">{c.csv.qaScore}</span>
+                  <div className="flex gap-0.5" aria-label={`${c.csv.qaScore} ${row.qa}`}>
                     {[1,2,3,4,5].map(d => <span key={d} className={`w-1.5 h-1.5 rounded-full ${d<=parseInt(row.qa)?'bg-gold':'bg-border-2'}`} />)}
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </motion.div>
 
           {/* Desktop: table */}
@@ -543,13 +495,16 @@ export default function FreeLines() {
                 <table className="w-full text-[0.8rem]">
                   <thead>
                     <tr>
-                      {['Prospect','Company','Signal Used','Opener A','Opener B','QA Score','Confidence'].map((h, i, a) => (
+                      {c.csv.headers.map((h, i, a) => (
                         <th key={h} scope="col" className={`bg-cream-2 text-left text-muted-2 font-semibold text-[0.65rem] uppercase tracking-wider px-4 py-2.5 border-b border-border whitespace-nowrap ${i===a.length-1?'rounded-tr-[calc(1.5rem-5px)]':''}`}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {csvRows.map((row, i) => (
+                    {c.csvRows.map((row, i) => {
+                      const confLabel = c.confLabels[row.confKey]
+                      const confHigh = row.confKey === 'high'
+                      return (
                       <tr key={i} className={`border-t border-border ${i%2===1?'bg-cream/50':''}`}>
                         <td className="px-4 py-3 font-semibold text-ink whitespace-nowrap">{row.n}</td>
                         <td className="px-4 py-3 text-muted whitespace-nowrap">{row.co}</td>
@@ -557,15 +512,15 @@ export default function FreeLines() {
                         <td className="px-4 py-3 italic text-ink max-w-[200px] text-[0.78rem] leading-snug">{row.a}</td>
                         <td className="px-4 py-3 italic text-ink max-w-[200px] text-[0.78rem] leading-snug">{row.b}</td>
                         <td className="px-4 py-3 text-center">
-                          <div className="flex gap-0.5 justify-center" aria-label={`QA score ${row.qa}`}>
+                          <div className="flex gap-0.5 justify-center" aria-label={`${c.csv.qaScore} ${row.qa}`}>
                             {[1,2,3,4,5].map(d => <span key={d} className={`w-1.5 h-1.5 rounded-full ${d<=parseInt(row.qa)?'bg-gold':'bg-border-2'}`} />)}
                           </div>
                         </td>
                         <td className="px-4 py-3 text-center whitespace-nowrap">
-                          <span className={`text-[0.68rem] font-bold px-2 py-1 rounded-full ${row.conf==='High'?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}`}>{row.conf}</span>
+                          <span className={`text-[0.68rem] font-bold px-2 py-1 rounded-full ${confHigh?'bg-emerald-100 text-emerald-700':'bg-amber-100 text-amber-700'}`}>{confLabel}</span>
                         </td>
                       </tr>
-                    ))}
+                    )})}
                   </tbody>
                 </table>
               </div>
@@ -580,28 +535,73 @@ export default function FreeLines() {
       <Section>
         <Container>
           <motion.div {...fadeUp} className="text-center mb-10">
-            <Eyebrow>Examples</Eyebrow>
+            <Eyebrow>{c.examples.eyebrow}</Eyebrow>
             <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
-              What you will receive <em className="italic text-gold">for your prospects.</em>
+              {c.examples.title}<em className="italic text-gold">{c.examples.titleEm}</em>
             </h2>
           </motion.div>
           <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{ once:true, margin:'-60px' }}
             className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {sampleOpeners.map((o, i) => <OpenerCard key={i} {...o} />)}
+            {c.examples.items.map((o, i) => <OpenerCard key={i} {...o} />)}
           </motion.div>
         </Container>
       </Section>
+
+      <Divider />
+
+      {/* FAQ */}
+      <Section>
+        <ContainerSm>
+          <motion.div {...fadeUp} className="text-center mb-10">
+            <Eyebrow>{c.faq.eyebrow}</Eyebrow>
+            <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.6rem)] font-bold leading-[1.2] tracking-tight">
+              {c.faq.title}
+            </h2>
+          </motion.div>
+          <motion.div {...fadeUp} className="divide-y divide-border">
+            {c.faq.items.map((faq, i) => {
+              const isOpen = openFaq === i
+              return (
+                <div key={faq.q}>
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : i)}
+                    aria-expanded={isOpen}
+                    aria-controls={`freelines-faq-${i}`}
+                    className="w-full flex items-center justify-between gap-4 py-4 text-left font-semibold text-[0.97rem] hover:text-navy transition-colors group"
+                  >
+                    <span>{faq.q}</span>
+                    <span
+                      aria-hidden="true"
+                      className={`w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isOpen ? 'bg-navy text-white border-navy rotate-45' : 'border-border-2 text-muted'}`}
+                    >
+                      +
+                    </span>
+                  </button>
+                  <div id={`freelines-faq-${i}`} role="region" className={`faq-body ${isOpen ? 'open' : ''}`}>
+                    <div>
+                      <p className="pb-4 text-sm text-muted leading-relaxed pr-10">{faq.a}</p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </motion.div>
+        </ContainerSm>
+      </Section>
+
+      <Divider />
 
       {/* ── FINAL CTA ───────────────────────────────────────────────────── */}
       <Section className="bg-navy-dark">
         <Container>
           <motion.div {...fadeUp} className="text-center">
-            <Eyebrow light>No risk. No commitment.</Eyebrow>
+            <Eyebrow light>{c.cta.eyebrow}</Eyebrow>
             <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.15] text-white mb-6">
-              Claim your 100 free lines <em className="italic text-gold">today.</em>
+              {c.cta.title}<em className="italic text-gold">{c.cta.titleEm}</em>
             </h2>
             <div className="flex flex-wrap justify-center gap-6 mb-8">
-              {['No credit card required','No campaign access','No minimum commitment','Results in 24 to 48 hours'].map(item => (
+              {c.cta.bullets.map(item => (
                 <div key={item} className="flex items-center gap-2 text-sm text-white/60">
                   <svg className="text-gold" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                     <path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -610,7 +610,7 @@ export default function FreeLines() {
                 </div>
               ))}
             </div>
-            <BtnPrimary to="/free-lines" large>Claim 100 Free Lines</BtnPrimary>
+            <BtnPrimary to="/free-lines" large>{c.cta.button}</BtnPrimary>
           </motion.div>
         </Container>
       </Section>

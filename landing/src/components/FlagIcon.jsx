@@ -47,20 +47,9 @@ function FlagFrance() {
   )
 }
 
-function FlagSpain() {
-  return (
-    <svg className={FLAG_CLASS} viewBox="0 0 3 2" aria-hidden>
-      <rect width="3" height="0.5" fill="#AA151B" />
-      <rect y="0.5" width="3" height="1" fill="#F1BF00" />
-      <rect y="1.5" width="3" height="0.5" fill="#AA151B" />
-    </svg>
-  )
-}
-
 const FLAGS = {
   en: FlagUS,
   fr: FlagFrance,
-  es: FlagSpain,
 }
 
 export default function FlagIcon({ code }) {
