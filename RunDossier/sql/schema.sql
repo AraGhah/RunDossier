@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS prospects (
                                  'qa_failed',
                                  'personalization_failed'
                                )),
-  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS prospect_signals_raw (

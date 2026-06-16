@@ -1,25 +1,18 @@
 import { Pool } from 'pg';
 import { config } from './config.js';
-
-const sslConfig = config.databaseSsl
-  ? { rejectUnauthorized: config.databaseSslStrict }
-  : undefined;
+import { getPgSslConfig } from './pg-ssl.js';
 
 export const pool = new Pool({
   connectionString: config.databaseUrl,
-  ssl: sslConfig,
+  ssl: getPgSslConfig(),
   max: 10,
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 5_000,
+  options: '-c statement_timeout=30000',
 });
 
 pool.on('error', (err) => {
   console.error('[db] Unexpected pool client error:', err);
-});
-
-pool.on('connect', (client) => {
-  // Kill runaway queries after 30 s at the session level
-  void client.query('SET statement_timeout = 30000');
 });
 
 export async function query<T = Record<string, unknown>>(

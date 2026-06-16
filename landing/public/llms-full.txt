@@ -1,0 +1,68 @@
+# Dossier
+
+> Personalized outbound openers that get replies — research-backed first lines for outbound agencies and B2B founders.
+
+## About Dossier
+
+Dossier is a B2B service that produces personalized cold-email openers. For each prospect in your list, we run structured research, select the strongest public signal (LinkedIn content, product launches, website copy, etc.), generate three opener variants, and score them with a separate QA pass. Low-confidence leads are flagged before delivery.
+
+We do not send emails or access your sequencer. You receive a CSV ready to import into Smartlead, Instantly, Lemlist, EmailBison, or similar tools.
+
+**Operator:** Ara Ghahramanyan  
+**Website:** https://rundossier.co  
+**Email:** ara@getdossier.co  
+**Last updated:** 2026-06-16
+
+## Who it is for
+
+1. Outbound agencies managing multiple client campaigns
+2. B2B founders running their own cold email
+3. SDR teams where reply rate is the primary KPI
+4. Lead gen operators sending 500+ emails per week
+
+Best fit: decision-makers at companies with roughly 10–200 employees.
+
+## How it works
+
+1. You send a prospect list (CSV with LinkedIn URLs)
+2. We research each lead and extract a usable signal
+3. We write three QA-scored opener variants per prospect
+4. You receive a CSV with openers, signals, and confidence scores
+5. You import into your sequencer and run your campaign
+
+Typical pilot turnaround: 24–48 hours for 100 prospects.
+
+## Pricing overview
+
+| Plan | Price | Volume |
+|------|-------|--------|
+| Pilot | Free | 100 prospects |
+| Starter | $499/mo | 500 prospects/month |
+| Growth | $999/mo | 2,000 prospects/month |
+| Agency | Custom | Unlimited |
+
+## Frequently asked questions
+
+**Is this just ChatGPT with a LinkedIn scrape?**  
+No. Value comes from structured research, signal selection, multi-variant generation, and QA scoring. Failed openers are rejected before delivery.
+
+**Do you send emails for us?**  
+No. CSV delivery only. You keep full control of inboxes and campaigns.
+
+**What if a prospect has little online presence?**  
+They are flagged as low-confidence in the deliverable.
+
+## Site map
+
+- [Home](https://rundossier.co/)
+- [Pricing](https://rundossier.co/pricing)
+- [About](https://rundossier.co/about)
+- [100 Free Lines](https://rundossier.co/free-lines)
+- [Book a Call](https://rundossier.co/book-call)
+- [Privacy](https://rundossier.co/privacy)
+- [Terms](https://rundossier.co/terms)
+
+## Social & entity
+
+- [LinkedIn — Ara Ghahramanyan](https://www.linkedin.com/in/ara-ghahramanyan-086261405/)
+- [Dossier website](https://rundossier.co)

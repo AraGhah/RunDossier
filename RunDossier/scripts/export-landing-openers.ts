@@ -5,6 +5,7 @@
 import 'dotenv/config';
 import { query, pool } from '../src/db.js';
 import { validateConfig } from '../src/config.js';
+import { SHIPPED_LINE_STATUSES } from '../src/utils/first-line-status.js';
 
 function anonymize(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -24,8 +25,8 @@ async function main(): Promise<void> {
     `SELECT p.name, COALESCE(p.title, '') AS title, fl.opener, fl.qa_score
      FROM first_lines fl
      JOIN prospects p ON p.id = fl.prospect_id
-     WHERE fl.status = 'ready' AND fl.variant_number = 1
-     ORDER BY fl.qa_score DESC NULLS LAST
+     WHERE fl.status IN (${SHIPPED_LINE_STATUSES.map(s => `'${s}'`).join(', ')})
+     ORDER BY fl.is_chosen DESC NULLS LAST, fl.qa_score DESC NULLS LAST, fl.variant_number ASC
      LIMIT 3`
   );
 

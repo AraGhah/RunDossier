@@ -12,6 +12,7 @@ import {
   logFunnelEvent,
 } from '../utils/funnel-log.js';
 import { pushToSmartlead, markSmartleadQueuePushed } from '../integrations/smartlead.js';
+import { SHIPPED_LINE_STATUSES } from '../utils/first-line-status.js';
 
 interface EligibleProspect {
   id: string;
@@ -56,7 +57,8 @@ export async function runDogfoodPromote(): Promise<{ queued: number; skipped: nu
        AND (
          SELECT COUNT(*)::int
          FROM first_lines fl
-         WHERE fl.prospect_id = p.id AND fl.status = 'ready'
+         WHERE fl.prospect_id = p.id
+           AND fl.status IN (${SHIPPED_LINE_STATUSES.map(s => `'${s}'`).join(', ')})
        ) >= $1
        AND NOT EXISTS (
          SELECT 1 FROM smartlead_queue sq WHERE sq.prospect_id = p.id
@@ -104,8 +106,8 @@ export async function runDogfoodPromote(): Promise<{ queued: number; skipped: nu
     const [line] = await query<BestLine>(
       `SELECT variant_number, subject, opener, bridge
        FROM first_lines
-       WHERE prospect_id = $1 AND status = 'ready'
-       ORDER BY qa_score DESC NULLS LAST
+       WHERE prospect_id = $1 AND status IN (${SHIPPED_LINE_STATUSES.map(s => `'${s}'`).join(', ')})
+       ORDER BY is_chosen DESC NULLS LAST, qa_score DESC NULLS LAST, variant_number ASC
        LIMIT 1`,
       [p.id]
     );

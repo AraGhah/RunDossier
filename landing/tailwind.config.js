@@ -22,6 +22,9 @@ export default {
         'cta-hover': '0 8px 32px rgba(26,43,74,0.40)',
         float: '0 2px 20px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(255,255,255,0.5)',
       },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      },
       animation: {
         'pulse-dot': 'pulseDot 2s infinite',
         'float':     'floatY 4s ease-in-out infinite',

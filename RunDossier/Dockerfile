@@ -9,6 +9,8 @@ RUN npm run build
 FROM node:22-alpine
 WORKDIR /app
 
+RUN apk add --no-cache ca-certificates wget && update-ca-certificates
+
 # Dedicated non-root user — prevents container escape from writing to FS as root
 RUN addgroup -S preframe && adduser -S -G preframe preframe
 

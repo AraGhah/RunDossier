@@ -1,0 +1,44 @@
+# Dossier
+
+> Research-backed personalized outbound openers for B2B agencies and founders. CSV delivery in 24–48 hours.
+
+Dossier researches each prospect, writes three QA-scored first lines, and delivers a ready-to-import CSV. No sequencer access required.
+
+## Product
+
+- Personalized first lines grounded in public research signals
+- Three opener variants per prospect with QA scoring
+- Confidence flags for thin-profile leads
+- Compatible with Smartlead, Instantly, Lemlist, and CSV-based sequencers
+
+## Pages
+
+- [Home](https://rundossier.co/)
+- [Service](https://rundossier.co/service)
+- [Pricing](https://rundossier.co/pricing)
+- [About](https://rundossier.co/about)
+- [100 Free Lines](https://rundossier.co/free-lines)
+- [Book a Call](https://rundossier.co/book-call)
+- [Contact](https://rundossier.co/contact)
+- [Privacy Policy](https://rundossier.co/privacy)
+- [Terms of Service](https://rundossier.co/terms)
+
+## Offers
+
+- [100 Free Lines pilot](https://rundossier.co/free-lines) — 100 prospects, no credit card
+- [Book a 30-minute fit call](https://rundossier.co/book-call)
+
+## Contact
+
+- Email: [ara@getdossier.co](mailto:ara@getdossier.co)
+- Contact page: [rundossier.co/contact](https://rundossier.co/contact)
+- Book a call: [rundossier.co/book-call](https://rundossier.co/book-call)
+- Founder: Ara Ghahramanyan (Ontario, Canada)
+- LinkedIn: [linkedin.com/in/ara-ghahramanyan-086261405](https://www.linkedin.com/in/ara-ghahramanyan-086261405/)
+
+## AI resources
+
+- [AI summary (JSON)](https://rundossier.co/ai/summary.json)
+- [FAQ (JSON)](https://rundossier.co/ai/faq.json)
+- [Service (JSON)](https://rundossier.co/ai/service.json)
+- [Full LLM context](https://rundossier.co/llms-full.txt)

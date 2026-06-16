@@ -1,0 +1,55 @@
+{
+  "service": {
+    "name": "Dossier — Personalized Outbound Openers",
+    "provider": "Dossier",
+    "url": "https://rundossier.co",
+    "type": "B2B outbound personalization",
+    "areaServed": "Worldwide",
+    "description": "Done-for-you prospect research and QA-scored personalized first lines for cold email, delivered as a CSV for your sequencer.",
+    "deliverables": [
+      "Three QA-scored opener variants per prospect",
+      "Research signal source for each opener",
+      "Confidence score and thin-profile flags",
+      "Ready-to-import CSV"
+    ],
+    "turnaround": "24 to 48 hours for pilot batches",
+    "integrations": ["Smartlead", "Instantly", "Lemlist", "EmailBison", "CSV-based sequencers"],
+    "doesNotInclude": [
+      "Email sending",
+      "Sequencer or inbox access",
+      "Campaign management"
+    ]
+  },
+  "offers": [
+    {
+      "name": "100 Free Lines Pilot",
+      "price": 0,
+      "currency": "USD",
+      "url": "https://rundossier.co/free-lines"
+    },
+    {
+      "name": "Starter",
+      "price": 499,
+      "currency": "USD",
+      "unit": "month",
+      "prospectsPerMonth": 500,
+      "url": "https://rundossier.co/pricing"
+    },
+    {
+      "name": "Growth",
+      "price": 999,
+      "currency": "USD",
+      "unit": "month",
+      "prospectsPerMonth": 2000,
+      "url": "https://rundossier.co/pricing"
+    }
+  ],
+  "contact": {
+    "email": "ara@getdossier.co",
+    "location": "Ontario, Canada",
+    "page": "https://rundossier.co/contact",
+    "bookCall": "https://rundossier.co/book-call",
+    "servicePage": "https://rundossier.co/service"
+  },
+  "lastUpdated": "2026-06-16"
+}

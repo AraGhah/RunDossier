@@ -1,26 +1,26 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from '../context/LanguageContext'
+import FlagIcon from './FlagIcon'
 
 const LANGS = [
-  { code: 'en', label: 'English',  flag: '🇺🇸' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'es', label: 'Español',  flag: '🇪🇸' },
-]
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'Français' }]
 
 export default function Nav() {
   const [scrolled, setScrolled]   = useState(false)
   const [menuOpen, setMenuOpen]   = useState(false)
   const location = useLocation()
   const { t } = useTranslation()
+  const menuRef = useRef(null)
+  const hamburgerRef = useRef(null)
 
   const links = [
     { label: t('nav.howItWorks'), to: '/#how-it-works' },
     { label: t('nav.examples'),   to: '/#examples' },
     { label: t('nav.pricing'),    to: '/pricing' },
-    { label: t('nav.about'),      to: '/about' },
-  ]
+    { label: t('nav.about'),      to: '/about' }]
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50)
@@ -35,14 +35,55 @@ export default function Nav() {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
+  // Focus trap + Escape handler for mobile menu
+  useEffect(() => {
+    if (!menuOpen) return
+
+    // Move focus to first interactive element when menu opens
+    const firstFocusable = menuRef.current?.querySelector('a, button')
+    firstFocusable?.focus()
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setMenuOpen(false)
+        hamburgerRef.current?.focus()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const focusable = Array.from(
+        menuRef.current?.querySelectorAll('a, button') ?? []
+      )
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last  = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [menuOpen])
+
   return (
     <>
+      {/* Skip link, visible on focus for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:bg-navy focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-cta"
+      >
+        Skip to main content
+      </a>
+
       {/* Progress bar */}
       <ScrollProgress />
 
       {/* Floating pill nav */}
-      <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2.5rem)] max-w-5xl">
-        <div className={`flex items-center justify-between gap-3 rounded-full border px-5 py-2.5
+      <div className="fixed top-3 sm:top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.25rem)] sm:w-[calc(100%-2.5rem)] max-w-5xl">
+        <div className={`flex items-center justify-between gap-2 sm:gap-3 rounded-full border px-3 sm:px-5 py-2 sm:py-2.5
           transition-all duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]
           ${scrolled
             ? 'bg-cream/95 backdrop-blur-xl border-border-2 shadow-float'
@@ -50,11 +91,15 @@ export default function Nav() {
           }`}>
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+          <Link
+            to="/"
+            className="flex items-center gap-2 flex-shrink-0"
+            onClick={() => window.scrollTo({ top: 0, left: 0 })}
+          >
             <span className="w-6 h-6 rounded-md bg-navy flex items-center justify-center">
               <span className="w-2 h-2 rounded-full bg-gold animate-pulse-dot" />
             </span>
-            <span className="font-display font-semibold text-navy text-[0.95rem] tracking-tight">
+            <span className="font-display font-semibold text-navy text-[0.85rem] sm:text-[0.95rem] tracking-tight">
               Dossier
             </span>
           </Link>
@@ -90,9 +135,12 @@ export default function Nav() {
 
           {/* Hamburger */}
           <button
+            ref={hamburgerRef}
             onClick={() => setMenuOpen(o => !o)}
-            className="md:hidden w-8 h-8 flex flex-col items-center justify-center gap-[5px]"
-            aria-label="Toggle menu"
+            className="md:hidden w-9 h-9 flex flex-col items-center justify-center gap-[5px]"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
           >
             <span className={`w-4.5 h-[1.5px] bg-ink rounded-full transition-all duration-300 ${menuOpen ? 'translate-y-[3.25px] rotate-45' : ''}`} style={{width:'18px'}} />
             <span className={`h-[1.5px] bg-ink rounded-full transition-all duration-300 ${menuOpen ? '-translate-y-[3.25px] -rotate-45' : ''}`} style={{width:'18px'}} />
@@ -104,6 +152,11 @@ export default function Nav() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
+            ref={menuRef}
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -117,9 +170,15 @@ export default function Nav() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08 + 0.1, duration: 0.45, ease: [0.32,0.72,0,1] }}
               >
-                <Link to={l.to} className="font-display text-4xl font-semibold text-ink hover:text-navy transition-colors block py-1.5 text-center">
-                  {l.label}
-                </Link>
+                {l.to.startsWith('/#') ? (
+                  <a href={l.to} className="font-display text-[clamp(1.75rem,8vw,2.5rem)] font-semibold text-ink hover:text-navy transition-colors block py-1.5 text-center">
+                    {l.label}
+                  </a>
+                ) : (
+                  <Link to={l.to} className="font-display text-[clamp(1.75rem,8vw,2.5rem)] font-semibold text-ink hover:text-navy transition-colors block py-1.5 text-center">
+                    {l.label}
+                  </Link>
+                )}
               </motion.div>
             ))}
             <motion.div
@@ -164,8 +223,10 @@ function LangSwitcher() {
         className="flex items-center gap-1.5 text-[0.78rem] font-semibold text-muted px-3 py-2 rounded-full
           hover:bg-black/[0.04] hover:text-ink transition-all duration-200"
         aria-label="Change language"
+        aria-haspopup="menu"
+        aria-expanded={open}
       >
-        <span className="text-[1rem] leading-none">{current.flag}</span>
+        <FlagIcon code={current.code} />
         <span className="uppercase tracking-wide">{current.code}</span>
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
           className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>
@@ -181,10 +242,12 @@ function LangSwitcher() {
             exit={{ opacity: 0, y: -6, scale: 0.96 }}
             transition={{ duration: 0.18, ease: [0.32,0.72,0,1] }}
             className="absolute top-full right-0 mt-2 bg-cream border border-border rounded-2xl shadow-card overflow-hidden z-50 min-w-[148px]"
+            role="menu"
           >
             {LANGS.map(l => (
               <button
                 key={l.code}
+                role="menuitem"
                 onClick={() => { setLanguage(l.code); setOpen(false) }}
                 className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-[0.82rem] font-medium text-left
                   transition-colors duration-150
@@ -193,7 +256,7 @@ function LangSwitcher() {
                     : 'text-ink-2 hover:bg-black/[0.04]'
                   }`}
               >
-                <span className="text-[1.1rem] leading-none">{l.flag}</span>
+                <FlagIcon code={l.code} />
                 <span>{l.label}</span>
                 {l.code === lang && (
                   <svg className="ml-auto text-navy" width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -213,7 +276,7 @@ function NavLink({ to, children }) {
   const isHash = to.startsWith('/#')
   if (isHash) {
     return (
-      <a href={to.replace('/', '')}
+      <a href={to}
         className="text-[0.82rem] font-medium text-muted px-3.5 py-2 rounded-full hover:text-ink hover:bg-black/[0.04] transition-all duration-200">
         {children}
       </a>
