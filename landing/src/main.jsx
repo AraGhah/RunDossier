@@ -5,9 +5,6 @@ import { MotionGlobalConfig } from 'framer-motion'
 import { LanguageProvider } from './context/LanguageContext'
 import App from './App'
 import './index.css'
-import { initCloudflareAnalytics } from './lib/cloudflare-analytics.js'
-
-initCloudflareAnalytics()
 
 // Disable all framer-motion animations for users who prefer reduced motion
 MotionGlobalConfig.skipAnimations =
