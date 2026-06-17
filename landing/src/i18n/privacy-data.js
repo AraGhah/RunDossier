@@ -272,13 +272,13 @@ function privacySectionsFr(v) {
       blocks: [
         {
           type: 'p',
-          text: 'Nous collectons des renseignements personnels en trois catégories : (1) Coordonnées que vous fournissez — nom, adresse e-mail professionnelle, entreprise, outil de séquence et texte du message — via notre formulaire, courriel (ara@getdossier.co) ou Cal.com ; conservées jusqu'à 12 mois après le dernier contact. (2) CSV de prospects que vous téléversez — lignes contenant noms, titres de poste, entreprises, URL LinkedIn et e-mails professionnels des prospects — utilisées uniquement pour exécuter votre commande et supprimées sous 90 jours après livraison. (3) Données techniques — adresse IP, type de navigateur, type d'appareil, région approximative et pages visitées — depuis les journaux serveur Cloudflare ; conservées jusqu'à 90 jours.',
+          text: "Nous collectons des renseignements personnels en trois catégories : (1) Coordonnées que vous fournissez — nom, adresse e-mail professionnelle, entreprise, outil de séquence et texte du message — via notre formulaire, courriel (ara@getdossier.co) ou Cal.com ; conservées jusqu’à 12 mois après le dernier contact. (2) CSV de prospects que vous téléversez — lignes contenant noms, titres de poste, entreprises, URL LinkedIn et e-mails professionnels des prospects — utilisées uniquement pour exécuter votre commande et supprimées sous 90 jours après livraison. (3) Données techniques — adresse IP, type de navigateur, type d’appareil, région approximative et pages visitées — depuis les journaux serveur Cloudflare ; conservées jusqu’à 90 jours.",
         },
         { type: 'h3', text: 'Renseignements que vous fournissez' },
         {
           type: 'ul',
           items: [
-            'Nom, adresse e-mail professionnelle, nom de l’entreprise et outil de séquence lorsque vous soumettez le formulaire pilote gratuit.',
+            "Nom, adresse e-mail professionnelle, nom de l’entreprise et outil de séquence lorsque vous soumettez le formulaire pilote gratuit.",
             'URL de profil LinkedIn ou URL de site web soumise avec une demande pilote.',
             'Nom, e-mail et détails de planification lorsque vous réservez un appel via Cal.com.',
             'Messages que vous nous envoyez par e-mail ou via nos canaux de contact.',
@@ -486,12 +486,12 @@ const PRIVACY_META = {
     faqTitle: 'Common privacy questions',
   },
   fr: {
-    eyebrow: ‘Juridique’,
-    lastUpdatedLabel: ‘Dernière mise à jour :’,
+    eyebrow: 'Juridique',
+    lastUpdatedLabel: 'Dernière mise à jour :',
     intro: (v) =>
       `La politique de confidentialité de ${v.entity} (dernière mise à jour : ${v.lastUpdated}) explique comment ${v.operator} — exploitant ${v.entity} depuis ${v.city}, Québec, Canada — collecte, utilise et protège les données personnelles sur ${v.websiteHost} en vertu de la LPRPDE et de la Loi 25. Données collectées : (1) coordonnées soumises (nom, e-mail professionnel, entreprise) ; (2) CSV de prospects uploadés — supprimés sous 90 jours après livraison ; (3) données Cal.com (nom, e-mail, créneau) ; (4) analytiques de base (adresse IP, type de navigateur). ${v.entity} ne vend pas de renseignements personnels. Demandes vie privée : ${v.email} ; réponse sous 30 jours.`,
-    faqEyebrow: ‘FAQ confidentialité’,
-    faqTitle: ‘Questions fréquentes sur la confidentialité’,
+    faqEyebrow: 'FAQ confidentialité',
+    faqTitle: 'Questions fréquentes sur la confidentialité',
   },
 }
 
