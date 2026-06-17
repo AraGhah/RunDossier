@@ -38,7 +38,7 @@ const FACTS_EN = [
   },
   {
     term: 'Business hours',
-    detail: 'Monday to Friday, 9:00 AM to 5:00 PM Eastern Time. Email replies typically within one business day.',
+    detail: 'every day, 10:00 to 19:00 Eastern Time. Email replies typically within one business day.',
   },
   {
     term: 'Operator',

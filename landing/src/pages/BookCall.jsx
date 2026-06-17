@@ -74,7 +74,7 @@ export default function BookCall() {
               <p className="text-muted text-lg leading-relaxed mb-4">
                 {isFr
                   ? `Appel gratuit de 30 minutes avec ${CAL_HOST_NAME} (fondateur, Dossier, ${LEGAL_CITY}, Québec, Canada) via Zoom ou Microsoft Teams — réservez sur cal.com/preframe. On confirme votre ICP, on montre un exemple d'accroche QA-scorée depuis votre niche, et on décide si le pilote gratuit 100 prospects (CSV sous 24–48 h, $0) a du sens.`
-                  : `Free 30-minute call with ${CAL_HOST_NAME} (Founder, Dossier, ${LEGAL_CITY}, Quebec, Canada) via Zoom or Microsoft Teams — book at cal.com/preframe. We review your ICP, show a live QA-scored opener from your niche, and confirm whether the free 100-prospect pilot (3 variants each, CSV in 24–48 h, $0) fits your campaign.`}
+                  : `Free 30 minute call with ${CAL_HOST_NAME} (Founder, Dossier, ${LEGAL_CITY}, Quebec, Canada) via Zoom or Microsoft Teams, book at cal.com/preframe. We review your ICP, show a live QA-scored opener from your niche, and confirm whether the free 100 prospect pilot (3 variants each, CSV in 24 to 48 h, $0) fits your campaign.`}
               </p>
               <p className="text-muted text-sm leading-relaxed mb-8">
                 {isFr

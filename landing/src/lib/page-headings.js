@@ -7,7 +7,7 @@ export const PAGE_TITLES = {
   '/pricing': 'Dossier Pricing, Start free, scale when it works',
   '/about': 'About Dossier, Research-backed outbound openers',
   '/free-lines': 'Dossier, 100 Free Personalized Openers',
-  '/book-call': 'Book a Call with Dossier, 30-Minute Fit Assessment',
+  '/book-call': 'Book a Call with Dossier, 30 Minute Fit Assessment',
   '/service': 'Dossier Service, Personalized outbound openers',
   '/contact': 'Contact Dossier, Email, phone, and scheduling',
   '/privacy': pageTitle('Privacy Policy'),

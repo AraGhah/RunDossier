@@ -72,7 +72,7 @@ export const translations = {
     // CONTACT BLOCK
     'contact.location': 'Dossier · Montreal, Quebec · Province of Quebec, Canada · rundossier.co',
     'contact.hoursLabel': 'Hours:',
-    'contact.hoursValue': 'Monday to Friday, 9:00 AM to 5:00 PM Eastern Time',
+    'contact.hoursValue': 'every day, 10:00 to 19:00 Eastern Time',
     'contact.emailLabel': 'Email:',
     'contact.phoneLabel': 'Phone:',
 
@@ -81,7 +81,7 @@ export const translations = {
     'page.pricing.h1': 'Dossier Pricing, Start free, scale when it works',
     'page.about.h1': 'About Dossier, Research-backed outbound openers',
     'page.freeLines.h1': 'Dossier, 100 Free Personalized Openers',
-    'page.bookCall.h1': 'Book a Call with Dossier, 30-Minute Fit Assessment',
+    'page.bookCall.h1': 'Book a Call with Dossier, 30 Minute Fit Assessment',
     'page.service.h1': 'Dossier Service, Personalized outbound openers',
     'page.contact.h1': 'Contact Dossier, Email, phone, and scheduling',
     'page.privacy.h1': 'Dossier, Privacy Policy',
