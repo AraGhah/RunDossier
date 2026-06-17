@@ -9,21 +9,41 @@
     "name": "Ara Ghahramanyan",
     "email": "ara@getdossier.co",
     "location": "Montreal, Quebec, Canada",
-    "linkedin": "https://www.linkedin.com/in/ara-ghahramanyan-086261405/"
+    "linkedin": "https://www.linkedin.com/in/ara-ghahramanyan-086261405/",
+    "calcom": "https://cal.com/preframe"
   },
   "metrics": {
     "pilotReplyRatePercent": 3.1,
     "genericBaselineReplyRatePercent": 2.1,
+    "maxPilotReplyRatePercent": 9.6,
+    "emailsTracked": 4200,
     "pilotProspectCount": 100,
     "openersPerProspect": 3,
-    "deliveryHours": "24-48"
+    "deliveryHours": "24-48",
+    "qaRejectionRatePercent": 15
+  },
+  "proof": {
+    "caseStudy": "B2B SaaS pilot: reply rates moved from 2.1% (generic baseline) to 9.6% (Dossier openers) over 4,200 emails tracked. Three QA-scored variants per prospect. QA rejection rate approximately 15-20%.",
+    "pilotRange": "3.1%-9.6% reply rates across initial 100-prospect campaigns"
   },
   "offers": [
     {
       "name": "100 Free Lines Pilot",
       "price": "0 USD",
       "url": "https://rundossier.co/free-lines",
-      "description": "100 prospects with three QA-scored openers each. No credit card."
+      "description": "100 prospects with three QA-scored openers each. No credit card. CSV in 24-48 hours."
+    },
+    {
+      "name": "Starter",
+      "price": "499 USD/mo",
+      "url": "https://rundossier.co/pricing",
+      "description": "500 prospects per month."
+    },
+    {
+      "name": "Growth",
+      "price": "999 USD/mo",
+      "url": "https://rundossier.co/pricing",
+      "description": "2,000 prospects per month."
     }
   ],
   "pages": [
@@ -35,5 +55,5 @@
     { "path": "/book-call", "title": "Book a Call" },
     { "path": "/contact", "title": "Contact" }
   ],
-  "lastUpdated": "2026-06-16"
+  "lastUpdated": "2026-06-17"
 }

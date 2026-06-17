@@ -59,7 +59,7 @@ export default function Footer() {
             <div className="mt-5">
               <ContactBlock />
             </div>
-            <div className="mt-5">
+            <div className="mt-5 flex flex-wrap gap-4">
               <a
                 href="https://www.linkedin.com/in/ara-ghahramanyan-086261405/"
                 target="_blank"
@@ -67,6 +67,17 @@ export default function Footer() {
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-navy underline underline-offset-[3px] decoration-navy/40 hover:decoration-navy transition-colors"
               >
                 {t('footer.linkedin')}
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                  <path d="M2 8L8 2M8 2H4M8 2V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </a>
+              <a
+                href="https://cal.com/preframe"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-navy underline underline-offset-[3px] decoration-navy/40 hover:decoration-navy transition-colors"
+              >
+                {t('footer.cal')}
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
                   <path d="M2 8L8 2M8 2H4M8 2V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>

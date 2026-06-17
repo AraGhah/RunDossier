@@ -32,7 +32,10 @@ function privacySectionsEn(v) {
     {
       title: '2. What personal information we collect',
       blocks: [
-        { type: 'p', text: 'We collect only what we need to operate our service. Categories include:' },
+        {
+          type: 'p',
+          text: 'We collect personal information in three categories: (1) Contact data you provide — name, work email address, company name, sequencer platform, and message text — via our intake form, email (ara@getdossier.co), or Cal.com booking; retained up to 12 months after last contact. (2) Prospect CSV files you upload — rows containing prospect names, job titles, company names, LinkedIn profile URLs, and business email addresses — used only to fulfill your order and deleted within 90 days of delivery. (3) Technical data — IP address, browser type, device type, approximate region, and pages visited — from Cloudflare server logs; retained up to 90 days.',
+        },
         { type: 'h3', text: 'Information you provide' },
         {
           type: 'ul',
@@ -267,7 +270,10 @@ function privacySectionsFr(v) {
     {
       title: '2. Quels renseignements personnels nous collectons',
       blocks: [
-        { type: 'p', text: 'Nous ne collectons que ce qui est nécessaire pour exploiter notre service. Les catégories comprennent :' },
+        {
+          type: 'p',
+          text: 'Nous collectons des renseignements personnels en trois catégories : (1) Coordonnées que vous fournissez — nom, adresse e-mail professionnelle, entreprise, outil de séquence et texte du message — via notre formulaire, courriel (ara@getdossier.co) ou Cal.com ; conservées jusqu'à 12 mois après le dernier contact. (2) CSV de prospects que vous téléversez — lignes contenant noms, titres de poste, entreprises, URL LinkedIn et e-mails professionnels des prospects — utilisées uniquement pour exécuter votre commande et supprimées sous 90 jours après livraison. (3) Données techniques — adresse IP, type de navigateur, type d'appareil, région approximative et pages visitées — depuis les journaux serveur Cloudflare ; conservées jusqu'à 90 jours.',
+        },
         { type: 'h3', text: 'Renseignements que vous fournissez' },
         {
           type: 'ul',
@@ -475,17 +481,17 @@ const PRIVACY_META = {
     eyebrow: 'Legal',
     lastUpdatedLabel: 'Last updated:',
     intro: (v) =>
-      `This Privacy Policy explains how ${v.entity}, operated by ${v.operator} from ${v.city}, Quebec, collects and uses information when you use rundossier.co or our personalized outbound opener service. It applies to website visitors, pilot participants, and paying clients.`,
+      `${v.entity}'s Privacy Policy (last updated ${v.lastUpdated}) explains how ${v.operator} — operating ${v.entity} from ${v.city}, Quebec, Canada — collects, uses, and protects personal data at ${v.websiteHost} under PIPEDA and Quebec Law 25. Data collected: (1) contact details you submit (name, work email, company name); (2) prospect CSV files you upload — deleted within 90 days of delivery; (3) Cal.com scheduling data (name, email, time slot); (4) basic web analytics (IP address, browser type). ${v.entity} does not sell personal information. Privacy requests: ${v.email}; 30-day response window.`,
     faqEyebrow: 'Privacy FAQ',
     faqTitle: 'Common privacy questions',
   },
   fr: {
-    eyebrow: 'Juridique',
-    lastUpdatedLabel: 'Dernière mise à jour :',
+    eyebrow: ‘Juridique’,
+    lastUpdatedLabel: ‘Dernière mise à jour :’,
     intro: (v) =>
-      `La présente politique de confidentialité explique comment ${v.entity}, exploité par ${v.operator} depuis ${v.city}, Québec, collecte et utilise les informations lorsque vous utilisez rundossier.co ou notre service d’accroches outbound personnalisées. Elle s’applique aux visiteurs du site, aux participants pilote et aux clients payants.`,
-    faqEyebrow: 'FAQ confidentialité',
-    faqTitle: 'Questions fréquentes sur la confidentialité',
+      `La politique de confidentialité de ${v.entity} (dernière mise à jour : ${v.lastUpdated}) explique comment ${v.operator} — exploitant ${v.entity} depuis ${v.city}, Québec, Canada — collecte, utilise et protège les données personnelles sur ${v.websiteHost} en vertu de la LPRPDE et de la Loi 25. Données collectées : (1) coordonnées soumises (nom, e-mail professionnel, entreprise) ; (2) CSV de prospects uploadés — supprimés sous 90 jours après livraison ; (3) données Cal.com (nom, e-mail, créneau) ; (4) analytiques de base (adresse IP, type de navigateur). ${v.entity} ne vend pas de renseignements personnels. Demandes vie privée : ${v.email} ; réponse sous 30 jours.`,
+    faqEyebrow: ‘FAQ confidentialité’,
+    faqTitle: ‘Questions fréquentes sur la confidentialité’,
   },
 }
 

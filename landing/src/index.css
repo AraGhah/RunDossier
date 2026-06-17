@@ -9,6 +9,24 @@
   h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; }
 }
 
+/* No-JS crawl shell: plain layout for auditors and crawlers without JavaScript */
+.crawl-fallback {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: #1a2332;
+  line-height: 1.6;
+}
+.crawl-fallback h1 { font-size: 1.75rem; margin: 0.75rem 0; }
+.crawl-fallback h2 { font-size: 1.35rem; margin: 2rem 0 0.75rem; }
+.crawl-fallback h3 { font-size: 1.05rem; margin: 0.5rem 0 0.25rem; }
+.crawl-fallback p,
+.crawl-fallback li { font-size: 0.95rem; margin: 0.5rem 0; }
+.crawl-fallback ol { padding-left: 1.25rem; }
+.crawl-fallback ul { padding-left: 1.25rem; }
+.crawl-fallback a { color: #0d1b2e; }
+
 @layer utilities {
   .text-balance { text-wrap: balance; }
   .grain-overlay {

@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const PLACEHOLDER_FRAGMENTS = [
   'YOUR_PASSWORD', 'YOUR_PROJECT', 'YOUR_', 'PLACEHOLDER',
@@ -67,8 +69,12 @@ export const config = {
   intakeBatchSize: 50,
   notifyMaxLength: 4000,
 
-  /** W5 delivery */
-  deliveryDir: optionalEnv('DELIVERY_DIR') || 'data/deliveries',
+  /** W5 delivery — writable in Docker (non-root); override with DELIVERY_DIR */
+  deliveryDir:
+    optionalEnv('DELIVERY_DIR') ||
+    (process.env.NODE_ENV === 'production'
+      ? join(tmpdir(), 'dossier-deliveries')
+      : 'data/deliveries'),
   resendApiKey: optionalEnv('RESEND_API_KEY'),
   deliveryFromEmail: optionalEnv('DELIVERY_FROM_EMAIL') || 'deliveries@getdossier.co',
 

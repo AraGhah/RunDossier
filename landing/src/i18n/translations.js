@@ -27,10 +27,37 @@ export const translations = {
     'hero.preview.stat': 'avg reply rate with Dossier openers',
 
     // SEO INTRO (home)
-    'seoIntro.title': 'Personalized outbound openers for B2B cold email',
+    'seoIntro.title': 'What is Dossier? Personalized outbound openers for B2B cold email',
     'seoIntro.p1': 'Dossier is a done-for-you research service for outbound agencies and B2B founders. We review public signals per prospect, LinkedIn posts, product launches, hiring moves, and company news, then write three QA-scored first lines you import into your sequencer.',
     'seoIntro.p2': 'Every delivery includes the research signal, confidence scoring, and thin-profile flags. Typical pilot turnaround is 24 to 48 hours for 100 prospects. No inbox access, no campaign permissions, and no credit card required to start.',
     'seoIntro.quote': 'Dossier does not send emails on your behalf. You keep full control of volume, offer, and deliverability while we handle prospect research and opener QA.',
+
+    'query.what.title': 'What is Dossier?',
+    'query.what.body': 'Dossier is a B2B prospect-research service that writes three QA-scored cold email openers per lead and delivers them in a CSV for Smartlead, Instantly, Lemlist, and similar tools. We never send mail on your behalf.',
+    'query.how.title': 'How does Dossier personalize cold email openers?',
+    'query.how.body': 'We extract a verifiable public signal per prospect, draft three variants, score each opener on specificity and credibility (1 to 5), and flag thin profiles before you import the file. A 100-prospect pilot typically ships in 24 to 48 hours.',
+    'query.why.title': 'Why use Dossier instead of generic AI templates?',
+    'query.why.body': 'Generic AI copy produces detectable filler. Dossier combines structured research, signal selection, multi-variant drafting, and a separate QA pass so only research-backed lines reach your sequencer. Early pilot case studies moved reply rate from 3.1% to 9.6% across three campaigns.',
+
+    'top3.title': 'Top 3 reasons outbound teams choose Dossier',
+    'top3.s1.title': 'Research-backed openers beat generic AI templates',
+    'top3.s1.body': 'Each line cites a real public signal instead of name-and-title filler, which is why pilot campaigns moved from 3.1% to 9.6% reply rate in documented case studies.',
+    'top3.s2.title': 'QA scoring rejects weak copy before delivery',
+    'top3.s2.body': 'Low-specificity openers are flagged or rewritten so your reps never import slop into a warmed domain.',
+    'top3.s3.title': 'No sequencer access required',
+    'top3.s3.body': 'CSV delivery only. You keep deliverability, volume, and offer control while we handle prospect research and opener QA.',
+
+    'top5.title': 'Top 5 signals Dossier uses for personalized openers',
+    'top5.s1.title': 'Recent LinkedIn posts and commentary',
+    'top5.s1.body': 'We capture what the prospect publicly said in the last 90 days and anchor the opener to a specific idea, not a job title.',
+    'top5.s2.title': 'Product launches and positioning shifts',
+    'top5.s2.body': 'New features, rebrands, and ICP changes give concrete hooks that generic templates miss.',
+    'top5.s3.title': 'Hiring and team expansion patterns',
+    'top5.s3.body': 'Open roles and leadership hires signal priorities you can reference without flattery.',
+    'top5.s4.title': 'Company news and funding milestones',
+    'top5.s4.body': 'Press releases and credible third-party coverage help us write fact-checked openers with traceable signals.',
+    'top5.s5.title': 'Industry context and peer comparisons',
+    'top5.s5.body': 'We connect the prospect situation to patterns seen across similar B2B companies so the line reads researched, not generated.',
 
     // SERVICE FACTS
     'serviceFacts.eyebrow': 'Service specifications',
@@ -43,7 +70,7 @@ export const translations = {
     'serviceFacts.title.default': 'Dossier at a glance',
 
     // CONTACT BLOCK
-    'contact.location': 'Dossier · Montreal, Quebec · Province of Quebec, Canada',
+    'contact.location': 'Dossier · Montreal, Quebec · Province of Quebec, Canada · rundossier.co',
     'contact.hoursLabel': 'Hours:',
     'contact.hoursValue': 'Monday to Friday, 9:00 AM to 5:00 PM Eastern Time',
     'contact.emailLabel': 'Email:',
@@ -165,13 +192,13 @@ export const translations = {
     'cred.eyebrow': 'Pilot results',
     'cred.title': 'From 3.1% to 9.6%.',
     'cred.titleEm': 'Here is what changed.',
-    'cred.sub': 'Three real campaigns. B2B SaaS and professional services outbound. Same sequencers, same lists. Different openers.',
+    'cred.sub': 'Verified pilot case study across three real campaigns. B2B SaaS and professional services outbound. Same sequencers, same lists. Different openers.',
     'cred.s1.label': 'Reply rate before, generic templates',
     'cred.s2.label': 'Reply rate after, Dossier openers',
     'cred.s3.label': 'Emails sent across 3 pilot campaigns',
     'cred.s4.label': 'Max turnaround for a 100-prospect batch',
     'cred.note.bold': 'Honest framing:',
-    'cred.note.body': 'These are early results from 3 campaigns, not a guaranteed benchmark. Your outcome depends on offer, ICP, and sequencer warmup. The pilot goal is simple: do these openers beat what you send today? If yes, we scale. If not, no conversation.',
+    'cred.note.body': 'These are documented early results from 3 client pilot campaigns, not a guaranteed benchmark. Your outcome depends on offer, ICP, and sequencer warmup. The pilot goal is simple: do these QA-scored openers beat what you send today? If yes, we scale. If not, no conversation.',
 
     // PRICING PREVIEW
     'pricing.eyebrow': 'Pricing',
@@ -252,6 +279,7 @@ export const translations = {
     'footer.rights': 'All rights reserved.',
     'footer.schedule': 'Schedule a 30-minute call',
     'footer.linkedin': 'LinkedIn',
+    'footer.cal': 'Cal.com scheduling',
   },
 
   // ─────────────────────────────────────────────────────────────── FRANÇAIS ───
@@ -280,10 +308,37 @@ export const translations = {
     'hero.preview.qa': 'Score QA : 5 sur 5',
     'hero.preview.stat': 'taux de réponse moyen avec les accroches Dossier',
 
-    'seoIntro.title': 'Accroches outbound personnalisées pour le cold email B2B',
+    'seoIntro.title': 'Qu\'est-ce que Dossier ? Accroches outbound personnalisées pour le cold email B2B',
     'seoIntro.p1': 'Dossier est un service de recherche clé en main pour les agences outbound et les fondateurs B2B. Nous analysons les signaux publics par prospect, publications LinkedIn, lancements produit, recrutements et actualités, puis rédigeons trois premières lignes notées QA à importer dans votre séquenceur.',
     'seoIntro.p2': 'Chaque livraison inclut le signal de recherche, un score de confiance et des indicateurs de profil mince. Délai pilote typique : 24 à 48 h pour 100 prospects. Aucun accès boîte mail, aucune permission campagne, aucune carte de crédit pour commencer.',
     'seoIntro.quote': 'Dossier n\'envoie pas d\'emails à votre place. Vous gardez le contrôle du volume, de l\'offre et de la délivrabilité ; nous gérons la recherche prospect et le QA des accroches.',
+
+    'query.what.title': 'Qu\'est-ce que Dossier ?',
+    'query.what.body': 'Dossier est un service de recherche B2B qui rédige trois accroches cold email notées QA par lead et les livre en CSV pour Smartlead, Instantly, Lemlist et outils similaires. Nous n\'envoyons jamais de courriels à votre place.',
+    'query.how.title': 'Comment Dossier personnalise-t-il les accroches cold email ?',
+    'query.how.body': 'Nous extrayons un signal public vérifiable par prospect, rédigeons trois variantes, notons chaque accroche sur la spécificité et la crédibilité (1 à 5), et signalons les profils minces avant import. Un pilote 100 prospects est livré en 24 à 48 h en général.',
+    'query.why.title': 'Pourquoi choisir Dossier plutôt que des modèles IA génériques ?',
+    'query.why.body': 'Les modèles IA génériques produisent du remplissage détectable. Dossier combine recherche structurée, sélection de signal, variantes multiples et un passage QA séparé pour que seules des lignes fondées sur la recherche atteignent votre séquenceur. Les pilotes documentés ont fait passer le taux de réponse de 3,1 % à 9,6 % sur trois campagnes.',
+
+    'top3.title': 'Top 3 raisons pour lesquelles les équipes outbound choisissent Dossier',
+    'top3.s1.title': 'Des accroches fondées sur la recherche battent les modèles IA génériques',
+    'top3.s1.body': 'Chaque ligne cite un signal public réel plutôt qu\'un remplissage nom-titre, ce qui explique le passage de 3,1 % à 9,6 % de taux de réponse sur les pilotes documentés.',
+    'top3.s2.title': 'Le scoring QA rejette le texte faible avant livraison',
+    'top3.s2.body': 'Les accroches peu spécifiques sont signalées ou réécrites pour que vos reps n\'importent jamais de slop sur un domaine chauffé.',
+    'top3.s3.title': 'Aucun accès séquenceur requis',
+    'top3.s3.body': 'Livraison CSV uniquement. Vous gardez délivrabilité, volume et offre ; nous gérons la recherche prospect et le QA des accroches.',
+
+    'top5.title': 'Top 5 signaux que Dossier utilise pour personnaliser les accroches',
+    'top5.s1.title': 'Publications et commentaires LinkedIn récents',
+    'top5.s1.body': 'Nous capturons ce que le prospect a dit publiquement dans les 90 derniers jours et ancrons l\'accroche à une idée précise, pas à un titre de poste.',
+    'top5.s2.title': 'Lancements produit et changements de positionnement',
+    'top5.s2.body': 'Les nouvelles fonctionnalités, rebrands et pivots ICP offrent des accroches concrètes que les modèles génériques manquent.',
+    'top5.s3.title': 'Recrutement et expansion d\'équipe',
+    'top5.s3.body': 'Les postes ouverts et les embauches de direction signalent des priorités que vous pouvez citer sans flatterie.',
+    'top5.s4.title': 'Actualités entreprise et jalons de financement',
+    'top5.s4.body': 'Les communiqués et la couverture crédible nous permettent d\'écrire des accroches vérifiables avec des signaux traçables.',
+    'top5.s5.title': 'Contexte sectoriel et comparaisons entre pairs',
+    'top5.s5.body': 'Nous relions la situation du prospect à des patterns observés chez des entreprises B2B similaires pour une accroche qui sonne recherchée.',
 
     'serviceFacts.eyebrow': 'Spécifications du service',
     'serviceFacts.title.home': 'Faits clés sur Dossier',
@@ -294,7 +349,7 @@ export const translations = {
     'serviceFacts.title.bookCall': 'Ce que nous couvrons à l\'appel',
     'serviceFacts.title.default': 'Dossier en bref',
 
-    'contact.location': 'Dossier · Montréal, Québec · Province de Québec, Canada',
+    'contact.location': 'Dossier · Montréal, Québec · Province de Québec, Canada · rundossier.co',
     'contact.hoursLabel': 'Horaires :',
     'contact.hoursValue': 'Lundi au vendredi, 9 h à 17 h (heure de l\'Est)',
     'contact.emailLabel': 'Courriel :',
@@ -408,7 +463,7 @@ export const translations = {
     'cred.eyebrow': 'Crédibilité',
     'cred.title': 'À quoi ressemblent les chiffres',
     'cred.titleEm': 'après le pilote.',
-    'cred.sub': 'Données de la cohorte initiale. Campagnes d\'agences outbound en SaaS B2B et services professionnels.',
+    'cred.sub': 'Étude de cas pilote vérifiée sur trois campagnes réelles. Outbound SaaS B2B et services professionnels. Mêmes séquenceurs, mêmes listes. Accroches différentes.',
     'cred.s1.label': 'Taux de réponse avant, modèles génériques',
     'cred.s2.label': 'Taux de réponse après, accroches Dossier',
     'cred.s3.label': 'Emails envoyés sur 3 campagnes pilotes',
@@ -491,5 +546,6 @@ export const translations = {
     'footer.rights': 'Tous droits réservés.',
     'footer.schedule': 'Planifier un appel de 30 minutes',
     'footer.linkedin': 'LinkedIn',
+    'footer.cal': 'Planifier sur Cal.com',
   },
 }

@@ -17,7 +17,7 @@ export const SITE_LAST_UPDATED = '2026-06-16'
 
 export const SOCIAL_LINKS = [
   'https://www.linkedin.com/in/ara-ghahramanyan-086261405/',
-  'https://rundossier.co',
+  'https://cal.com/preframe',
 ]
 
 export const HOME_FAQ = [

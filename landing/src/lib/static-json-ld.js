@@ -12,11 +12,11 @@ import {
   buildWebPageSchema,
 } from './seo'
 
-export function buildGlobalStaticGraph() {
+export function buildGlobalStaticGraph({ phone = '' } = {}) {
   const graph = [
-    buildOrganizationSchema(),
+    buildOrganizationSchema({ phone }),
     buildWebSiteSchema(),
-    buildLocalBusinessSchema(),
+    buildLocalBusinessSchema({ phone }),
     buildServiceSchema(),
     buildWebPageSchema({
       path: '/',

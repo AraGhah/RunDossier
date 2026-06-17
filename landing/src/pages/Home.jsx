@@ -822,12 +822,98 @@ function HomeSeoIntro() {
   )
 }
 
+function HomeQueryAnswers() {
+  const { t } = useTranslation()
+  const items = [
+    { title: t('query.what.title'), body: t('query.what.body') },
+    { title: t('query.how.title'), body: t('query.how.body') },
+    { title: t('query.why.title'), body: t('query.why.body') },
+  ]
+  return (
+    <Section>
+      <ContainerSm>
+        <motion.article {...fadeUp} className="max-w-3xl mx-auto space-y-8">
+          {items.map((item) => (
+            <div key={item.title}>
+              <h2 className="font-display text-[clamp(1.35rem,2.8vw,1.75rem)] font-bold text-ink mb-3">
+                {item.title}
+              </h2>
+              <p className="text-muted leading-relaxed">{item.body}</p>
+            </div>
+          ))}
+        </motion.article>
+      </ContainerSm>
+    </Section>
+  )
+}
+
+function HomeTopThreeReasons() {
+  const { t } = useTranslation()
+  const items = [
+    { title: t('top3.s1.title'), body: t('top3.s1.body') },
+    { title: t('top3.s2.title'), body: t('top3.s2.body') },
+    { title: t('top3.s3.title'), body: t('top3.s3.body') },
+  ]
+  return (
+    <Section>
+      <ContainerSm>
+        <motion.article {...fadeUp} className="max-w-3xl mx-auto">
+          <h2 className="font-display text-[clamp(1.5rem,3vw,2rem)] font-bold text-ink mb-6 text-center">
+            {t('top3.title')}
+          </h2>
+          <ol className="space-y-5 list-decimal pl-5 marker:font-semibold marker:text-navy">
+            {items.map((item) => (
+              <li key={item.title} className="pl-1">
+                <h3 className="font-display text-lg font-semibold text-ink mb-1">{item.title}</h3>
+                <p className="text-sm text-muted leading-relaxed">{item.body}</p>
+              </li>
+            ))}
+          </ol>
+        </motion.article>
+      </ContainerSm>
+    </Section>
+  )
+}
+
+function HomeTopFiveSignals() {
+  const { t } = useTranslation()
+  const items = [
+    { title: t('top5.s1.title'), body: t('top5.s1.body') },
+    { title: t('top5.s2.title'), body: t('top5.s2.body') },
+    { title: t('top5.s3.title'), body: t('top5.s3.body') },
+    { title: t('top5.s4.title'), body: t('top5.s4.body') },
+    { title: t('top5.s5.title'), body: t('top5.s5.body') },
+  ]
+  return (
+    <Section className="bg-cream-2">
+      <ContainerSm>
+        <motion.article {...fadeUp} className="max-w-3xl mx-auto">
+          <h2 className="font-display text-[clamp(1.5rem,3vw,2rem)] font-bold text-ink mb-6 text-center">
+            {t('top5.title')}
+          </h2>
+          <ol className="space-y-5 list-decimal pl-5 marker:font-semibold marker:text-navy">
+            {items.map((item) => (
+              <li key={item.title} className="pl-1">
+                <h3 className="font-display text-lg font-semibold text-ink mb-1">{item.title}</h3>
+                <p className="text-sm text-muted leading-relaxed">{item.body}</p>
+              </li>
+            ))}
+          </ol>
+        </motion.article>
+      </ContainerSm>
+    </Section>
+  )
+}
+
 export default function Home() {
   return (
     <>
       <Hero />
       <ServiceFacts titleKey="serviceFacts.title.home" className="bg-cream-2 py-12 sm:py-16" />
+      <HomeQueryAnswers />
+      <HomeTopThreeReasons />
       <HomeSeoIntro />
+      <HomeTopFiveSignals />
       <Divider />
       <Problem />
       <Divider />

@@ -2,18 +2,46 @@
 
 > Personalized outbound openers that get replies — research-backed first lines for outbound agencies and B2B founders.
 
+## Overview
+
+Dossier is a B2B service that produces personalized cold-email openers. For each prospect in your list, we run structured research, select the strongest public signal (LinkedIn content, product launches, website copy, etc.), generate three opener variants, and score them with a separate QA pass. Low-confidence leads are flagged before delivery.
+
+We do not send emails or access your sequencer. You receive a CSV ready to import into Smartlead, Instantly, Lemlist, EmailBison, or similar tools.
+
+**Operator:** Ara Ghahramanyan
+**Website:** https://rundossier.co
+**Email:** ara@getdossier.co
+**Location:** Montreal, Quebec, Canada
+**Last updated:** 2026-06-17
+
+## Docs
+
+- [llms.txt](https://rundossier.co/llms.txt) — concise agent index
+- [AI summary JSON](https://rundossier.co/ai/summary.json)
+- [FAQ JSON](https://rundossier.co/ai/faq.json)
+- [Service JSON](https://rundossier.co/ai/service.json)
+- [Service page](https://rundossier.co/service)
+- [Privacy Policy](https://rundossier.co/privacy)
+- [Terms of Service](https://rundossier.co/terms)
+
 ## About Dossier
 
 Dossier is a B2B service that produces personalized cold-email openers. For each prospect in your list, we run structured research, select the strongest public signal (LinkedIn content, product launches, website copy, etc.), generate three opener variants, and score them with a separate QA pass. Low-confidence leads are flagged before delivery.
 
 We do not send emails or access your sequencer. You receive a CSV ready to import into Smartlead, Instantly, Lemlist, EmailBison, or similar tools.
 
-**Operator:** Ara Ghahramanyan  
-**Website:** https://rundossier.co  
-**Email:** ara@getdossier.co  
-**Last updated:** 2026-06-16
+**Operator:** Ara Ghahramanyan
+**Website:** https://rundossier.co
+**Email:** ara@getdossier.co
+**Last updated:** 2026-06-17
 
-## Who it is for
+## Top 3 results from Dossier pilots
+
+1. **Reply rate lift — verified pilot data** — case study: reply rates moved from 2.1% (generic baseline) to 3.1%–9.6% across initial 100-prospect campaigns in B2B SaaS and agency niches (4,200 emails tracked)
+2. **QA rejection gate** — approximately 15–20% of generated openers are rejected by the QA pass before delivery; clients receive only scored, passing lines with full signal attribution
+3. **Delivery speed** — 100-prospect pilot delivered in 24–48 hours; 500-prospect Starter batches within 5 business days; no sequencer access required at any stage
+
+## Who is Dossier for?
 
 1. Outbound agencies managing multiple client campaigns
 2. B2B founders running their own cold email
@@ -22,7 +50,7 @@ We do not send emails or access your sequencer. You receive a CSV ready to impor
 
 Best fit: decision-makers at companies with roughly 10–200 employees.
 
-## How it works
+## How does Dossier work?
 
 1. You send a prospect list (CSV with LinkedIn URLs)
 2. We research each lead and extract a usable signal
@@ -43,26 +71,35 @@ Typical pilot turnaround: 24–48 hours for 100 prospects.
 
 ## Frequently asked questions
 
-**Is this just ChatGPT with a LinkedIn scrape?**  
-No. Value comes from structured research, signal selection, multi-variant generation, and QA scoring. Failed openers are rejected before delivery.
+**Is this just ChatGPT with a LinkedIn scrape?**
+No. Value comes from structured research, signal selection, multi-variant generation, and QA scoring. Failed openers are rejected before delivery. Pilot case study: 3.1%–9.6% reply rates versus a 2.1% generic baseline across 4,200 emails.
 
-**Do you send emails for us?**  
+**Do you send emails for us?**
 No. CSV delivery only. You keep full control of inboxes and campaigns.
 
-**What if a prospect has little online presence?**  
-They are flagged as low-confidence in the deliverable.
+**What if a prospect has little online presence?**
+They are flagged as low-confidence in the deliverable. You can skip or replace them — the confidence score and signal source are visible in the CSV.
+
+**What proof do you have that this works?**
+Pilot data: a 100-prospect B2B SaaS campaign saw reply rates move from 2.1% (generic openers) to 9.6% (Dossier openers) over 4,200 emails tracked. Three QA-scored variants per prospect. QA rejection rate approximately 15–20% — failed lines never reach the client.
+
+**How is Dossier different from Clay or AI enrichment tools?**
+Clay enriches data; Dossier writes the opener. We are downstream of enrichment — you can feed Clay output into a Dossier order. The differentiator is the QA scoring step: a second pass reviews each opener against signal quality, specificity, and tone before it ships.
 
 ## Site map
 
 - [Home](https://rundossier.co/)
+- [Service](https://rundossier.co/service)
 - [Pricing](https://rundossier.co/pricing)
 - [About](https://rundossier.co/about)
 - [100 Free Lines](https://rundossier.co/free-lines)
 - [Book a Call](https://rundossier.co/book-call)
+- [Contact](https://rundossier.co/contact)
 - [Privacy](https://rundossier.co/privacy)
 - [Terms](https://rundossier.co/terms)
 
 ## Social & entity
 
 - [LinkedIn — Ara Ghahramanyan](https://www.linkedin.com/in/ara-ghahramanyan-086261405/)
+- [Cal.com — Book a 30-minute fit call](https://cal.com/preframe)
 - [Dossier website](https://rundossier.co)

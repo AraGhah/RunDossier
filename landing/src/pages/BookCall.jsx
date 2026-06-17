@@ -6,8 +6,8 @@ import ContactBlock from '../components/ContactBlock'
 import ServiceFacts from '../components/ServiceFacts'
 import PageH1 from '../components/PageH1'
 import { getPageH1 } from '../lib/page-headings'
-import { LEGAL_CITY } from '../lib/legal'
-import { calBookingUrl, CAL_MEETING_DURATION_LABEL } from '../lib/cal'
+import { LEGAL_CITY, LEGAL_EMAIL, LEGAL_BUSINESS_HOURS } from '../lib/legal'
+import { calBookingUrl, CAL_MEETING_DURATION_LABEL, CAL_HOST_NAME } from '../lib/cal'
 import { Section, Container, ContainerSm, Eyebrow, BtnPrimary, Card, Divider, fadeUp, staggerContainer, staggerItem } from '../components/ui'
 import { useTranslation } from '../context/LanguageContext'
 
@@ -73,13 +73,13 @@ export default function BookCall() {
               <PageH1 className="mb-5">{h1}</PageH1>
               <p className="text-muted text-lg leading-relaxed mb-4">
                 {isFr
-                  ? 'On confirme votre ICP, on montre un exemple live de votre niche, puis on décide du pilote. Pas de deck. Pas de pression. Juste une conversation utile.'
-                  : 'We confirm your ICP, show you a live example from your niche, and agree on a pilot plan. No pitch deck. No pressure. Just a direct conversation about whether this works for your campaign.'}
+                  ? `Appel gratuit de 30 minutes avec ${CAL_HOST_NAME} (fondateur, Dossier, ${LEGAL_CITY}, Québec, Canada) via Zoom ou Microsoft Teams — réservez sur cal.com/preframe. On confirme votre ICP, on montre un exemple d'accroche QA-scorée depuis votre niche, et on décide si le pilote gratuit 100 prospects (CSV sous 24–48 h, $0) a du sens.`
+                  : `Free 30-minute call with ${CAL_HOST_NAME} (Founder, Dossier, ${LEGAL_CITY}, Quebec, Canada) via Zoom or Microsoft Teams — book at cal.com/preframe. We review your ICP, show a live QA-scored opener from your niche, and confirm whether the free 100-prospect pilot (3 variants each, CSV in 24–48 h, $0) fits your campaign.`}
               </p>
               <p className="text-muted text-sm leading-relaxed mb-8">
                 {isFr
-                  ? `Dossier opère depuis ${LEGAL_CITY}, Canada, et sert des équipes outbound B2B partout. On passe en revue votre séquenceur, votre baseline, et si un pilote de 100 prospects est la bonne étape.`
-                  : `Dossier is operated from ${LEGAL_CITY}, Canada, and serves B2B outbound agencies and founders worldwide. On this call we review your sequencer, reply-rate baseline, and whether a 100-prospect pilot is the right next step. You can also email us before booking if you prefer async intake.`}
+                  ? `Créneaux disponibles ${LEGAL_BUSINESS_HOURS}. Vous pouvez aussi écrire à ${LEGAL_EMAIL} si vous préférez une prise en charge async avant le call.`
+                  : `Available ${LEGAL_BUSINESS_HOURS}. You can also email ${LEGAL_EMAIL} if you prefer async intake before booking.`}
               </p>
               <div className="flex flex-col gap-3 text-sm">
                 {(isFr

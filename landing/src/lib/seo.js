@@ -21,22 +21,40 @@ export function absoluteUrl(path = '/') {
   return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`
 }
 
-export function buildOrganizationSchema() {
-  const tel = legalPhoneTel()
-  const contactPoint = {
-    '@type': 'ContactPoint',
-    contactType: 'customer support',
-    email: CONTACT.email,
-    areaServed: 'Worldwide',
-    availableLanguage: ['English', 'French'],
-    ...(tel ? { telephone: tel } : {}),
-    hoursAvailable: {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      opens: '09:00',
-      closes: '17:00',
+export function resolveTelephone(phoneOverride = '') {
+  const raw = (phoneOverride || '').trim() || legalPhoneTel()
+  if (!raw) return ''
+  const digits = raw.replace(/[^\d+]/g, '')
+  return digits.startsWith('+') ? digits : `+${digits.replace(/^\+/, '')}`
+}
+
+export function buildOrganizationSchema({ phone = '' } = {}) {
+  const tel = resolveTelephone(phone)
+  const contactPoint = [
+    {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: CONTACT.email,
+      url: `${SITE_URL}/contact`,
+      areaServed: 'Worldwide',
+      availableLanguage: ['English', 'French'],
+      ...(tel ? { telephone: tel } : {}),
+      hoursAvailable: {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '09:00',
+        closes: '17:00',
+      },
     },
-  }
+    {
+      '@type': 'ContactPoint',
+      contactType: 'sales',
+      url: 'https://cal.com/preframe',
+      availableLanguage: ['English', 'French'],
+      areaServed: 'Worldwide',
+      description: 'Book a free 30-minute fit call with Ara Ghahramanyan (Dossier) via Zoom or Microsoft Teams.',
+    },
+  ]
 
   return {
     '@type': 'Organization',
@@ -69,8 +87,8 @@ export function buildOrganizationSchema() {
   }
 }
 
-export function buildLocalBusinessSchema() {
-  const tel = legalPhoneTel()
+export function buildLocalBusinessSchema({ phone = '' } = {}) {
+  const tel = resolveTelephone(phone)
   return {
     '@type': 'ProfessionalService',
     '@id': `${SITE_URL}/#localbusiness`,
@@ -92,13 +110,22 @@ export function buildLocalBusinessSchema() {
       { '@type': 'Place', name: 'Worldwide' },
     ],
     openingHours: LEGAL_BUSINESS_HOURS,
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'customer support',
-      email: LEGAL_EMAIL,
-      ...(tel ? { telephone: tel } : {}),
-      areaServed: 'Worldwide',
-    },
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        contactType: 'customer support',
+        email: LEGAL_EMAIL,
+        url: `${SITE_URL}/contact`,
+        ...(tel ? { telephone: tel } : {}),
+        areaServed: 'Worldwide',
+      },
+      {
+        '@type': 'ContactPoint',
+        contactType: 'sales',
+        url: 'https://cal.com/preframe',
+        areaServed: 'Worldwide',
+      },
+    ],
     parentOrganization: { '@id': `${SITE_URL}/#organization` },
   }
 }
