@@ -39,7 +39,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.104.1",
+    "@anthropic-ai/sdk": "^0.105.0",
     "apify-client": "^2.23.4",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
