@@ -192,7 +192,8 @@ export function buildServiceSchema() {
   return {
     '@type': 'Service',
     '@id': `${SITE_URL}/#service`,
-    name: `${SITE_NAME}, Personalized Outbound Openers`,
+    name: SITE_NAME,
+    alternateName: 'Personalized outbound openers for B2B cold email',
     description:
       'Done-for-you prospect research and QA-scored personalized first lines for cold email, delivered as a CSV for your sequencer.',
     provider: {
@@ -291,7 +292,25 @@ export function buildJsonLdGraph({
   }
 }
 
+/** Separate JSON-LD nodes for schema-stacking audits (one script tag per top-level entity). */
+export function buildJsonLdStack(options) {
+  return buildJsonLdGraph(options)['@graph']
+}
+
+export function stackedJsonLdScriptHtml(nodes, { indent = '    ' } = {}) {
+  return nodes
+    .map((node, i) => {
+      const payload = { '@context': 'https://schema.org', ...node }
+      const json = JSON.stringify(payload, null, 2)
+        .split('\n')
+        .map((line) => `${indent}${line}`)
+        .join('\n')
+      return `${indent}<script id="dossier-jsonld-${i}" type="application/ld+json">\n${json}\n${indent}</script>`
+    })
+    .join('\n')
+}
+
 export function pageTitle(suffix) {
-  if (!suffix) return `${SITE_NAME}, ${SITE_TAGLINE}`
+  if (!suffix) return `${SITE_NAME} | ${SITE_TAGLINE}`
   return `${suffix} | ${SITE_NAME}`
 }

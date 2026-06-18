@@ -7,7 +7,7 @@ import { getPageH1 } from '../lib/page-headings'
 import { useTranslation } from '../context/LanguageContext'
 
 export default function Pricing() {
-  const { lang } = useTranslation()
+  const { lang, t } = useTranslation()
   const isFr = lang === 'fr'
   const h1 = getPageH1('/pricing', lang)
   const [openFaq, setOpenFaq] = useState(null)
@@ -157,6 +157,7 @@ export default function Pricing() {
           <motion.div {...fadeUp} className="text-center max-w-2xl mx-auto">
             <Eyebrow>{isFr ? 'Tarifs' : 'Pricing'}</Eyebrow>
             <PageH1>{h1}</PageH1>
+            <p className="mt-3 text-gold font-medium text-lg">{t('page.pricing.sub')}</p>
             <p className="mt-5 text-muted text-lg leading-relaxed">
               {isFr
                 ? 'Chaque plan commence par un pilote gratuit de 100 prospects. Pas de carte. Pas d’engagement. On gagne votre confiance en battant votre baseline.'

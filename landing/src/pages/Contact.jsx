@@ -5,15 +5,17 @@ import {
   Section, ContainerSm, Eyebrow, BtnPrimary, BtnGhost, Card,
   fadeUp, staggerContainer, staggerItem,
 } from '../components/ui'
+import PublicProfiles from '../components/PublicProfiles'
 import PageH1 from '../components/PageH1'
 import ContactBlock from '../components/ContactBlock'
 import { getPageH1 } from '../lib/page-headings'
 import { useTranslation } from '../context/LanguageContext'
 import { getContactContent } from '../i18n/contact-data'
 import { LEGAL_EMAIL, LEGAL_JURISDICTION, LEGAL_PHONE, LEGAL_CITY, legalPhoneDisplay, legalPhoneTel } from '../lib/legal'
+import { LINKEDIN_URL } from '../lib/site-data'
 import { calBookingUrl } from '../lib/cal'
 
-const LINKEDIN_URL = 'https://www.linkedin.com/in/ara-ghahramanyan-086261405/'
+const LINKEDIN_PROFILE = LINKEDIN_URL
 
 export default function Contact() {
   const { lang } = useTranslation()
@@ -46,7 +48,7 @@ export default function Contact() {
       Icon: Linkedin,
       ...c.cards.linkedin,
       action: c.cards.linkedin.action,
-      href: LINKEDIN_URL,
+      href: LINKEDIN_PROFILE,
       external: true,
     },
   ]
@@ -93,6 +95,11 @@ export default function Contact() {
                 </Card>
               </motion.div>
             ))}
+          </motion.div>
+
+          <motion.div {...fadeUp} className="mt-10">
+            <h2 className="font-display text-xl font-bold text-ink mb-4">{c.publicProfilesTitle}</h2>
+            <PublicProfiles variant="cards" />
           </motion.div>
 
           <motion.div {...fadeUp} className="mt-10 rounded-xl border border-border bg-white/70 p-6">

@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import {
   Section, Container, ContainerSm, Eyebrow, BtnPrimary, BtnGhost,
-  Card, Divider, fadeUp, fadeUpBlur, staggerContainer, staggerItem,
+  Card, fadeUp, fadeUpBlur, staggerContainer, staggerItem,
   OpenerCard,
 } from '../components/ui'
 import { useTranslation } from '../context/LanguageContext'
@@ -77,11 +77,11 @@ function Hero() {
               {t('hero.eyebrow')}
             </p>
 
-            <PageH1 className="mb-4">{seoH1}</PageH1>
+            <PageH1 className="sr-only">{seoH1}</PageH1>
 
             <h2
               ref={hookRef}
-              className="font-display text-[clamp(1.6rem,3.2vw,2.4rem)] font-bold leading-[1.12] tracking-[-0.02em] text-ink mb-4"
+              className="font-display text-[clamp(2.2rem,4.5vw,3.6rem)] font-bold leading-[1.08] tracking-[-0.03em] text-ink mb-6"
             >
               {hookText}
             </h2>
@@ -110,14 +110,6 @@ function Hero() {
               {t('hero.disclaimer')}
             </motion.p>
 
-            <motion.div {...fadeUp} transition={{ delay: 0.6, duration: 0.7, ease:[0.32,0.72,0,1] }}
-              className="flex flex-wrap gap-2 mt-10">
-              {['Smartlead','Instantly','Lemlist','EmailBison','Clay','Apollo CSV'].map(tag => (
-                <span key={tag} className="text-[0.72rem] font-medium bg-white border border-border text-muted rounded-full px-3 py-1.5 hover:border-border-2 transition-colors">
-                  {tag}
-                </span>
-              ))}
-            </motion.div>
           </motion.div>
 
           {/* Right: live opener preview */}
@@ -159,6 +151,30 @@ function Hero() {
         </div>
       </Container>
     </section>
+  )
+}
+
+// ── INTEGRATOR STRIP ─────────────────────────────────────────────────────────
+function IntegratorStrip() {
+  const tools = ['Smartlead', 'Instantly', 'Lemlist', 'EmailBison', 'Clay', 'Apollo']
+  return (
+    <div className="border-y border-border py-5 bg-white/60">
+      <Container>
+        <div className="flex items-center gap-4 sm:gap-8 flex-wrap justify-center">
+          <span className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-muted-2 whitespace-nowrap">
+            CSV-ready for
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {tools.map(tool => (
+              <span key={tool}
+                className="text-[0.76rem] font-medium text-ink-2 bg-white border border-border px-3.5 py-1.5 rounded-full shadow-sm whitespace-nowrap hover:border-border-2 transition-all duration-200">
+                {tool}
+              </span>
+            ))}
+          </div>
+        </div>
+      </Container>
+    </div>
   )
 }
 
@@ -909,32 +925,23 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <ServiceFacts titleKey="serviceFacts.title.home" className="bg-cream-2 py-12 sm:py-16" />
-      <HomeQueryAnswers />
-      <HomeTopThreeReasons />
-      <HomeSeoIntro />
-      <HomeTopFiveSignals />
-      <Divider />
+      <IntegratorStrip />
       <Problem />
-      <Divider />
       <Agitation />
-      <Divider />
       <Solution />
-      <Divider />
       <HowItWorks />
-      <Divider />
       <Examples />
-      <Divider />
-      <Benefits />
-      <Divider />
       <WhyUs />
-      <Divider />
       <Credibility />
-      <Divider />
+      <Benefits />
       <PricingPreview />
-      <Divider />
       <FAQ />
       <FinalCTA />
+      <HomeSeoIntro />
+      <HomeQueryAnswers />
+      <HomeTopThreeReasons />
+      <HomeTopFiveSignals />
+      <ServiceFacts titleKey="serviceFacts.title.home" className="bg-cream-2 py-12 sm:py-16" />
     </>
   )
 }

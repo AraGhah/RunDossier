@@ -60,14 +60,22 @@ Best fit: decision-makers at companies with roughly 10–200 employees.
 
 Typical pilot turnaround: 24–48 hours for 100 prospects.
 
-## Pricing overview
+## Products
 
-| Plan | Price | Volume |
-|------|-------|--------|
-| Pilot | Free | 100 prospects |
-| Starter | $499/mo | 500 prospects/month |
-| Growth | $999/mo | 2,000 prospects/month |
-| Agency | Custom | Unlimited |
+| Product | Price | Volume | URL |
+|---------|-------|--------|-----|
+| 100 Free Lines Pilot | Free | 100 prospects | rundossier.co/free-lines |
+| Starter Plan | $499/mo | 500 prospects/month | rundossier.co/pricing |
+| Growth Plan | $999/mo | 2,000 prospects/month | rundossier.co/pricing |
+| Agency Plan | Custom | Unlimited | rundossier.co/book-call |
+
+Compatible with Smartlead, Instantly, Lemlist, EmailBison, Clay, and Apollo CSV workflows.
+
+## Policies
+
+- [Privacy Policy](https://rundossier.co/privacy) — PIPEDA and Quebec Law 25 compliance. How prospect data is collected, used, retained, and deleted. Operated by Ara Ghahramanyan, Montreal, Canada.
+- [Terms of Service](https://rundossier.co/terms) — Usage rules for the pilot, paid plans, CSV deliverables, billing, cancellation, and compliance responsibilities.
+- Data retention and deletion: email ara@getdossier.co. 30-day response under Canadian privacy law.
 
 ## Frequently asked questions
 

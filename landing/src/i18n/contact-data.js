@@ -48,6 +48,7 @@ const CONTACT_EN = {
   },
   cta1: 'Claim 100 free lines',
   cta2: 'View the service',
+  publicProfilesTitle: 'Public profiles',
 }
 
 const CONTACT_FR = {
@@ -87,6 +88,7 @@ const CONTACT_FR = {
   },
   cta1: '100 lignes gratuites',
   cta2: 'Voir le service',
+  publicProfilesTitle: 'Profils publics',
 }
 
 export function getContactContent(lang) {

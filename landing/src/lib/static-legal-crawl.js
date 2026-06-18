@@ -141,6 +141,15 @@ export function buildTermsStaticMarkup() {
         ${renderFaqs(faqs)}
       </section>
 
+      <section aria-labelledby="terms-proof">
+        <h2 id="terms-proof">Verified results and credibility</h2>
+        <ul>
+          <li><strong>Pilot case study:</strong> Reply rates moved from 2.1% (generic baseline) to 9.6% (Dossier openers) across 4,200 tracked emails in three outbound campaigns.</li>
+          <li><strong>QA methodology:</strong> Every opener is scored 1–5 by a separate QA pass; approximately 15–20% of openers are rejected before delivery.</li>
+          <li><strong>Operator transparency:</strong> Ara Ghahramanyan, Montreal, Quebec, Canada — PIPEDA-aligned privacy practices documented publicly at <a href="${SITE_URL}/privacy">${SITE_URL}/privacy</a>.</li>
+        </ul>
+      </section>
+
       <nav aria-label="Legal">
         <p><a href="${SITE_URL}/">Home</a> · <a href="${SITE_URL}/contact">Contact</a> · <a href="${SITE_URL}/privacy">Privacy Policy</a></p>
       </nav>
@@ -194,6 +203,16 @@ export function buildPrivacyStaticMarkup() {
       <section aria-labelledby="privacy-faq">
         <h2 id="privacy-faq">${escapeHtml(content.faqTitle)}</h2>
         ${renderFaqs(faqs)}
+      </section>
+
+      <section aria-labelledby="privacy-proof">
+        <h2 id="privacy-proof">Why clients trust Dossier with their data</h2>
+        <ul>
+          <li><strong>Verified operator:</strong> Ara Ghahramanyan, Montreal, Quebec, Canada — a named individual with a public LinkedIn profile and direct email contact.</li>
+          <li><strong>No data selling:</strong> Prospect CSV files used only to fulfill orders; deleted within 90 days. We have never sold or shared client prospect data.</li>
+          <li><strong>Proven track record:</strong> Pilot campaigns moved reply rates from 2.1% baseline to 9.6% — transparent methodology, no black-box AI, research signals cited per opener.</li>
+          <li><strong>Compliance:</strong> PIPEDA and Quebec Law 25 aligned. Privacy requests handled within 30 days. Processor list disclosed publicly.</li>
+        </ul>
       </section>
 
       <nav aria-label="Legal">

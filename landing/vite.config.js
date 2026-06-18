@@ -3,11 +3,11 @@ import react from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildGlobalStaticGraph } from './src/lib/static-json-ld.js'
+import { buildHomeJsonLdStack } from './src/lib/static-json-ld.js'
 import { buildStaticCrawlMarkup } from './src/lib/static-crawl-content.js'
 import { STATIC_LEGAL_PAGES } from './src/lib/static-legal-crawl.js'
 import { getSeoForPath } from './src/lib/seo-routes.js'
-import { buildJsonLdGraph } from './src/lib/seo.js'
+import { buildJsonLdStack, stackedJsonLdScriptHtml } from './src/lib/seo.js'
 import { SITE_URL } from './src/lib/site-data.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -21,8 +21,9 @@ function escapeAttr(value) {
 
 function buildLegalPageHtml(shell, route, buildMarkup) {
   const seo = getSeoForPath(route, 'en')
-  const jsonLd = JSON.stringify(
-    buildJsonLdGraph({
+  const pageUrl = `${SITE_URL}${route}`
+  const jsonLdHtml = stackedJsonLdScriptHtml(
+    buildJsonLdStack({
       path: route,
       title: seo.title,
       description: seo.description,
@@ -33,12 +34,7 @@ function buildLegalPageHtml(shell, route, buildMarkup) {
       dateModified: seo.dateModified,
       pageType: seo.pageType,
     }),
-    null,
-    2,
   )
-    .split('\n')
-    .map((line) => `    ${line}`)
-    .join('\n')
   const crawl = buildMarkup()
 
   return shell
@@ -48,12 +44,43 @@ function buildLegalPageHtml(shell, route, buildMarkup) {
       `<meta name="description" content="${escapeAttr(seo.description)}"`,
     )
     .replace(
-      /<head>/,
-      `<head>\n    <link rel="canonical" href="${SITE_URL}${route}" />`,
+      /<meta name="robots" content="[^"]*"/,
+      `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1"`,
     )
     .replace(
-      /<script type="application\/ld\+json">[\s\S]*?<\/script>/,
-      `<script type="application/ld+json">\n${jsonLd}\n    </script>`,
+      /<meta name="googlebot" content="[^"]*"/,
+      `<meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1"`,
+    )
+    // Replace the home canonical with the page-specific one (avoids duplicate canonical bug)
+    .replace(
+      /<link rel="canonical" href="[^"]*" \/>/,
+      `<link rel="canonical" href="${pageUrl}" />`,
+    )
+    // Update OG meta tags to page-specific values
+    .replace(
+      /(<meta property="og:title" content=")[^"]*(")/,
+      `$1${escapeAttr(seo.title)}$2`,
+    )
+    .replace(
+      /(<meta property="og:description" content=")[^"]*(")/,
+      `$1${escapeAttr(seo.description)}$2`,
+    )
+    .replace(
+      /(<meta property="og:url" content=")[^"]*(")/,
+      `$1${escapeAttr(pageUrl)}$2`,
+    )
+    // Update Twitter meta tags to page-specific values
+    .replace(
+      /(<meta name="twitter:title" content=")[^"]*(")/,
+      `$1${escapeAttr(seo.title)}$2`,
+    )
+    .replace(
+      /(<meta name="twitter:description" content=")[^"]*(")/,
+      `$1${escapeAttr(seo.description)}$2`,
+    )
+    .replace(
+      /(?:<script id="dossier-jsonld-\d+" type="application\/ld\+json">[\s\S]*?<\/script>\s*)+/,
+      `${jsonLdHtml}\n`,
     )
     .replace(
       /<div id="crawl-fallback" class="crawl-fallback">[\s\S]*?<\/div>\s*\n\s*<div id="root"><\/div>/,
@@ -66,16 +93,13 @@ function injectStaticHtml(env) {
     name: 'inject-static-html',
     transformIndexHtml(html) {
       const phone = (env.VITE_CONTACT_PHONE || '').trim()
-      const json = JSON.stringify(buildGlobalStaticGraph({ phone }), null, 2)
-        .split('\n')
-        .map((line) => `    ${line}`)
-        .join('\n')
+      const jsonLdHtml = stackedJsonLdScriptHtml(buildHomeJsonLdStack({ phone }))
       const crawl = buildStaticCrawlMarkup({ phone })
 
       return html
         .replace(
           /<script type="application\/ld\+json">[\s\S]*?<\/script>/,
-          `<script type="application/ld+json">\n${json}\n    </script>`,
+          jsonLdHtml,
         )
         .replace(
           /<body>\s*\n\s*<div id="root"><\/div>/,

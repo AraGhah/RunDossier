@@ -1,11 +1,9 @@
 import { LEGAL_EMAIL, LEGAL_BUSINESS_HOURS } from './legal'
-import { HOME_FAQ, SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from './site-data'
+import { HOME_FAQ, LINKEDIN_HANDLE, LINKEDIN_URL, CAL_PUBLIC_HANDLE, CAL_PUBLIC_URL, SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from './site-data'
 
 function phoneMarkup(phone) {
   const trimmed = (phone || '').trim()
-  if (!trimmed) {
-    return `<p><strong>Schedule a call:</strong> <a href="${SITE_URL}/book-call">${SITE_URL}/book-call</a> (30-minute fit assessment)</p>`
-  }
+  if (!trimmed) return ''
   const tel = trimmed.replace(/[^\d+]/g, '')
   const href = tel.startsWith('+') ? tel : `+${tel.replace(/^\+/, '')}`
   return `<p><strong>Phone:</strong> <a href="tel:${href}">${trimmed}</a></p>`
@@ -25,7 +23,7 @@ export function buildStaticCrawlMarkup({ phone = '' } = {}) {
     <div id="crawl-fallback" class="crawl-fallback">
       <header>
         <p><a href="${SITE_URL}/">${SITE_NAME}</a></p>
-        <h1>${SITE_NAME}, ${SITE_TAGLINE}</h1>
+        <h1>${SITE_NAME} — ${SITE_TAGLINE}</h1>
         <p>${SITE_DESCRIPTION}</p>
       </header>
 
@@ -96,15 +94,24 @@ export function buildStaticCrawlMarkup({ phone = '' } = {}) {
         <p>Deliveries are formatted for Smartlead, Instantly, Lemlist, EmailBison, Clay, and Apollo CSV workflows.</p>
       </section>
 
-      <section aria-labelledby="crawl-offers">
-        <h2 id="crawl-offers">Offers and pricing overview</h2>
+      <section aria-labelledby="crawl-products">
+        <h2 id="crawl-products">Products</h2>
         <ul>
-          <li><strong>100 Free Lines Pilot</strong> — 100 prospects, three QA-scored openers each, delivered in 24 to 48 hours.</li>
-          <li><strong>Starter</strong> — $499 per month for 500 prospects per month.</li>
-          <li><strong>Growth</strong> — $999 per month for 2,000 prospects per month.</li>
-          <li><strong>Agency</strong> — custom volume, delivery speed, and integration terms.</li>
+          <li><strong>100 Free Lines Pilot</strong> — 100 prospects, three QA-scored openers each, delivered as CSV in 24 to 48 hours. Price: $0, no credit card required.</li>
+          <li><strong>Starter Plan</strong> — $499 per month for 500 prospects per month. Three opener variants each, CSV delivery, email support.</li>
+          <li><strong>Growth Plan</strong> — $999 per month for 2,000 prospects per month. Priority delivery and dedicated support.</li>
+          <li><strong>Agency Plan</strong> — custom volume, white-label CSV, SLA, and integrations. Contact for pricing.</li>
         </ul>
         <p>See full pricing at <a href="${SITE_URL}/pricing">${SITE_URL}/pricing</a>.</p>
+      </section>
+
+      <section aria-labelledby="crawl-policies">
+        <h2 id="crawl-policies">Policies</h2>
+        <ul>
+          <li><strong><a href="${SITE_URL}/privacy">Privacy Policy</a></strong> — PIPEDA and Quebec Law 25 compliance. How we collect, use, and delete prospect data. Operated by Ara Ghahramanyan, Montreal, Canada.</li>
+          <li><strong><a href="${SITE_URL}/terms">Terms of Service</a></strong> — Usage rules for the free pilot, paid plans, CSV deliverables, billing, cancellation, and compliance responsibilities.</li>
+          <li><strong>Data requests</strong> — Email <a href="mailto:${LEGAL_EMAIL}">${LEGAL_EMAIL}</a> for access, correction, or deletion under PIPEDA and Quebec Law 25. 30-day response window.</li>
+        </ul>
       </section>
 
       <section aria-labelledby="crawl-faq">
@@ -126,17 +133,31 @@ export function buildStaticCrawlMarkup({ phone = '' } = {}) {
         </ul>
       </section>
 
+      <section aria-labelledby="crawl-profiles">
+        <h2 id="crawl-profiles">Public profiles — find Dossier online</h2>
+        <ul>
+          <li><strong>LinkedIn (founder):</strong> <a href="${LINKEDIN_URL}" rel="me">${LINKEDIN_HANDLE}</a> — Ara Ghahramanyan, founder of Dossier</li>
+          <li><strong>Cal.com (scheduling):</strong> <a href="${CAL_PUBLIC_URL}">${CAL_PUBLIC_HANDLE}</a> — 30-minute fit call</li>
+        </ul>
+      </section>
+
       <section aria-labelledby="crawl-contact">
         <h2 id="crawl-contact">Contact Dossier</h2>
-        <p>Dossier · Montreal, Quebec · Province of Quebec, Canada</p>
-        <p><strong>Hours:</strong> ${LEGAL_BUSINESS_HOURS}</p>
-        <p><strong>Email:</strong> <a href="mailto:${LEGAL_EMAIL}">${LEGAL_EMAIL}</a></p>
-        ${phoneMarkup(phone)}
-        <p>
-          <strong>Social profiles:</strong>
-          <a href="https://www.linkedin.com/in/ara-ghahramanyan-086261405/">LinkedIn — Ara Ghahramanyan</a> ·
-          <a href="https://cal.com/preframe">Cal.com — Book a 30-minute fit call</a>
-        </p>
+        <address>
+          <p>Dossier · Montreal, Quebec · Province of Quebec, Canada</p>
+          <p><strong>Hours:</strong> ${LEGAL_BUSINESS_HOURS}</p>
+          <p><strong>Email:</strong> <a href="mailto:${LEGAL_EMAIL}">${LEGAL_EMAIL}</a></p>
+          ${phoneMarkup(phone)}
+          <p><strong>Schedule a call:</strong> <a href="${SITE_URL}/book-call" rel="contact">${SITE_URL}/book-call</a> (30-minute fit assessment)</p>
+          <p>
+            <strong>LinkedIn:</strong>
+            <a href="${LINKEDIN_URL}" rel="me">${LINKEDIN_HANDLE}</a>
+          </p>
+          <p>
+            <strong>Cal.com:</strong>
+            <a href="${CAL_PUBLIC_URL}" rel="contact">${CAL_PUBLIC_HANDLE}</a>
+          </p>
+        </address>
         <p><a href="${SITE_URL}/contact">Contact page</a> · <a href="${SITE_URL}/service">Service details</a> · <a href="${SITE_URL}/free-lines">Start free pilot</a></p>
       </section>
 

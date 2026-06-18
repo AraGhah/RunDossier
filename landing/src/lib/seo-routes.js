@@ -23,7 +23,7 @@ const SEO_DESCRIPTIONS = {
       'Dossier researches each B2B prospect, writes QA-scored cold email openers, and delivers a CSV for Smartlead, Instantly, Lemlist, and other sequencers.',
     '/contact':
       'Contact Dossier by email, phone, or scheduling link. Pilot requests, pricing questions, and partnership inquiries.',
-    '/privacy': 'Privacy Policy for Dossier, how we collect, use, and protect your data.',
+    '/privacy': 'Privacy Policy for Dossier — how we collect, use, and protect your data under PIPEDA and Quebec Law 25. Operated by Ara Ghahramanyan, Montreal, Canada.',
     '/terms':
       'What are Dossier Terms of Service? Rules for the B2B opener service: free 100-prospect pilot, Starter ($499/mo), Growth ($999/mo), compliance, billing, and liability.',
   },

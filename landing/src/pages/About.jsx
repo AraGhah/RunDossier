@@ -15,9 +15,9 @@ import PageH1 from '../components/PageH1'
 import { getPageH1 } from '../lib/page-headings'
 import { useTranslation } from '../context/LanguageContext'
 import { getAboutContent } from '../i18n/about-data'
+import { LINKEDIN_URL } from '../lib/site-data'
 
 // ── CONSTANTS ─────────────────────────────────────────────────────────────────
-const LINKEDIN_URL = 'https://www.linkedin.com/in/ara-ghahramanyan-086261405/'
 
 // ── COUNT-UP ANIMATION ────────────────────────────────────────────────────────
 function CountUp({ to, suffix = '', prefix = '', duration = 1.6, isDecimal }) {

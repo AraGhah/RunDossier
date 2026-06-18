@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { absoluteUrl, buildJsonLdGraph } from '../lib/seo'
+import { absoluteUrl, buildJsonLdStack, stackedJsonLdScriptHtml } from '../lib/seo'
 import { getSeoForPath } from '../lib/seo-routes'
-import { SITE_NAME } from '../lib/site-data'
+import { SITE_NAME, LINKEDIN_URL } from '../lib/site-data'
 import { useTranslation } from '../context/LanguageContext'
 
-const JSON_LD_ID = 'dossier-json-ld'
+const JSON_LD_PREFIX = 'dossier-jsonld-'
 
 function upsertMeta(name, content) {
   if (!content) return
@@ -39,15 +39,22 @@ function upsertLink(rel, href) {
   el.setAttribute('href', href)
 }
 
-function upsertJsonLd(data) {
-  let el = document.getElementById(JSON_LD_ID)
-  if (!el) {
-    el = document.createElement('script')
-    el.id = JSON_LD_ID
-    el.type = 'application/ld+json'
-    document.head.appendChild(el)
-  }
-  el.textContent = JSON.stringify(data)
+function upsertJsonLdStack(stack) {
+  // Collect old nodes by reference BEFORE adding new ones so clearJsonLdScripts
+  // doesn't accidentally remove scripts we just appended.
+  const oldNodes = [
+    ...document.querySelectorAll(`script[id^="${JSON_LD_PREFIX}"]`),
+    ...(document.getElementById('dossier-json-ld') ? [document.getElementById('dossier-json-ld')] : []),
+    ...document.querySelectorAll('script[type="application/ld+json"]'),
+  ]
+  const markup = stackedJsonLdScriptHtml(stack, { indent: '' })
+  const tpl = document.createElement('template')
+  tpl.innerHTML = markup.trim()
+  tpl.content.querySelectorAll('script').forEach((node) => {
+    document.head.appendChild(node)
+  })
+  // Remove old nodes AFTER new ones are in DOM — zero gap for crawlers.
+  oldNodes.forEach((node) => node.remove())
 }
 
 export default function SeoHead() {
@@ -59,7 +66,10 @@ export default function SeoHead() {
   useEffect(() => {
     document.title = seo.title
     upsertMeta('description', seo.description)
+    upsertMeta('robots', 'index, follow, max-image-preview:large, max-snippet:-1')
+    upsertMeta('googlebot', 'index, follow, max-image-preview:large, max-snippet:-1')
     upsertLink('canonical', canonical)
+    upsertLink('me', LINKEDIN_URL)
 
     upsertOgMeta('og:title', seo.title)
     upsertOgMeta('og:description', seo.description)
@@ -71,8 +81,8 @@ export default function SeoHead() {
     upsertMeta('twitter:title', seo.title)
     upsertMeta('twitter:description', seo.description)
 
-    upsertJsonLd(
-      buildJsonLdGraph({
+    upsertJsonLdStack(
+      buildJsonLdStack({
         path: pathname,
         title: seo.title,
         description: seo.description,
