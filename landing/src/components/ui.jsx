@@ -16,6 +16,20 @@ export const fadeUpBlur = {
   transition:  { duration: 0.8, ease: [0.32,0.72,0,1] },
 }
 
+export const fadeLeft = {
+  initial:     { opacity: 0, x: -32 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport:    { once: true, margin: '-60px' },
+  transition:  { duration: 0.75, ease: [0.32,0.72,0,1] },
+}
+
+export const fadeRight = {
+  initial:     { opacity: 0, x: 32 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport:    { once: true, margin: '-60px' },
+  transition:  { duration: 0.75, ease: [0.32,0.72,0,1] },
+}
+
 export const staggerContainer = {
   initial:     {},
   whileInView: { transition: { staggerChildren: 0.1 } },
@@ -23,8 +37,8 @@ export const staggerContainer = {
 }
 
 export const staggerItem = {
-  initial:    { opacity: 0, y: 28 },
-  whileInView:{ opacity: 1, y: 0 },
+  initial:    { opacity: 0, y: 28, scale: 0.98 },
+  whileInView:{ opacity: 1, y: 0,  scale: 1 },
   transition: { duration: 0.65, ease: [0.32,0.72,0,1] },
 }
 
@@ -183,5 +197,94 @@ export function BeforeAfterRow({ before, after, source }) {
         <p className="text-[0.72rem] text-muted mt-3 break-words">Signal: {source}</p>
       </div>
     </div>
+  )
+}
+
+// ── COMPARISON TABLE ──────────────────────────────────────────────────────────
+export function CompareTable({ rows }) {
+  const cols = ['', 'Dossier', 'Generic AI', 'Manual BDR']
+  return (
+    <div className="w-full overflow-hidden rounded-xl2 border border-white/[0.1]">
+      {/* Header */}
+      <div className="grid grid-cols-4 text-[0.65rem] font-bold uppercase tracking-[0.12em]">
+        <div className="col-span-1 py-3 px-4 bg-white/[0.04] text-white/30" />
+        <div className="col-span-1 py-3 px-4 bg-gold/20 text-gold text-center border-l border-white/[0.08]">
+          Dossier
+        </div>
+        <div className="col-span-1 py-3 px-4 bg-white/[0.04] text-white/35 text-center border-l border-white/[0.08]">
+          Generic AI
+        </div>
+        <div className="col-span-1 py-3 px-4 bg-white/[0.04] text-white/35 text-center border-l border-white/[0.08]">
+          Manual BDR
+        </div>
+      </div>
+
+      {/* Rows */}
+      {rows.map((row, i) => (
+        <div key={i} className={`grid grid-cols-4 border-t border-white/[0.07] ${i % 2 === 0 ? 'bg-white/[0.02]' : ''}`}>
+          <div className="col-span-1 py-3 px-4 text-[0.76rem] text-white/55 font-medium flex items-center">{row.label}</div>
+          <div className="col-span-1 py-3 px-4 border-l border-white/[0.08] flex items-center justify-center">
+            <CellValue value={row.dossier} highlight />
+          </div>
+          <div className="col-span-1 py-3 px-4 border-l border-white/[0.08] flex items-center justify-center">
+            <CellValue value={row.ai} />
+          </div>
+          <div className="col-span-1 py-3 px-4 border-l border-white/[0.08] flex items-center justify-center">
+            <CellValue value={row.manual} />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function CellValue({ value, highlight }) {
+  if (value === true)  return <span className={`text-sm font-bold ${highlight ? 'text-gold' : 'text-white/40'}`}>✓</span>
+  if (value === false) return <span className="text-sm text-white/25">✗</span>
+  return <span className={`text-[0.76rem] font-medium text-center leading-tight ${highlight ? 'text-white/90' : 'text-white/40'}`}>{value}</span>
+}
+
+// Avatar glyphs: visually distinct initials that don't derive from role text
+const AVATAR_GLYPHS = ['AG', 'MO', 'RC']
+const AVATAR_COLORS = [
+  'bg-navy/[0.08] border-navy/[0.1] text-navy/60',
+  'bg-gold/[0.12] border-gold/30 text-gold',
+  'bg-emerald-50 border-emerald-200 text-emerald-700',
+]
+
+// ── SOCIAL PROOF CARD ─────────────────────────────────────────────────────────
+export function SocialProofCard({ quote, role, result, index = 0 }) {
+  const glyph  = AVATAR_GLYPHS[index % AVATAR_GLYPHS.length]
+  const colors = AVATAR_COLORS[index % AVATAR_COLORS.length]
+  return (
+    <motion.div
+      variants={staggerItem}
+      className="bg-white border border-border rounded-xl3 p-6 sm:p-7 relative overflow-hidden
+        hover:-translate-y-[5px] hover:shadow-card transition-all duration-300 shine-card group"
+    >
+      <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold/60 via-gold/20 to-transparent" />
+
+      {/* Decorative quote mark */}
+      <div className="absolute top-4 right-5 font-display text-[3rem] leading-none text-gold/10 select-none" aria-hidden="true">"</div>
+
+      {/* Result metric chip */}
+      {result && (
+        <div className="inline-flex items-center gap-2 bg-gold/10 border border-gold/20 rounded-full px-3 py-1 mb-5">
+          <span className="w-[5px] h-[5px] rounded-full bg-gold flex-shrink-0" aria-hidden="true" />
+          <span className="text-[0.7rem] font-bold text-ink-2">{result}</span>
+        </div>
+      )}
+
+      <p className="font-display italic text-[clamp(0.9rem,2.2vw,1rem)] leading-relaxed text-ink mb-5 relative z-10">
+        "{quote}"
+      </p>
+
+      <div className="flex items-center gap-3 pt-4 border-t border-border">
+        <div className={`w-8 h-8 rounded-full border flex items-center justify-center flex-shrink-0 ${colors}`}>
+          <span className="text-[0.6rem] font-bold uppercase">{glyph}</span>
+        </div>
+        <p className="text-[0.76rem] font-medium text-ink-2 leading-snug">{role}</p>
+      </div>
+    </motion.div>
   )
 }

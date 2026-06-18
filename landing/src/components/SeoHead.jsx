@@ -2,8 +2,10 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { absoluteUrl, buildJsonLdStack, stackedJsonLdScriptHtml } from '../lib/seo'
 import { getSeoForPath } from '../lib/seo-routes'
-import { SITE_NAME, LINKEDIN_URL } from '../lib/site-data'
+import { SITE_NAME, LINKEDIN_URL, SITE_URL } from '../lib/site-data'
 import { useTranslation } from '../context/LanguageContext'
+
+const OG_IMAGE = `${SITE_URL}/og-image.png`
 
 const JSON_LD_PREFIX = 'dossier-jsonld-'
 
@@ -65,6 +67,7 @@ export default function SeoHead() {
 
   useEffect(() => {
     document.title = seo.title
+    document.documentElement.lang = lang
     upsertMeta('description', seo.description)
     upsertMeta('robots', 'index, follow, max-image-preview:large, max-snippet:-1')
     upsertMeta('googlebot', 'index, follow, max-image-preview:large, max-snippet:-1')
@@ -76,10 +79,16 @@ export default function SeoHead() {
     upsertOgMeta('og:url', canonical)
     upsertOgMeta('og:type', 'website')
     upsertOgMeta('og:site_name', SITE_NAME)
+    upsertOgMeta('og:image', OG_IMAGE)
+    upsertOgMeta('og:image:width', '1200')
+    upsertOgMeta('og:image:height', '630')
+    upsertOgMeta('og:image:alt', `${SITE_NAME} — Personalized outbound openers that get replies`)
 
-    upsertMeta('twitter:card', 'summary')
+    upsertMeta('twitter:card', 'summary_large_image')
     upsertMeta('twitter:title', seo.title)
     upsertMeta('twitter:description', seo.description)
+    upsertMeta('twitter:image', OG_IMAGE)
+    upsertMeta('twitter:image:alt', `${SITE_NAME} — Personalized outbound openers that get replies`)
 
     upsertJsonLdStack(
       buildJsonLdStack({

@@ -328,7 +328,8 @@ export default function Pricing() {
               <em className="italic text-gold">{isFr ? 'les tarifs.' : 'pricing.'}</em>
             </h2>
           </motion.div>
-          <motion.div {...fadeUp} className="divide-y divide-border">
+          <motion.div {...fadeUp} transition={{delay:0.1}}
+            className="bg-white border border-border rounded-2xl overflow-hidden divide-y divide-border shadow-[0_2px_24px_rgba(0,0,0,0.04)]">
             {faqs.map((faq, i) => {
               const isOpen = openFaq === i
               return (
@@ -336,12 +337,13 @@ export default function Pricing() {
                 <button onClick={() => setOpenFaq(isOpen ? null : i)}
                   aria-expanded={isOpen}
                   aria-controls={`pricing-faq-${i}`}
-                  className="w-full flex items-center justify-between gap-4 py-4 text-left font-semibold text-[0.97rem] hover:text-navy transition-colors group">
+                  className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left font-semibold text-[0.97rem] hover:text-navy transition-colors group">
                   <span>{faq.q}</span>
-                  <span aria-hidden="true" className={`w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${isOpen?'bg-navy text-white border-navy rotate-45':'border-border-2 text-muted'}`}>+</span>
+                  <span aria-hidden="true"
+                    className={`w-7 h-7 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover:border-navy/30 ${isOpen?'bg-navy text-white border-navy rotate-45':'border-border-2 text-muted'}`}>+</span>
                 </button>
                 <div id={`pricing-faq-${i}`} role="region" className={`faq-body ${isOpen?'open':''}`}>
-                  <div><p className="pb-4 text-sm text-muted leading-relaxed pr-10">{faq.a}</p></div>
+                  <div><p className="px-6 pb-5 text-sm text-muted leading-relaxed pr-10">{faq.a}</p></div>
                 </div>
               </div>
               )

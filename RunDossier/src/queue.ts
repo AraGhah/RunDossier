@@ -9,8 +9,9 @@ import { runPipelineDigest } from './jobs/pipeline-digest.job.js';
 import { runDogfoodScrape } from './jobs/dogfood-scrape.job.js';
 import { runDogfoodPromote } from './jobs/dogfood-promote.job.js';
 import { runProspectSearchJob } from './jobs/prospect-search.job.js';
+import { runPiiRetention } from './jobs/pii-retention.job.js';
 
-const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search'] as const;
+const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention'] as const;
 
 /** pg-boss retries for transient worker failures (API timeouts, network blips). */
 const TRANSIENT_JOB_OPTIONS = {
@@ -101,6 +102,17 @@ export async function startQueue(): Promise<void> {
         await runProspectSearchJob();
       } catch (err) {
         console.error('[prospect-search] job error:', err);
+      }
+    }
+  });
+
+  await boss.schedule('pii-retention', '0 3 * * *');
+  await boss.work('pii-retention', async (jobs) => {
+    for (const _job of jobs) {
+      try {
+        await runPiiRetention();
+      } catch (err) {
+        console.error('[pii-retention] job error:', err);
       }
     }
   });

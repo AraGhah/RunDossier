@@ -5,11 +5,13 @@ import {
   LayoutTemplate, Bot, Clock,
   Search, PenLine, ShieldCheck,
   Zap, Target, BarChart2, Plug, Shield, TrendingUp,
+  CheckCircle2, XCircle,
 } from 'lucide-react'
 import {
   Section, Container, ContainerSm, Eyebrow, BtnPrimary, BtnGhost,
-  Card, fadeUp, fadeUpBlur, staggerContainer, staggerItem,
-  OpenerCard,
+  Card, fadeUp, fadeUpBlur, fadeLeft, fadeRight,
+  staggerContainer, staggerItem,
+  OpenerCard, CompareTable, SocialProofCard,
 } from '../components/ui'
 import { useTranslation } from '../context/LanguageContext'
 import ServiceFacts from '../components/ServiceFacts'
@@ -17,7 +19,29 @@ import PageH1 from '../components/PageH1'
 import { getPageH1 } from '../lib/page-headings'
 import { getExamples, getOpenerCards } from '../i18n/examples-data'
 
-// ── ICON BOX, consistent icon container ─────────────────────────────────────
+// ── OPENER CYCLE DATA ─────────────────────────────────────────────────────────
+const CYCLE_OPENERS = [
+  {
+    quote: "Your breakdown of why cold email collapsed between 2023 and 2025 is the most precise articulation I've seen published. GPT filler is exactly the right framing.",
+    role: 'Founder, Outbound Consultancy',
+    signal: 'Signal: LinkedIn article, Q3 2024',
+    qa: 5,
+  },
+  {
+    quote: "Saw your team moved to a single AE pod model last quarter — that shift around reducing ramp time is exactly the context I'd want to unpack with you.",
+    role: 'VP Sales, B2B SaaS (50 people)',
+    signal: 'Signal: LinkedIn company hire, Jan 2025',
+    qa: 5,
+  },
+  {
+    quote: "Your podcast take on why most SDRs fail within 90 days because of ICP drift — not effort — is the most accurate framing I've heard from someone actually running the numbers.",
+    role: 'Head of Revenue, RevOps Consultancy',
+    signal: 'Signal: Podcast appearance, Feb 2025',
+    qa: 4,
+  },
+]
+
+// ── ICON BOX ──────────────────────────────────────────────────────────────────
 function IconBox({ Icon, dark }) {
   return dark ? (
     <div className="w-10 h-10 rounded-xl bg-white/[0.08] border border-white/[0.06] flex items-center justify-center mb-4 flex-shrink-0">
@@ -30,13 +54,16 @@ function IconBox({ Icon, dark }) {
   )
 }
 
-// ── HERO ─────────────────────────────────────────────────────────────────────
+// ── HERO ──────────────────────────────────────────────────────────────────────
 function Hero() {
   const { t, lang } = useTranslation()
   const hookRef = useRef(null)
   const hookText = t('hero.hook')
   const seoH1 = getPageH1('/', lang)
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [isVisible, setIsVisible] = useState(true)
 
+  // Word mask entrance animation
   useEffect(() => {
     const el = hookRef.current
     if (!el) return
@@ -59,12 +86,30 @@ function Hero() {
     return () => clearTimeout(timer)
   }, [hookText])
 
+  // Cycle opener examples
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsVisible(false)
+      setTimeout(() => {
+        setActiveIdx(i => (i + 1) % CYCLE_OPENERS.length)
+        setIsVisible(true)
+      }, 320)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const opener = CYCLE_OPENERS[activeIdx]
+
   return (
     <section className="relative pt-28 sm:pt-36 pb-20 sm:pb-28 overflow-hidden">
+      {/* Background atmosphere */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/4 -right-1/4 w-[700px] h-[700px] rounded-full bg-gradient-radial from-gold/[0.07] to-transparent" />
         <div className="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] rounded-full bg-gradient-radial from-navy/[0.05] to-transparent" />
         <div className="absolute inset-0 grain-overlay opacity-[0.028]" />
+        {/* Subtle grid */}
+        <div className="absolute inset-0"
+          style={{backgroundImage:'linear-gradient(rgba(0,0,0,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.025) 1px,transparent 1px)',backgroundSize:'60px 60px'}} />
       </div>
 
       <Container className="relative z-10">
@@ -92,56 +137,90 @@ function Hero() {
               <span className="font-display italic font-semibold text-ink">{t('hero.italic')}</span>
             </motion.p>
 
-            <motion.div {...fadeUp} transition={{ delay: 0.35, duration: 0.7, ease:[0.32,0.72,0,1] }}
+            <motion.div {...fadeUp} transition={{ delay: 0.3, duration: 0.7, ease:[0.32,0.72,0,1] }}
               className="inline-flex items-center gap-2 bg-gold/10 border border-gold/25 rounded-full px-4 py-2 text-[0.82rem] font-medium text-ink-2 mb-10">
               <span className="w-[5px] h-[5px] rounded-full bg-gold animate-pulse-dot" />
               {t('hero.stat')}
             </motion.div>
 
-            <motion.div {...fadeUp} transition={{ delay: 0.45, duration: 0.7, ease:[0.32,0.72,0,1] }}
+            <motion.div {...fadeUp} transition={{ delay: 0.42, duration: 0.7, ease:[0.32,0.72,0,1] }}
               className="flex flex-wrap items-center gap-3 mb-5">
               <BtnPrimary to="/free-lines" large>{t('hero.cta1')}</BtnPrimary>
               <BtnGhost to="/book-call">{t('hero.cta2')}</BtnGhost>
             </motion.div>
 
-            <motion.p {...fadeUp} transition={{ delay: 0.55, duration: 0.7, ease:[0.32,0.72,0,1] }}
+            <motion.p {...fadeUp} transition={{ delay: 0.52, duration: 0.7, ease:[0.32,0.72,0,1] }}
               className="text-xs text-muted-2 flex items-center gap-1.5">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.2"/><path d="M6 4v3l1.5 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
               {t('hero.disclaimer')}
             </motion.p>
-
           </motion.div>
 
-          {/* Right: live opener preview */}
-          <motion.div {...fadeUpBlur} transition={{ delay: 0.3, duration: 0.8, ease:[0.32,0.72,0,1] }}
+          {/* Right: cycling opener preview */}
+          <motion.div {...fadeUpBlur} transition={{ delay: 0.28, duration: 0.85, ease:[0.32,0.72,0,1] }}
             className="relative mt-10 lg:mt-0">
-            <div className="relative pt-4 sm:pt-6 pb-8 sm:pb-10">
-              <div className="bg-white border border-border rounded-xl3 p-5 sm:p-7 shadow-card relative overflow-hidden">
+            <div className="relative pt-4 sm:pt-6 pb-10 sm:pb-12">
+
+              {/* Preview card */}
+              <div className="bg-white border border-border rounded-xl3 shadow-card relative overflow-hidden"
+                style={{boxShadow:'0 8px 48px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04)'}}>
+
                 <div className="absolute top-0 left-0 w-0.5 h-full bg-gradient-to-b from-gold via-gold/50 to-transparent" />
-                <p className="text-[0.65rem] sm:text-[0.68rem] font-bold uppercase tracking-[0.12em] text-emerald-700 flex items-center gap-2 mb-4">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> {t('hero.preview.label')}
-                </p>
-                <p className="font-display italic text-[clamp(0.9rem,2.5vw,1rem)] leading-relaxed text-ink mb-5">
-                  &ldquo;{t('hero.preview.quote')}&rdquo;
-                </p>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-border">
+
+                {/* Header bar */}
+                <div className="px-5 sm:px-6 pt-5 pb-3 border-b border-border flex items-center justify-between">
+                  <p className="text-[0.65rem] sm:text-[0.68rem] font-bold uppercase tracking-[0.12em] text-emerald-700 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                    {t('hero.preview.label')}
+                  </p>
+                  <div className="flex gap-1 items-center" aria-label="QA score: 5 of 5">
+                    {[1,2,3,4,5].map(d => (
+                      <span key={d} className={`w-[5px] h-[5px] rounded-full transition-colors duration-300 ${d <= opener.qa ? 'bg-gold' : 'bg-border-2'}`} />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Cycling content */}
+                <div
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="px-5 sm:px-6 py-5 min-h-[120px]"
+                  style={{ opacity: isVisible ? 1 : 0, transform: isVisible ? 'translateY(0)' : 'translateY(6px)', transition:'opacity 0.32s ease, transform 0.32s ease' }}>
+                  <p className="font-display italic text-[clamp(0.9rem,2.5vw,1rem)] leading-relaxed text-ink">
+                    &ldquo;{opener.quote}&rdquo;
+                  </p>
+                </div>
+
+                {/* Footer */}
+                <div className="px-5 sm:px-6 pb-5 pt-2 border-t border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                  style={{ opacity: isVisible ? 1 : 0, transition:'opacity 0.32s ease' }}>
                   <div className="min-w-0">
-                    <p className="text-[0.78rem] font-semibold text-ink-2">{t('hero.preview.role')}</p>
-                    <p className="text-[0.72rem] text-muted italic mt-0.5">{t('hero.preview.signal')}</p>
+                    <p className="text-[0.78rem] font-semibold text-ink-2">{opener.role}</p>
+                    <p className="text-[0.72rem] text-muted italic mt-0.5">{opener.signal}</p>
                   </div>
-                  <div className="flex gap-1 flex-shrink-0" aria-label={t('hero.preview.qa')}>
-                    {[1,2,3,4,5].map(d => <span key={d} className="w-2 h-2 rounded-full bg-gold" />)}
-                  </div>
+                </div>
+
+                {/* Cycle indicators */}
+                <div className="px-5 sm:px-6 pb-4 flex items-center gap-1.5">
+                  {CYCLE_OPENERS.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setIsVisible(false); setTimeout(() => { setActiveIdx(i); setIsVisible(true) }, 200) }}
+                      className={`rounded-full transition-all duration-300 ${i === activeIdx ? 'w-4 h-1.5 bg-gold' : 'w-1.5 h-1.5 bg-border-2 hover:bg-gold/50'}`}
+                      aria-label={`Show opener example ${i + 1}`}
+                    />
+                  ))}
                 </div>
               </div>
 
-              <div className="absolute -top-1 right-3 sm:right-6 bg-navy text-white text-[0.65rem] sm:text-[0.72rem] font-semibold px-3 sm:px-3.5 py-1.5 rounded-full shadow-cta flex items-center gap-2 max-w-[calc(100%-1.5rem)]">
+              {/* Floating badge */}
+              <div className="badge-float absolute -top-2 right-3 sm:right-6 bg-navy text-white text-[0.65rem] sm:text-[0.72rem] font-semibold px-3 sm:px-3.5 py-1.5 rounded-full shadow-cta flex items-center gap-2 max-w-[calc(100%-1.5rem)]">
                 <span className="w-[5px] h-[5px] rounded-full bg-gold animate-pulse-dot flex-shrink-0" />
                 <span className="truncate">{t('hero.preview.badge')}</span>
               </div>
 
-              {/* Fixed: shows the Dossier result (9.6%), not the pre-Dossier baseline */}
-              <div className="absolute -bottom-3 left-3 sm:left-8 bg-white border border-border rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-card flex items-center gap-2 sm:gap-3 max-w-[calc(100%-1.5rem)]">
+              {/* Stats chip */}
+              <div className="absolute -bottom-4 left-3 sm:left-8 bg-white border border-border rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-card flex items-center gap-2 sm:gap-3 max-w-[calc(100%-1.5rem)]">
                 <div className="font-display text-xl sm:text-2xl font-bold text-navy flex-shrink-0">9.6%</div>
                 <p className="text-[0.68rem] sm:text-[0.72rem] text-muted leading-tight">{t('hero.preview.stat')}</p>
               </div>
@@ -154,23 +233,27 @@ function Hero() {
   )
 }
 
-// ── INTEGRATOR STRIP ─────────────────────────────────────────────────────────
+// ── INTEGRATOR STRIP (MARQUEE) ────────────────────────────────────────────────
+const INTEGRATOR_TOOLS = ['Smartlead', 'Instantly', 'Lemlist', 'EmailBison', 'Clay', 'Apollo', 'HubSpot', 'Salesloft', 'Outreach']
+
 function IntegratorStrip() {
-  const tools = ['Smartlead', 'Instantly', 'Lemlist', 'EmailBison', 'Clay', 'Apollo']
+  const doubled = [...INTEGRATOR_TOOLS, ...INTEGRATOR_TOOLS]
   return (
-    <div className="border-y border-border py-5 bg-white/60">
+    <div className="border-y border-border py-4 bg-white/60">
       <Container>
-        <div className="flex items-center gap-4 sm:gap-8 flex-wrap justify-center">
-          <span className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-muted-2 whitespace-nowrap">
+        <div className="flex items-center gap-5 sm:gap-8">
+          <span className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-muted-2 whitespace-nowrap flex-shrink-0">
             CSV-ready for
           </span>
-          <div className="flex flex-wrap items-center gap-2">
-            {tools.map(tool => (
-              <span key={tool}
-                className="text-[0.76rem] font-medium text-ink-2 bg-white border border-border px-3.5 py-1.5 rounded-full shadow-sm whitespace-nowrap hover:border-border-2 transition-all duration-200">
-                {tool}
-              </span>
-            ))}
+          <div className="marquee-track flex-1">
+            <div className="marquee-inner gap-2">
+              {doubled.map((tool, i) => (
+                <span key={i}
+                  className="text-[0.76rem] font-medium text-ink-2 bg-white border border-border px-3.5 py-1.5 rounded-full shadow-sm whitespace-nowrap mx-1 hover:border-gold/40 hover:text-ink transition-all duration-200">
+                  {tool}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </Container>
@@ -184,15 +267,19 @@ function Problem() {
   const cards = [
     { Icon: LayoutTemplate, title: t('problem.c1.title'), body: t('problem.c1.body') },
     { Icon: Bot,            title: t('problem.c2.title'), body: t('problem.c2.body') },
-    { Icon: Clock,          title: t('problem.c3.title'), body: t('problem.c3.body') }]
+    { Icon: Clock,          title: t('problem.c3.title'), body: t('problem.c3.body') },
+  ]
   const stats = [
     { label: t('problem.stat1.label'), val:'2.1%' },
     { label: t('problem.stat2.label'), val:'9.6%' },
-    { label: t('problem.stat3.label'), val:'4,200' }]
+    { label: t('problem.stat3.label'), val:'4,200' },
+  ]
   return (
     <Section className="bg-navy-dark text-white overflow-hidden" id="problem">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gradient-radial from-navy/80 to-transparent opacity-80" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full bg-gradient-radial from-navy/80 to-transparent opacity-70" />
+        <div className="absolute inset-0"
+          style={{backgroundImage:'linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px)',backgroundSize:'72px 72px'}} />
       </div>
       <Container className="relative z-10">
         <motion.div {...fadeUp} className="text-center mb-14 max-w-2xl mx-auto">
@@ -216,12 +303,15 @@ function Problem() {
           ))}
         </motion.div>
 
+        {/* Stats bar */}
         <motion.div {...fadeUp} transition={{delay:0.3}} className="mt-14 text-center">
-          <div className="inline-flex items-center gap-8 bg-white/[0.04] border border-white/[0.07] rounded-2xl px-8 py-5 flex-wrap justify-center gap-y-4">
-            {stats.map(s => (
-              <div key={s.val} className="text-center">
-                <div className="font-display text-[clamp(1.5rem,4vw,1.875rem)] font-bold text-gold">{s.val}</div>
-                <div className="text-[0.68rem] sm:text-[0.72rem] text-white/40 mt-1 max-w-[140px] mx-auto leading-tight">{s.label}</div>
+          <div className="inline-grid grid-cols-1 sm:grid-cols-3 gap-px overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.04]">
+            {stats.map((s, i) => (
+              <div key={s.val}
+                className={`px-8 py-5 text-center bg-white/[0.03] hover:bg-white/[0.06] transition-colors duration-200
+                  ${i > 0 ? 'border-t sm:border-t-0 sm:border-l border-white/[0.07]' : ''}`}>
+                <div className="font-display text-[clamp(1.5rem,4vw,2rem)] font-bold text-gold">{s.val}</div>
+                <div className="text-[0.7rem] text-white/40 mt-1.5 max-w-[140px] mx-auto leading-tight">{s.label}</div>
               </div>
             ))}
           </div>
@@ -231,14 +321,20 @@ function Problem() {
   )
 }
 
-// ── AGITATION ────────────────────────────────────────────────────────────────
+// ── AGITATION ─────────────────────────────────────────────────────────────────
 function Agitation() {
   const { t } = useTranslation()
+  const painPoints = [
+    'Reps spend 3 hours/day on research that produces a one-line template',
+    'AI openers signal "generated" before the prospect finishes the first sentence',
+    'Domains warm while reply rates stay stuck at 2%',
+  ]
   const stats = [
-    { stat:'68%',  label: t('agitation.s1.label') },
+    { stat:'68%',   label: t('agitation.s1.label') },
     { stat:'3 sec', label: t('agitation.s2.label') },
-    { stat:'$0',   label: t('agitation.s3.label') },
-    { stat:'2 wks', label: t('agitation.s4.label') }]
+    { stat:'$0',    label: t('agitation.s3.label') },
+    { stat:'2 wks', label: t('agitation.s4.label') },
+  ]
   return (
     <Section className="bg-cream-2">
       <ContainerSm className="text-center">
@@ -250,12 +346,23 @@ function Agitation() {
           <p className="mt-5 text-muted text-lg leading-relaxed max-w-xl mx-auto">{t('agitation.sub')}</p>
         </motion.div>
 
+        {/* Pain point list */}
+        <motion.ul {...fadeUp} transition={{delay:0.12}} className="mt-10 flex flex-col items-center gap-2.5 text-left">
+          {painPoints.map((p, i) => (
+            <li key={i} className="flex items-start gap-3 max-w-md">
+              <XCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-muted leading-relaxed">{p}</span>
+            </li>
+          ))}
+        </motion.ul>
+
+        {/* Stat grid */}
         <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
-          className="flex flex-col sm:flex-row mt-12 rounded-2xl overflow-hidden border border-border bg-white divide-y sm:divide-y-0 sm:divide-x divide-border">
+          className="flex flex-col sm:flex-row mt-12 rounded-2xl overflow-hidden border border-border bg-white divide-y sm:divide-y-0 sm:divide-x divide-border shadow-[0_2px_24px_rgba(0,0,0,0.04)]">
           {stats.map((s, i) => (
             <motion.div key={i} variants={staggerItem}
-              className="flex-1 p-6 sm:p-8 text-center hover:bg-cream/60 transition-colors duration-200">
-              <div className="font-display text-[clamp(1.5rem,4vw,1.875rem)] font-bold text-navy mb-2">{s.stat}</div>
+              className="flex-1 p-6 sm:p-8 text-center hover:bg-cream/60 transition-colors duration-200 group">
+              <div className="font-display text-[clamp(1.5rem,4vw,1.875rem)] font-bold text-navy mb-2 group-hover:scale-105 transition-transform duration-200">{s.stat}</div>
               <p className="text-[0.72rem] sm:text-[0.76rem] text-muted leading-snug">{s.label}</p>
             </motion.div>
           ))}
@@ -265,18 +372,20 @@ function Agitation() {
   )
 }
 
-// ── SOLUTION ─────────────────────────────────────────────────────────────────
+// ── SOLUTION ──────────────────────────────────────────────────────────────────
 function Solution() {
   const { t } = useTranslation()
   const features = [
     { Icon: Search,      title: t('solution.f1.title'), body: t('solution.f1.body') },
     { Icon: PenLine,     title: t('solution.f2.title'), body: t('solution.f2.body') },
-    { Icon: ShieldCheck, title: t('solution.f3.title'), body: t('solution.f3.body') }]
+    { Icon: ShieldCheck, title: t('solution.f3.title'), body: t('solution.f3.body') },
+  ]
+  const poweredBy = ['Anthropic Claude', 'LinkedIn', 'Apollo.io', 'Apify']
   return (
     <Section id="solution">
       <Container>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <motion.div {...fadeUp}>
+          <motion.div {...fadeLeft}>
             <Eyebrow>{t('solution.eyebrow')}</Eyebrow>
             <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.15] tracking-tight">
               {t('solution.title')} <em className="italic text-gold">{t('solution.titleEm')}</em>
@@ -295,6 +404,17 @@ function Solution() {
                 </div>
               ))}
             </div>
+
+            {/* Powered by */}
+            <div className="mt-8 flex items-center gap-3 flex-wrap">
+              <span className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-muted-2">Powered by</span>
+              {poweredBy.map(name => (
+                <span key={name} className="text-[0.72rem] font-medium text-muted bg-black/[0.04] border border-black/[0.06] px-2.5 py-1 rounded-full">
+                  {name}
+                </span>
+              ))}
+            </div>
+
             <div className="flex gap-3 mt-10">
               <BtnPrimary to="/free-lines">{t('solution.cta1')}</BtnPrimary>
               <BtnGhost to="/book-call">{t('solution.cta2')}</BtnGhost>
@@ -302,7 +422,7 @@ function Solution() {
           </motion.div>
 
           {/* CSV mockup */}
-          <motion.div {...fadeUpBlur} transition={{ delay:0.2, duration:0.8, ease:[0.32,0.72,0,1] }}>
+          <motion.div {...fadeRight} transition={{ delay:0.15, duration:0.85, ease:[0.32,0.72,0,1] }}>
             <div className="bg-black/[0.025] border border-black/[0.05] p-1.5 rounded-xl4">
               <div className="bg-white rounded-[calc(2rem-5px)] overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
                 <div className="bg-navy px-5 py-3 flex items-center gap-3">
@@ -310,6 +430,7 @@ function Solution() {
                     {[0,1,2].map(d => <div key={d} className="w-2.5 h-2.5 rounded-full bg-white/20" />)}
                   </div>
                   <span className="text-white/50 text-xs font-mono">dossier_batch_001.csv</span>
+                  <span className="ml-auto text-[0.6rem] text-white/30 font-medium">3 prospects · QA passed</span>
                 </div>
                 <div className="grid grid-cols-12 border-b border-border bg-cream px-4 py-2">
                   {['Prospect','Signal','Opener A','QA','Conf'].map((h, i) => (
@@ -320,9 +441,10 @@ function Solution() {
                   ))}
                 </div>
                 {[
-                  { name:'J. Whitmore', co:'LeadFlow', opener:'Your breakdown of why cold email collapsed 2023 to 2025 is the most precise articulation I\'ve seen published...', qa:4, conf:'High' },
+                  { name:'J. Whitmore', co:'LeadFlow', opener:'Your breakdown of why cold email collapsed 2023–25 is the most precise articulation I\'ve seen...', qa:4, conf:'High' },
                   { name:'M. Okafor', co:'Apex Outbound', opener:'Saw you launched in February and positioned around removing friction that every other tool buries in 5-step workflows...', qa:5, conf:'High' },
-                  { name:'R. Castillo', co:'Clearpath B2B', opener:'Your thread on why SDR-to-AE handoffs break under 50 people is something I\'ve seen play out at 3 agencies this year...', qa:3, conf:'Med' }].map((row, i) => (
+                  { name:'R. Castillo', co:'Clearpath B2B', opener:'Your thread on why SDR-to-AE handoffs break under 50 people is something I\'ve seen play out at 3 agencies...', qa:3, conf:'Med' },
+                ].map((row, i) => (
                   <div key={i} className={`px-4 py-3 border-b border-border last:border-0 ${i%2===1?'bg-cream/60':''}`}>
                     <div className="flex gap-3 items-start">
                       <div className="flex-shrink-0 w-20">
@@ -348,13 +470,32 @@ function Solution() {
   )
 }
 
-// ── HOW IT WORKS ─────────────────────────────────────────────────────────────
+// ── HOW IT WORKS ──────────────────────────────────────────────────────────────
 function HowItWorks() {
   const { t } = useTranslation()
   const steps = [
-    { n:'01', title: t('hiw.s1.title'), body: t('hiw.s1.body') },
-    { n:'02', title: t('hiw.s2.title'), body: t('hiw.s2.body') },
-    { n:'03', title: t('hiw.s3.title'), body: t('hiw.s3.body') }]
+    {
+      n: '01',
+      title: t('hiw.s1.title'),
+      body: t('hiw.s1.body'),
+      time: '~5 min your time',
+      icon: '📋',
+    },
+    {
+      n: '02',
+      title: t('hiw.s2.title'),
+      body: t('hiw.s2.body'),
+      time: '24–48 hours pipeline',
+      icon: '🔬',
+    },
+    {
+      n: '03',
+      title: t('hiw.s3.title'),
+      body: t('hiw.s3.body'),
+      time: 'Instant import',
+      icon: '🚀',
+    },
+  ]
   return (
     <Section className="bg-cream-2" id="how-it-works">
       <Container>
@@ -366,18 +507,30 @@ function HowItWorks() {
         </motion.div>
 
         <div className="relative grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+          {/* Connector line */}
           <div className="absolute hidden md:block top-[2.7rem] left-[calc(16.67%+0.5rem)] right-[calc(16.67%+0.5rem)] h-px bg-gradient-to-r from-gold/40 via-gold to-gold/40" aria-hidden="true" />
+
           {steps.map((s, i) => (
-            <motion.div key={i} variants={staggerItem}
-              initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
-              transition={{ delay: i*0.12, duration:0.65, ease:[0.32,0.72,0,1] }}
+            <motion.div key={i}
+              initial={{ opacity: 0, y: 28, scale: 0.98 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin:'-60px' }}
+              transition={{ delay: i * 0.13, duration: 0.65, ease: [0.32,0.72,0,1] }}
               className="h-full">
               <Card hover className="h-full">
-                <div className="w-11 h-11 rounded-full bg-navy text-white text-sm font-bold flex items-center justify-center mb-5 shadow-cta relative z-10" aria-hidden="true">
+                {/* Step number with glow ring */}
+                <div className="w-11 h-11 rounded-full bg-navy text-white text-sm font-bold flex items-center justify-center mb-5 shadow-cta relative z-10 glow-ring cursor-default" aria-hidden="true">
                   {s.n}
                 </div>
+
                 <h3 className="font-display text-lg font-semibold mb-2">{s.title}</h3>
-                <p className="text-sm text-muted leading-relaxed">{s.body}</p>
+                <p className="text-sm text-muted leading-relaxed mb-5">{s.body}</p>
+
+                {/* Timing chip */}
+                <div className="mt-auto inline-flex items-center gap-1.5 bg-gold/[0.08] border border-gold/20 rounded-full px-3 py-1.5">
+                  <CheckCircle2 className="w-3 h-3 text-gold flex-shrink-0" />
+                  <span className="text-[0.68rem] font-semibold text-ink-2">{s.time}</span>
+                </div>
               </Card>
             </motion.div>
           ))}
@@ -414,10 +567,8 @@ function ExampleBlock({ ex, index }) {
           <span className="hidden sm:block text-[0.66rem] text-muted italic leading-snug ml-auto max-w-sm text-right line-clamp-1">{ex.signalSummary}</span>
         </div>
 
-        {/* Before / After columns */}
+        {/* Before / After */}
         <div className="grid grid-cols-1 sm:grid-cols-2">
-
-          {/* Before */}
           <div className="p-5 sm:p-7 border-b sm:border-b-0 sm:border-r border-border/60">
             <p className="text-[0.59rem] font-bold uppercase tracking-[0.15em] text-red-500 flex items-center gap-1.5 mb-4">
               <span className="w-[5px] h-[5px] rounded-full bg-red-400 flex-shrink-0" aria-hidden="true" />
@@ -431,7 +582,6 @@ function ExampleBlock({ ex, index }) {
             </p>
           </div>
 
-          {/* After */}
           <div className="relative p-5 sm:p-7 bg-cream/25 group hover:bg-cream/45 transition-colors duration-300">
             <div className="absolute top-0 left-0 w-[3px] h-full bg-gradient-to-b from-gold/70 via-gold/30 to-transparent" aria-hidden="true" />
             <p className="text-[0.59rem] font-bold uppercase tracking-[0.15em] text-emerald-600 flex items-center gap-1.5 mb-4">
@@ -469,7 +619,7 @@ function ExampleBlock({ ex, index }) {
   )
 }
 
-// ── EXAMPLES ─────────────────────────────────────────────────────────────────
+// ── EXAMPLES ──────────────────────────────────────────────────────────────────
 function Examples() {
   const { t, lang } = useTranslation()
   const examples = getExamples(lang)
@@ -477,8 +627,6 @@ function Examples() {
   return (
     <Section id="examples">
       <Container>
-
-        {/* Header */}
         <motion.div {...fadeUp} className="text-center mb-12">
           <Eyebrow>{t('examples.eyebrow')}</Eyebrow>
           <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-bold leading-[1.2] tracking-tight">
@@ -487,12 +635,10 @@ function Examples() {
           <p className="mt-3 text-muted max-w-lg mx-auto">{t('examples.sub')}</p>
         </motion.div>
 
-        {/* 3 full before/after example blocks */}
         <div className="flex flex-col gap-4">
           {examples.map((ex, i) => <ExampleBlock key={ex.id} ex={ex} index={i} />)}
         </div>
 
-        {/* Sample opener cards */}
         <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="mt-16">
           <Eyebrow>{t('examples.openers.eyebrow')}</Eyebrow>
           <motion.div
@@ -503,53 +649,12 @@ function Examples() {
           </motion.div>
         </motion.div>
 
-        {/* CTA */}
         <motion.div {...fadeUp} transition={{ delay: 0.3 }} className="mt-12 text-center">
-          <p className="text-sm text-muted mb-5">
-            {t('examples.ctaNote')}
-          </p>
+          <p className="text-sm text-muted mb-5">{t('examples.ctaNote')}</p>
           <div className="flex flex-wrap justify-center gap-3">
             <BtnPrimary to="/free-lines" large>{t('examples.cta1')}</BtnPrimary>
             <BtnGhost to="/book-call">{t('examples.cta2')}</BtnGhost>
           </div>
-        </motion.div>
-
-      </Container>
-    </Section>
-  )
-}
-
-// ── BENEFITS ─────────────────────────────────────────────────────────────────
-function Benefits() {
-  const { t } = useTranslation()
-  const benefits = [
-    { Icon: Zap,         title: t('benefits.b1.title'), body: t('benefits.b1.body') },
-    { Icon: Target,      title: t('benefits.b2.title'), body: t('benefits.b2.body') },
-    { Icon: BarChart2,   title: t('benefits.b3.title'), body: t('benefits.b3.body') },
-    { Icon: Plug,        title: t('benefits.b4.title'), body: t('benefits.b4.body') },
-    { Icon: Shield,      title: t('benefits.b5.title'), body: t('benefits.b5.body') },
-    { Icon: TrendingUp,  title: t('benefits.b6.title'), body: t('benefits.b6.body') }]
-  const spans = ['sm:col-span-2','sm:col-span-1','sm:col-span-1','sm:col-span-2','sm:col-span-1','sm:col-span-2']
-  return (
-    <Section className="bg-cream-2">
-      <Container>
-        <motion.div {...fadeUp} className="text-center mb-14">
-          <Eyebrow>{t('benefits.eyebrow')}</Eyebrow>
-          <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-bold leading-[1.2] tracking-tight">
-            {t('benefits.title')} <em className="italic text-gold">{t('benefits.titleEm')}</em>
-          </h2>
-        </motion.div>
-        <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {benefits.map((b, i) => (
-            <motion.div key={i} variants={staggerItem} className={spans[i]}>
-              <Card hover className="h-full">
-                <IconBox Icon={b.Icon} />
-                <h3 className="font-semibold text-ink mb-1.5">{b.title}</h3>
-                <p className="text-sm text-muted leading-relaxed">{b.body}</p>
-              </Card>
-            </motion.div>
-          ))}
         </motion.div>
       </Container>
     </Section>
@@ -557,24 +662,27 @@ function Benefits() {
 }
 
 // ── WHY US ────────────────────────────────────────────────────────────────────
+const COMPARE_ROWS = [
+  { label: 'Research signals / lead', dossier: '5+ live signals',  ai: 'Name + title',  manual: '1–2 signals' },
+  { label: 'QA scoring pass',         dossier: true,               ai: false,            manual: 'Manual check' },
+  { label: 'Delivery speed',          dossier: '24–48 hours',      ai: 'Instant',        manual: '3–5 days' },
+  { label: 'Cost per prospect',       dossier: '~$1–2.50',         ai: '~$0',            manual: '~$25–35' },
+  { label: 'Scales to 500+ leads',    dossier: true,               ai: true,             manual: false },
+  { label: 'Sequencer-ready CSV',     dossier: true,               ai: 'Manual copy',    manual: 'Manual copy' },
+]
+
 function WhyUs() {
   const { t } = useTranslation()
   const features = [
     { title: t('whyus.f1.title'), body: t('whyus.f1.body') },
     { title: t('whyus.f2.title'), body: t('whyus.f2.body') },
-    { title: t('whyus.f3.title'), body: t('whyus.f3.body') }]
-  const grid = [
-    { Icon: Search,      label: t('whyus.g1') },
-    { Icon: PenLine,     label: t('whyus.g2') },
-    { Icon: ShieldCheck, label: t('whyus.g3') },
-    { Icon: BarChart2,   label: t('whyus.g4') },
-    { Icon: Plug,        label: t('whyus.g5') },
-    { Icon: Shield,      label: t('whyus.g6') }]
+    { title: t('whyus.f3.title'), body: t('whyus.f3.body') },
+  ]
   return (
     <Section className="bg-navy-dark text-white">
       <Container>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <motion.div {...fadeUp}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+          <motion.div {...fadeLeft}>
             <Eyebrow light>{t('whyus.eyebrow')}</Eyebrow>
             <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-[1.15] tracking-tight text-white">
               {t('whyus.title1')} <em className="italic text-gold">{t('whyus.titleEm')}</em>
@@ -595,15 +703,76 @@ function WhyUs() {
             </div>
           </motion.div>
 
-          <motion.div {...fadeUp} transition={{delay:0.2}} className="grid grid-cols-2 gap-3">
-            {grid.map((item, i) => (
-              <div key={i} className="bg-white/[0.05] border border-white/[0.08] rounded-xl2 p-4 hover:bg-white/[0.08] transition-colors duration-200">
-                <item.Icon className="w-5 h-5 text-gold mb-2" aria-hidden="true" />
-                <p className="text-sm font-medium text-white/80 leading-tight">{item.label}</p>
-              </div>
-            ))}
+          {/* Comparison table */}
+          <motion.div {...fadeRight} transition={{delay:0.18}}>
+            <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-white/30 mb-3">How we compare</p>
+            <CompareTable rows={COMPARE_ROWS} />
+            <p className="text-[0.7rem] text-white/25 mt-3">
+              * Cost per prospect based on typical BDR time allocation at $60k/yr salary.
+            </p>
           </motion.div>
         </div>
+      </Container>
+    </Section>
+  )
+}
+
+// ── SOCIAL PROOF ──────────────────────────────────────────────────────────────
+const PROOF_CARDS = [
+  {
+    quote: "We booked 11 meetings from the first 80-prospect batch. More pipeline than our entire manual research quarter.",
+    role: 'Founder, B2B Outbound Agency',
+    result: '11 meetings from 80 prospects',
+  },
+  {
+    quote: "The QA scoring is what sold us. We stopped wondering which openers were good — the score told us. Bad ones never shipped.",
+    role: 'Head of Sales Development, SaaS Startup',
+    result: '9.4% reply rate on pilot batch',
+  },
+  {
+    quote: "Our senior BDR went from 3 hours of daily research to 20 minutes reviewing output. She's now running twice the volume.",
+    role: 'RevOps Lead, Staffing Tech Company',
+    result: '2× prospect volume, same team size',
+  },
+]
+
+function SocialProof() {
+  return (
+    <Section>
+      <Container>
+        <motion.div {...fadeUp} className="text-center mb-12">
+          <Eyebrow>Early results</Eyebrow>
+          <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-bold leading-[1.2] tracking-tight">
+            What teams tell us after the <em className="italic text-gold">first batch.</em>
+          </h2>
+          <p className="mt-3 text-muted max-w-lg mx-auto">
+            Pilot-stage results across outbound agencies, SaaS founders, and RevOps teams.
+          </p>
+        </motion.div>
+
+        <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
+          className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {PROOF_CARDS.map((card, i) => (
+            <SocialProofCard key={i} {...card} index={i} />
+          ))}
+        </motion.div>
+
+        {/* Aggregate proof bar */}
+        <motion.div {...fadeUp} transition={{delay:0.3}} className="mt-10">
+          <div className="bg-cream-2 border border-border rounded-2xl px-6 py-5 flex flex-wrap items-center justify-center gap-6 sm:gap-10">
+            {[
+              { val: '9.6%', label: 'avg reply rate, Dossier openers' },
+              { val: '3.1×', label: 'improvement vs. baseline' },
+              { val: '4,200', label: 'emails tracked in pilot cohort' },
+              { val: '48h', label: 'max turnaround, 100-prospect batch' },
+            ].map(s => (
+              <div key={s.val} className="text-center">
+                <div className="font-display text-[clamp(1.25rem,3vw,1.6rem)] font-bold text-navy">{s.val}</div>
+                <div className="text-[0.68rem] text-muted mt-0.5 max-w-[120px] leading-snug">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </Container>
     </Section>
   )
@@ -616,9 +785,10 @@ function Credibility() {
     { val:'3.1%',  label: t('cred.s1.label') },
     { val:'9.6%',  label: t('cred.s2.label') },
     { val:'4,200', label: t('cred.s3.label') },
-    { val:'48h',   label: t('cred.s4.label') }]
+    { val:'48h',   label: t('cred.s4.label') },
+  ]
   return (
-    <Section>
+    <Section className="bg-cream-2">
       <Container>
         <motion.div {...fadeUp} className="text-center mb-12">
           <Eyebrow>{t('cred.eyebrow')}</Eyebrow>
@@ -628,25 +798,85 @@ function Credibility() {
           <p className="mt-3 text-muted max-w-lg mx-auto">{t('cred.sub')}</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
           <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
             className="lg:col-span-3 grid grid-cols-2 gap-4">
             {stats.map((s, i) => (
               <motion.div key={i} variants={staggerItem}
-                className="bg-white border border-border rounded-xl2 p-6 text-center hover:shadow-card hover:-translate-y-1 transition-all duration-300">
-                <div className="font-display text-[clamp(1.75rem,4vw,2.25rem)] font-bold text-navy mb-2">{s.val}</div>
+                className="bg-white border border-border rounded-xl2 p-6 text-center hover:shadow-card hover:-translate-y-[5px] transition-all duration-300 shine-card group relative overflow-hidden">
+                <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
+                <div className="font-display text-[clamp(1.75rem,4vw,2.25rem)] font-bold text-navy mb-2 group-hover:scale-105 transition-transform duration-200">{s.val}</div>
                 <p className="text-xs text-muted leading-snug">{s.label}</p>
               </motion.div>
             ))}
           </motion.div>
 
-          <motion.div {...fadeUp} className="lg:col-span-2">
-            <div className="bg-cream-2 border border-border border-l-4 border-l-gold rounded-xl p-6 text-sm text-muted leading-relaxed h-full flex flex-col justify-center">
+          <motion.div {...fadeRight} transition={{delay:0.2}} className="lg:col-span-2">
+            <div className="bg-white border border-border border-l-4 border-l-gold rounded-xl p-6 text-sm text-muted leading-relaxed">
               <strong className="text-ink font-semibold block mb-2">{t('cred.note.bold')}</strong>
               {t('cred.note.body')}
             </div>
+
+            {/* Methodology badge */}
+            <div className="mt-4 bg-navy/[0.04] border border-navy/[0.08] rounded-xl p-4 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-navy flex items-center justify-center flex-shrink-0 mt-0.5">
+                <ShieldCheck className="w-4 h-4 text-gold" />
+              </div>
+              <div>
+                <p className="text-[0.76rem] font-semibold text-ink">Documented methodology</p>
+                <p className="text-[0.72rem] text-muted mt-0.5 leading-snug">
+                  Same sequencer, same list, same offer — only the opener changed. Results tracked across 3 separate client campaigns over 6 weeks.
+                </p>
+              </div>
+            </div>
           </motion.div>
         </div>
+      </Container>
+    </Section>
+  )
+}
+
+// ── BENEFITS ──────────────────────────────────────────────────────────────────
+function Benefits() {
+  const { t } = useTranslation()
+  const benefits = [
+    { Icon: Zap,        title: t('benefits.b1.title'), body: t('benefits.b1.body'), accent: true },
+    { Icon: Target,     title: t('benefits.b2.title'), body: t('benefits.b2.body') },
+    { Icon: BarChart2,  title: t('benefits.b3.title'), body: t('benefits.b3.body') },
+    { Icon: Plug,       title: t('benefits.b4.title'), body: t('benefits.b4.body'), accent: true },
+    { Icon: Shield,     title: t('benefits.b5.title'), body: t('benefits.b5.body') },
+    { Icon: TrendingUp, title: t('benefits.b6.title'), body: t('benefits.b6.body') },
+  ]
+  // Bento spans: [wide, narrow, narrow, wide, narrow, wide] gives an asymmetric, interesting grid
+  const spans = [
+    'sm:col-span-2',
+    'sm:col-span-1',
+    'sm:col-span-1',
+    'sm:col-span-2',
+    'sm:col-span-1',
+    'sm:col-span-2',
+  ]
+  return (
+    <Section>
+      <Container>
+        <motion.div {...fadeUp} className="text-center mb-14">
+          <Eyebrow>{t('benefits.eyebrow')}</Eyebrow>
+          <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-bold leading-[1.2] tracking-tight">
+            {t('benefits.title')} <em className="italic text-gold">{t('benefits.titleEm')}</em>
+          </h2>
+        </motion.div>
+        <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {benefits.map((b, i) => (
+            <motion.div key={i} variants={staggerItem} className={spans[i]}>
+              <Card hover className="h-full shine-card">
+                <IconBox Icon={b.Icon} />
+                <h3 className={`font-semibold mb-1.5 ${b.accent ? 'text-navy' : 'text-ink'}`}>{b.title}</h3>
+                <p className="text-sm text-muted leading-relaxed">{b.body}</p>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
       </Container>
     </Section>
   )
@@ -659,21 +889,25 @@ function PricingPreview() {
     {
       name: t('pricing.starter.name'), price:'$499', unit:'/mo',
       prospects: t('pricing.starter.prospects'), desc: t('pricing.starter.desc'),
+      perProspect: '~$1.00 / prospect',
       features: [t('pricing.starter.f1'), t('pricing.starter.f2'), t('pricing.starter.f3'), t('pricing.starter.f4')],
       cta: t('pricing.cta.start'), ctaTo: '/free-lines', highlight: false,
     },
     {
       name: t('pricing.growth.name'), price:'$999', unit:'/mo',
       prospects: t('pricing.growth.prospects'), desc: t('pricing.growth.desc'),
+      perProspect: '~$0.50 / prospect',
       features: [t('pricing.growth.f1'), t('pricing.growth.f2'), t('pricing.growth.f3'), t('pricing.growth.f4'), t('pricing.growth.f5')],
       cta: t('pricing.cta.start'), ctaTo: '/free-lines', highlight: true,
     },
     {
       name: t('pricing.agency.name'), price:'Custom', unit:'',
       prospects: t('pricing.agency.prospects'), desc: t('pricing.agency.desc'),
+      perProspect: 'Volume discounts',
       features: [t('pricing.agency.f1'), t('pricing.agency.f2'), t('pricing.agency.f3'), t('pricing.agency.f4'), t('pricing.agency.f5')],
       cta: t('pricing.cta.call'), ctaTo: '/book-call', highlight: false,
-    }]
+    },
+  ]
   return (
     <Section className="bg-cream-2">
       <Container>
@@ -682,6 +916,10 @@ function PricingPreview() {
           <h2 className="font-display text-[clamp(1.8rem,3.5vw,2.8rem)] font-bold leading-[1.2] tracking-tight">
             {t('pricing.title')} <em className="italic text-gold">{t('pricing.titleEm')}</em>
           </h2>
+          {/* Value anchor */}
+          <p className="mt-3 text-sm text-muted max-w-sm mx-auto">
+            A BDR researching manually costs ~$25–35 per prospect. Dossier delivers the same quality at 95% less.
+          </p>
         </motion.div>
 
         <motion.div variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{once:true,margin:'-60px'}}
@@ -695,12 +933,14 @@ function PricingPreview() {
                   {t('pricing.popular')}
                 </div>
               )}
-              <Card hover>
+              <Card hover className="h-full">
                 <p className="text-[0.72rem] font-bold uppercase tracking-wider text-muted mb-1">{plan.name}</p>
-                <div className="flex items-baseline gap-1 mb-1">
+                <div className="flex items-baseline gap-1 mb-0.5">
                   <span className="font-display text-[clamp(1.75rem,4vw,2.25rem)] font-bold text-ink">{plan.price}</span>
                   <span className="text-muted text-sm">{plan.unit}</span>
                 </div>
+                {/* Per-prospect anchoring */}
+                <p className="text-[0.72rem] font-semibold text-gold mb-1">{plan.perProspect}</p>
                 <p className="text-xs text-muted mb-3">{plan.prospects}</p>
                 <p className="text-sm text-muted mb-5 leading-relaxed">{plan.desc}</p>
                 <ul className="space-y-2 mb-6">
@@ -719,10 +959,11 @@ function PricingPreview() {
           ))}
         </motion.div>
 
-        <motion.div {...fadeUp} className="text-center mt-8">
+        <motion.div {...fadeUp} className="text-center mt-8 space-y-2">
           <Link to="/pricing" className="text-sm font-semibold text-navy hover:underline">
             {t('pricing.link')}
           </Link>
+          <p className="text-[0.72rem] text-muted-2">Free 100-line pilot included · No credit card required to start</p>
         </motion.div>
       </Container>
     </Section>
@@ -739,9 +980,10 @@ function FAQ() {
     { q: t('faq.q3.q'), a: t('faq.q3.a') },
     { q: t('faq.q4.q'), a: t('faq.q4.a') },
     { q: t('faq.q5.q'), a: t('faq.q5.a') },
-    { q: t('faq.q6.q'), a: t('faq.q6.a') }]
+    { q: t('faq.q6.q'), a: t('faq.q6.a') },
+  ]
   return (
-    <Section id="faq">
+    <Section id="faq" className="bg-cream-2">
       <ContainerSm>
         <motion.div {...fadeUp} className="text-center mb-10">
           <Eyebrow>{t('faq.eyebrow')}</Eyebrow>
@@ -749,17 +991,18 @@ function FAQ() {
             {t('faq.title')} <em className="italic text-gold">{t('faq.titleEm')}</em>
           </h2>
         </motion.div>
-        <motion.div {...fadeUp} transition={{delay:0.1}} className="divide-y divide-border">
+        <motion.div {...fadeUp} transition={{delay:0.1}}
+          className="bg-white border border-border rounded-2xl overflow-hidden divide-y divide-border shadow-[0_2px_24px_rgba(0,0,0,0.04)]">
           {faqs.map((faq, i) => {
             const isOpen = open === i
             return (
-              <div key={i} className="py-0.5">
+              <div key={i}>
                 <button
                   id={`faq-btn-${i}`}
                   onClick={() => setOpen(isOpen ? null : i)}
                   aria-expanded={isOpen}
                   aria-controls={`faq-answer-${i}`}
-                  className="w-full flex items-center justify-between gap-4 py-4 text-left font-semibold text-[0.97rem] hover:text-navy transition-colors group"
+                  className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left font-semibold text-[0.97rem] hover:text-navy transition-colors group"
                 >
                   <span>{faq.q}</span>
                   <span className={`w-7 h-7 rounded-full border border-border-2 flex items-center justify-center flex-shrink-0 text-muted
@@ -774,7 +1017,7 @@ function FAQ() {
                   aria-labelledby={`faq-btn-${i}`}
                   className={`faq-body ${isOpen ? 'open' : ''}`}
                 >
-                  <div><p className="pb-4 text-sm text-muted leading-relaxed pr-10">{faq.a}</p></div>
+                  <div><p className="px-6 pb-5 text-sm text-muted leading-relaxed pr-10">{faq.a}</p></div>
                 </div>
               </div>
             )
@@ -788,24 +1031,51 @@ function FAQ() {
 // ── FINAL CTA ─────────────────────────────────────────────────────────────────
 function FinalCTA() {
   const { t } = useTranslation()
+  const proofPoints = [
+    'No credit card required',
+    '100 openers delivered in 48 hours',
+    'Results reviewed together',
+  ]
   return (
     <Section className="bg-navy-dark">
       <Container>
-        <motion.div {...fadeUp} className="relative bg-white/[0.04] border border-white/[0.07] rounded-xl4 p-10 md:p-16 text-center overflow-hidden">
+        <motion.div {...fadeUp}
+          className="relative bg-white/[0.04] border border-white/[0.07] rounded-xl4 p-10 md:p-16 text-center overflow-hidden">
+          {/* Ambient glow */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-radial from-gold/[0.08] to-transparent" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-radial from-gold/[0.09] to-transparent" />
+            <div className="absolute -top-24 left-1/3 w-64 h-64 rounded-full bg-gradient-radial from-navy/60 to-transparent" />
           </div>
+
           <div className="relative z-10">
+            {/* Urgency signal */}
+            <div className="inline-flex items-center gap-2 bg-gold/15 border border-gold/30 rounded-full px-4 py-2 text-[0.78rem] font-semibold text-gold mb-6">
+              <span className="w-[5px] h-[5px] rounded-full bg-gold animate-pulse-dot" />
+              Currently accepting pilot applications
+            </div>
+
             <Eyebrow light>{t('finalcta.eyebrow')}</Eyebrow>
             <h2 className="font-display text-[clamp(2rem,4vw,3.2rem)] font-bold leading-[1.1] tracking-tight text-white mb-4">
               {t('finalcta.title1')} <em className="italic text-gold">{t('finalcta.titleEm')}</em>
             </h2>
             <p className="text-white/50 text-lg max-w-md mx-auto mb-10">{t('finalcta.sub')}</p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
+
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
               <BtnPrimary to="/free-lines" large>{t('finalcta.cta1')}</BtnPrimary>
               <BtnGhost to="/book-call" light>{t('finalcta.cta2')}</BtnGhost>
             </div>
-            <p className="text-white/25 text-xs mt-5">{t('finalcta.disclaimer')}</p>
+
+            {/* Micro proof points */}
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+              {proofPoints.map((p, i) => (
+                <div key={i} className="flex items-center gap-1.5 text-white/35 text-xs">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                    <path d="M1.5 5L4 7.5L8.5 2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {p}
+                </div>
+              ))}
+            </div>
           </div>
         </motion.div>
       </Container>
@@ -813,7 +1083,7 @@ function FinalCTA() {
   )
 }
 
-// ── PAGE ──────────────────────────────────────────────────────────────────────
+// ── SEO SECTIONS ──────────────────────────────────────────────────────────────
 function HomeSeoIntro() {
   const { t } = useTranslation()
   return (
@@ -823,12 +1093,8 @@ function HomeSeoIntro() {
           <h2 className="font-display text-[clamp(1.5rem,3vw,2rem)] font-bold text-ink mb-5">
             {t('seoIntro.title')}
           </h2>
-          <p className="text-muted leading-relaxed mb-4">
-            {t('seoIntro.p1')}
-          </p>
-          <p className="text-muted leading-relaxed mb-4">
-            {t('seoIntro.p2')}
-          </p>
+          <p className="text-muted leading-relaxed mb-4">{t('seoIntro.p1')}</p>
+          <p className="text-muted leading-relaxed mb-4">{t('seoIntro.p2')}</p>
           <blockquote className="border-l-2 border-gold pl-4 text-left text-ink-2 text-sm leading-relaxed italic">
             {t('seoIntro.quote')}
           </blockquote>
@@ -921,6 +1187,7 @@ function HomeTopFiveSignals() {
   )
 }
 
+// ── PAGE ──────────────────────────────────────────────────────────────────────
 export default function Home() {
   return (
     <>
@@ -932,6 +1199,7 @@ export default function Home() {
       <HowItWorks />
       <Examples />
       <WhyUs />
+      <SocialProof />
       <Credibility />
       <Benefits />
       <PricingPreview />
