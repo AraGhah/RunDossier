@@ -18,8 +18,11 @@
     "landing:openers": "tsx scripts/export-landing-openers.ts",
     "pilot:migrate": "tsx scripts/apply-pilot-migration.ts",
     "workflow:migrate": "tsx scripts/apply-workflow-migration.ts",
+    "audit:migrate": "tsx scripts/apply-audit-migration.ts",
     "search": "tsx scripts/run-prospect-search.ts",
-    "test": "tsx --test src/**/*.test.ts"
+    "test": "tsx --test src/**/*.test.ts",
+    "test:coverage": "node --import tsx --test --experimental-test-coverage --test-coverage-include=src/utils/** --test-coverage-include=src/middleware/** src/**/*.test.ts",
+    "audit:deps": "npm audit --audit-level=high"
   },
   "engines": {
     "node": ">=22.12.0"
