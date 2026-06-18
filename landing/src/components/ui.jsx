@@ -58,7 +58,7 @@ export function Eyebrow({ children, light }) {
 // ── PRIMARY CTA BUTTON ────────────────────────────────────────────────────────
 export function BtnPrimary({ to, href, children, large, className = '' }) {
   const cls = `inline-flex items-center gap-3 bg-navy text-white font-semibold rounded-full shadow-cta
-    hover:bg-navy-2 hover:shadow-cta-hover active:scale-[0.97]
+    hover:bg-navy-2 hover:shadow-cta-hover hover:scale-[1.025] active:scale-[0.97]
     transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group
     ${large ? 'text-[1rem] pl-6 pr-2 py-3' : 'text-[0.88rem] pl-5 pr-2 py-2.5'} ${className}`
 
@@ -116,7 +116,7 @@ export function Card({ children, className = '', innerClassName = '', hover = tr
     ? 'bg-white/[0.06] rounded-[calc(1.5rem-4px)] p-6 h-full shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
     : 'bg-white rounded-[calc(1.5rem-4px)] p-6 h-full shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]'
   return (
-    <div className={`${outer} ${hover ? 'transition-all duration-400 hover:-translate-y-1 hover:shadow-card' : ''} ${className}`}>
+    <div className={`${outer} ${hover ? 'transition-all duration-300 hover:-translate-y-[5px] hover:shadow-card' : ''} ${className}`}>
       <div className={`${inner} ${innerClassName}`}>{children}</div>
     </div>
   )

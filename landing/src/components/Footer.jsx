@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import ContactBlock from './ContactBlock'
+import PublicProfiles from './PublicProfiles'
 import { useTranslation } from '../context/LanguageContext'
 
 // Hash links must use plain <a href>, React Router's <Link> does not scroll to anchors reliably
@@ -33,6 +34,9 @@ export default function Footer() {
     [t('footer.col.company')]: [
       { l: t('footer.link.about'), to: '/about' },
       { l: t('footer.link.contact'), to: '/contact' }],
+    [t('footer.col.public')]: [
+      { l: t('footer.link.linkedin'), to: 'https://www.linkedin.com/in/ara-ghahramanyan-086261405/', newTab: true },
+      { l: t('footer.link.calPublic'), to: 'https://cal.com/preframe', newTab: true }],
     [t('footer.col.legal')]: [
       { l: t('footer.link.privacy'), to: '/privacy', newTab: true },
       { l: t('footer.link.terms'), to: '/terms', newTab: true }],
@@ -41,7 +45,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-border bg-cream-2">
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-10">
 
           {/* Brand */}
           <div className="col-span-2">
@@ -60,17 +64,10 @@ export default function Footer() {
               <ContactBlock />
             </div>
             <div className="mt-5">
-              <a
-                href="https://www.linkedin.com/in/ara-ghahramanyan-086261405/"
-                target="_blank"
-                rel="noopener noreferrer me"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-navy underline underline-offset-[3px] decoration-navy/40 hover:decoration-navy transition-colors"
-              >
-                {t('footer.linkedin')}
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                  <path d="M2 8L8 2M8 2H4M8 2V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </a>
+              <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-muted-2 mb-3">
+                {t('footer.col.public')}
+              </p>
+              <PublicProfiles variant="compact" />
             </div>
             <div className="mt-6">
               <Link

@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { query } from '../db.js';
 import { notify } from '../notify.js';
@@ -13,6 +14,39 @@ interface ClientRow {
   name: string;
   contact_email: string;
   client_first_name: string | null;
+}
+
+export interface DeliveryRunSummary {
+  clientsProcessed: number;
+  prospectsDelivered: number;
+  details: string[];
+  errors: string[];
+}
+
+let resolvedDeliveryDir: string | null = null;
+
+async function ensureDeliveryDir(): Promise<string> {
+  if (resolvedDeliveryDir) return resolvedDeliveryDir;
+
+  const candidates = [
+    config.deliveryDir,
+    join(tmpdir(), 'dossier-deliveries'),
+    'data/deliveries',
+  ];
+
+  for (const dir of [...new Set(candidates)]) {
+    try {
+      await mkdir(dir, { recursive: true });
+      resolvedDeliveryDir = dir;
+      return dir;
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === 'EACCES' || code === 'EROFS') continue;
+      throw err;
+    }
+  }
+
+  throw new Error('No writable delivery directory (set DELIVERY_DIR to a writable path)');
 }
 
 async function sendDeliveryEmail(
@@ -41,6 +75,12 @@ async function sendDeliveryEmail(
       },
     ],
   });
+}
+
+function averageFitScore(rows: DeliveryRow[]): number {
+  if (rows.length === 0) return 0;
+  const sum = rows.reduce((acc, row) => acc + (row.fit_score ?? 0), 0);
+  return Math.round(sum / rows.length);
 }
 
 export async function runDeliveryForClient(clientId: string): Promise<number> {
@@ -101,16 +141,19 @@ export async function runDeliveryForClient(clientId: string): Promise<number> {
        WHERE id = ANY($1::uuid[])`,
       [rows.map(r => r.id)]
     );
-    await notify(`Delivery skipped for ${client.name}: all rows filtered (internal emails) — prospects marked delivered`);
-    return 0;
+    await notify(
+      `W5 Livraison — ${client.name}\n` +
+        `• ${rows.length} prospect(s) marqués livrés (emails internes uniquement, CSV non envoyé)`
+    );
+    return rows.length;
   }
 
   const csv = buildDeliveryCsv(deliverable);
   const date = new Date().toISOString().slice(0, 10);
   const filename = `Dossier Delivery - ${date} - ${client.name.replace(/[^\w.-]+/g, '_')}.csv`;
 
-  await mkdir(config.deliveryDir, { recursive: true });
-  const filePath = join(config.deliveryDir, filename);
+  const deliveryDir = await ensureDeliveryDir();
+  const filePath = join(deliveryDir, filename);
   await writeFile(filePath, csv, 'utf8');
 
   const emailed = await sendDeliveryEmail(
@@ -137,20 +180,33 @@ export async function runDeliveryForClient(clientId: string): Promise<number> {
     );
   }
 
+  const avgFit = averageFitScore(deliverable);
+  const emailStatus = emailed
+    ? 'email envoyé'
+    : resendConfigured()
+      ? 'email échoué — retry au prochain cycle'
+      : 'Resend non configuré — CSV seulement';
+
   await notify(
-    `W5 Delivery: ${client.name}\n${deliverable.length} prospect(s)\nFile: ${filePath}\nEmail: ${client.contact_email}${
-      emailed
-        ? ''
-        : resendConfigured()
-          ? '\n(Email failed — prospects left in personalized_qa_passed for retry)'
-          : '\n(Resend not configured — CSV saved only)'
-    }`
+    `W5 Livraison — ${client.name}\n` +
+      `• ${deliverable.length} prospect(s) exportés` +
+      (internalOnlyIds.length > 0 ? ` (${internalOnlyIds.length} interne(s) exclus)` : '') +
+      `\n• Score fit moyen: ${avgFit}/100\n` +
+      `• Fichier: ${filePath}\n` +
+      `• Destinataire: ${client.contact_email} (${emailStatus})`
   );
 
   return canFinalize ? deliverable.length : 0;
 }
 
-export async function runDelivery(): Promise<void> {
+export async function runDelivery(): Promise<DeliveryRunSummary> {
+  const summary: DeliveryRunSummary = {
+    clientsProcessed: 0,
+    prospectsDelivered: 0,
+    details: [],
+    errors: [],
+  };
+
   const clients = await query<{ client_id: string }>(
     `SELECT DISTINCT client_id
      FROM prospects
@@ -159,10 +215,22 @@ export async function runDelivery(): Promise<void> {
 
   for (const { client_id } of clients) {
     try {
-      await runDeliveryForClient(client_id);
+      const [client] = await query<{ name: string }>(
+        `SELECT name FROM clients WHERE id = $1`,
+        [client_id]
+      );
+      const count = await runDeliveryForClient(client_id);
+      if (count > 0) {
+        summary.clientsProcessed += 1;
+        summary.prospectsDelivered += count;
+        summary.details.push(`${client?.name ?? client_id}: ${count} livré(s)`);
+      }
     } catch (err) {
+      const message = (err as Error).message;
       console.error('[delivery] client error:', client_id, err);
-      await notify(`Delivery failed for client ${client_id}: ${(err as Error).message}`);
+      summary.errors.push(`${client_id}: ${message}`);
     }
   }
+
+  return summary;
 }

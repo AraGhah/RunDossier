@@ -28,6 +28,7 @@ export default function Privacy() {
     email: LEGAL_EMAIL,
     city: LEGAL_CITY,
     bookCallUrl: `${LEGAL_WEBSITE}/book-call`,
+    lastUpdated: LEGAL_LAST_UPDATED,
   }
   const c = getPrivacyContent(lang, vars)
 

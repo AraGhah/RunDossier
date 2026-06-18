@@ -19,6 +19,8 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
 
+RUN mkdir -p /app/data/deliveries && chown -R preframe:preframe /app/data
+
 # Drop to non-root before the process starts
 USER preframe
 

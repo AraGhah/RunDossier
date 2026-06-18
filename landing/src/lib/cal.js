@@ -12,8 +12,8 @@ export const CAL_HOST_ROLE = 'Founder, Dossier'
 export const CAL_HOST_EMAIL = 'ara@getdossier.co'
 
 export const calLinks = {
-  zoom: import.meta.env.VITE_CAL_ZOOM_LINK?.trim() || DEFAULT_CAL_LINK,
-  teams: import.meta.env.VITE_CAL_TEAMS_LINK?.trim() || DEFAULT_CAL_LINK,
+  zoom: import.meta.env?.VITE_CAL_ZOOM_LINK?.trim() || DEFAULT_CAL_LINK,
+  teams: import.meta.env?.VITE_CAL_TEAMS_LINK?.trim() || DEFAULT_CAL_LINK,
 }
 
 export const calLinksDiffer = calLinks.zoom !== calLinks.teams

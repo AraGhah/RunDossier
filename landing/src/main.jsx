@@ -7,6 +7,7 @@ import App from './App'
 import './index.css'
 import { initCloudflareAnalytics } from './lib/cloudflare-analytics.js'
 
+document.documentElement.classList.add('js')
 initCloudflareAnalytics()
 
 // Disable all framer-motion animations for users who prefer reduced motion

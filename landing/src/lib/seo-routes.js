@@ -18,13 +18,14 @@ const SEO_DESCRIPTIONS = {
     '/free-lines':
       'Claim 100 free personalized openers. Three QA-scored variants per prospect, research signals included, CSV delivered in 24 to 48 hours.',
     '/book-call':
-      'Book a 30-minute fit call with Dossier. Review your ICP, see a live opener example, and decide if the free 100-prospect pilot makes sense.',
+      'Book a free 30-minute fit call with Ara Ghahramanyan (Dossier, Montreal, Quebec) at cal.com/preframe via Zoom or Microsoft Teams. We show a live QA-scored opener from your niche and confirm if the free 100-prospect pilot (CSV in 24–48 h, $0) fits.',
     '/service':
       'Dossier researches each B2B prospect, writes QA-scored cold email openers, and delivers a CSV for Smartlead, Instantly, Lemlist, and other sequencers.',
     '/contact':
       'Contact Dossier by email, phone, or scheduling link. Pilot requests, pricing questions, and partnership inquiries.',
-    '/privacy': 'Privacy Policy for Dossier, how we collect, use, and protect your data.',
-    '/terms': 'Terms of Service for Dossier, usage terms for our personalized opener service.',
+    '/privacy': 'Privacy Policy for Dossier — how we collect, use, and protect your data under PIPEDA and Quebec Law 25. Operated by Ara Ghahramanyan, Montreal, Canada.',
+    '/terms':
+      'What are Dossier Terms of Service? Rules for the B2B opener service: free 100-prospect pilot, Starter ($499/mo), Growth ($999/mo), compliance, billing, and liability.',
   },
   fr: {
     '/':

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Linkedin } from 'lucide-react'
 import { useTranslation } from '../context/LanguageContext'
+import { LINKEDIN_URL } from '../lib/site-data'
 import FlagIcon from './FlagIcon'
 
 const LANGS = [
@@ -113,6 +115,15 @@ export default function Nav() {
 
           {/* CTAs + Lang */}
           <div className="hidden md:flex items-center gap-2">
+            <a
+              href={LINKEDIN_URL}
+              target="_blank"
+              rel="noopener noreferrer me"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-muted hover:text-navy hover:bg-black/[0.04] transition-colors"
+              aria-label={t('nav.linkedinAria')}
+            >
+              <Linkedin className="w-4 h-4" aria-hidden="true" />
+            </a>
             <LangSwitcher />
             <Link to="/free-lines"
               className="text-[0.8rem] font-semibold text-navy px-4 py-2 rounded-full border border-navy/20
@@ -188,6 +199,15 @@ export default function Nav() {
               className="flex flex-col items-center gap-3 mt-6"
             >
               <LangSwitcher />
+              <a
+                href={LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer me"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-navy/20 text-navy font-semibold text-sm"
+              >
+                <Linkedin className="w-4 h-4" aria-hidden="true" />
+                {t('nav.linkedin')}
+              </a>
               <div className="flex gap-3">
                 <Link to="/free-lines" className="px-6 py-3 rounded-full border border-navy/30 text-navy font-semibold text-sm">
                   {t('nav.freeLines')}

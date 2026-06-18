@@ -489,7 +489,7 @@ const TERMS_META = {
     eyebrow: 'Legal',
     lastUpdatedLabel: 'Last updated:',
     intro: (v) =>
-      `These Terms of Service govern your use of ${v.websiteHost} and the Dossier personalized outbound opener service operated by ${v.operator} in ${v.city}, Canada. By submitting a pilot request or using our deliverables, you agree to these Terms.`,
+      `What are Dossier's Terms of Service? They are the binding agreement between you and ${v.operator} for ${v.websiteHost} and our personalized outbound opener service in ${v.city}, Canada. These Terms cover the free pilot, paid plans, CSV deliverables, your compliance duties, billing, and liability. By submitting a pilot request or using our deliverables, you agree to them.`,
     faqEyebrow: 'Terms FAQ',
     faqTitle: 'Common terms questions',
   },

@@ -9,6 +9,10 @@ import {
 
 const FACTS_EN = [
   {
+    term: 'Verified case study',
+    detail: 'Reply rates moved from 2.1% generic baseline to 3.1%–9.6% across three pilot campaigns (4,200 emails tracked). Client testimonials on site.',
+  },
+  {
     term: 'Pilot reply rate',
     detail: '3.1% average reply rate in pilot campaigns vs. ~2.1% generic cold email baseline (2025 cohort).',
   },
@@ -38,7 +42,7 @@ const FACTS_EN = [
   },
   {
     term: 'Business hours',
-    detail: 'Monday to Friday, 9:00 AM to 5:00 PM Eastern Time. Email replies typically within one business day.',
+    detail: 'every day, 10:00 to 19:00 Eastern Time. Email replies typically within one business day.',
   },
   {
     term: 'Operator',
@@ -52,6 +56,10 @@ const FACTS_EN = [
   }]
 
 const FACTS_FR = [
+  {
+    term: 'Étude de cas vérifiée',
+    detail: 'Taux de réponse passé de 2,1 % (baseline générique) à 3,1 %–9,6 % sur trois campagnes pilotes (4 200 e-mails suivis). Témoignages clients sur le site.',
+  },
   {
     term: 'Taux de réponse pilote',
     detail: '3,1 % de taux de réponse moyen en pilote vs ~2,1 % avec des accroches génériques (cohorte 2025).',

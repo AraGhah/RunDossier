@@ -4,12 +4,12 @@ import { translations } from '../i18n/translations'
 /** Visible H1 must match document title token-for-token for SEO audits. */
 export const PAGE_TITLES = {
   '/': pageTitle(),
-  '/pricing': 'Dossier Pricing, Start free, scale when it works',
-  '/about': 'About Dossier, Research-backed outbound openers',
-  '/free-lines': 'Dossier, 100 Free Personalized Openers',
-  '/book-call': 'Book a Call with Dossier, 30-Minute Fit Assessment',
-  '/service': 'Dossier Service, Personalized outbound openers',
-  '/contact': 'Contact Dossier, Email, phone, and scheduling',
+  '/pricing': pageTitle('Pricing'),
+  '/about': pageTitle('About'),
+  '/free-lines': pageTitle('100 Free Lines'),
+  '/book-call': pageTitle('Book a Call'),
+  '/service': pageTitle('Service'),
+  '/contact': pageTitle('Contact'),
   '/privacy': pageTitle('Privacy Policy'),
   '/terms': pageTitle('Terms of Service'),
 }

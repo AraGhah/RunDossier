@@ -12,7 +12,7 @@ export const LEGAL_JURISDICTION = 'Province of Quebec, Canada'
 export const LEGAL_CITY = 'Montreal'
 export const LEGAL_REGION = 'Quebec'
 export const LEGAL_COUNTRY = 'CA'
-export const LEGAL_BUSINESS_HOURS = 'Monday to Friday, 9:00 AM to 5:00 PM Eastern Time'
+export const LEGAL_BUSINESS_HOURS = 'every day, 10:00 to 19:00 Eastern Time'
 
 export function legalPhoneTel() {
   if (!LEGAL_PHONE) return ''

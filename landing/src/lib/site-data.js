@@ -15,10 +15,35 @@ export const SITE_DESCRIPTION =
   'Research-backed first lines for outbound agencies and B2B founders. Structured prospect research, QA-scored openers, CSV delivery in 24 to 48 hours.'
 export const SITE_LAST_UPDATED = '2026-06-16'
 
-export const SOCIAL_LINKS = [
-  'https://www.linkedin.com/in/ara-ghahramanyan-086261405/',
-  'https://rundossier.co',
+export const LINKEDIN_URL = 'https://www.linkedin.com/in/ara-ghahramanyan-086261405/'
+export const LINKEDIN_HANDLE = 'linkedin.com/in/ara-ghahramanyan-086261405'
+export const CAL_PUBLIC_URL = 'https://cal.com/preframe'
+export const CAL_PUBLIC_HANDLE = 'cal.com/preframe'
+
+/** Public profiles surfaced sitewide for trust audits and human discovery. */
+export const PUBLIC_PROFILES = [
+  {
+    id: 'linkedin',
+    platform: 'LinkedIn',
+    titleKey: 'publicProfiles.linkedin.title',
+    bodyKey: 'publicProfiles.linkedin.body',
+    actionKey: 'publicProfiles.linkedin.action',
+    url: LINKEDIN_URL,
+    displayUrl: LINKEDIN_HANDLE,
+    rel: 'me',
+  },
+  {
+    id: 'cal',
+    platform: 'Cal.com',
+    titleKey: 'publicProfiles.cal.title',
+    bodyKey: 'publicProfiles.cal.body',
+    actionKey: 'publicProfiles.cal.action',
+    url: CAL_PUBLIC_URL,
+    displayUrl: CAL_PUBLIC_HANDLE,
+  },
 ]
+
+export const SOCIAL_LINKS = [LINKEDIN_URL, CAL_PUBLIC_URL]
 
 export const HOME_FAQ = [
   {

@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import {
   Section, Container, ContainerSm, Eyebrow, BtnPrimary, BtnGhost,
-  Card, Divider, fadeUp, fadeUpBlur, staggerContainer, staggerItem,
+  Card, fadeUp, fadeUpBlur, staggerContainer, staggerItem,
   OpenerCard,
 } from '../components/ui'
 import { useTranslation } from '../context/LanguageContext'
@@ -77,11 +77,11 @@ function Hero() {
               {t('hero.eyebrow')}
             </p>
 
-            <PageH1 className="mb-4">{seoH1}</PageH1>
+            <PageH1 className="sr-only">{seoH1}</PageH1>
 
             <h2
               ref={hookRef}
-              className="font-display text-[clamp(1.6rem,3.2vw,2.4rem)] font-bold leading-[1.12] tracking-[-0.02em] text-ink mb-4"
+              className="font-display text-[clamp(2.2rem,4.5vw,3.6rem)] font-bold leading-[1.08] tracking-[-0.03em] text-ink mb-6"
             >
               {hookText}
             </h2>
@@ -110,14 +110,6 @@ function Hero() {
               {t('hero.disclaimer')}
             </motion.p>
 
-            <motion.div {...fadeUp} transition={{ delay: 0.6, duration: 0.7, ease:[0.32,0.72,0,1] }}
-              className="flex flex-wrap gap-2 mt-10">
-              {['Smartlead','Instantly','Lemlist','EmailBison','Clay','Apollo CSV'].map(tag => (
-                <span key={tag} className="text-[0.72rem] font-medium bg-white border border-border text-muted rounded-full px-3 py-1.5 hover:border-border-2 transition-colors">
-                  {tag}
-                </span>
-              ))}
-            </motion.div>
           </motion.div>
 
           {/* Right: live opener preview */}
@@ -159,6 +151,30 @@ function Hero() {
         </div>
       </Container>
     </section>
+  )
+}
+
+// ── INTEGRATOR STRIP ─────────────────────────────────────────────────────────
+function IntegratorStrip() {
+  const tools = ['Smartlead', 'Instantly', 'Lemlist', 'EmailBison', 'Clay', 'Apollo']
+  return (
+    <div className="border-y border-border py-5 bg-white/60">
+      <Container>
+        <div className="flex items-center gap-4 sm:gap-8 flex-wrap justify-center">
+          <span className="text-[0.62rem] font-bold uppercase tracking-[0.16em] text-muted-2 whitespace-nowrap">
+            CSV-ready for
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {tools.map(tool => (
+              <span key={tool}
+                className="text-[0.76rem] font-medium text-ink-2 bg-white border border-border px-3.5 py-1.5 rounded-full shadow-sm whitespace-nowrap hover:border-border-2 transition-all duration-200">
+                {tool}
+              </span>
+            ))}
+          </div>
+        </div>
+      </Container>
+    </div>
   )
 }
 
@@ -822,33 +838,110 @@ function HomeSeoIntro() {
   )
 }
 
+function HomeQueryAnswers() {
+  const { t } = useTranslation()
+  const items = [
+    { title: t('query.what.title'), body: t('query.what.body') },
+    { title: t('query.how.title'), body: t('query.how.body') },
+    { title: t('query.why.title'), body: t('query.why.body') },
+  ]
+  return (
+    <Section>
+      <ContainerSm>
+        <motion.article {...fadeUp} className="max-w-3xl mx-auto space-y-8">
+          {items.map((item) => (
+            <div key={item.title}>
+              <h2 className="font-display text-[clamp(1.35rem,2.8vw,1.75rem)] font-bold text-ink mb-3">
+                {item.title}
+              </h2>
+              <p className="text-muted leading-relaxed">{item.body}</p>
+            </div>
+          ))}
+        </motion.article>
+      </ContainerSm>
+    </Section>
+  )
+}
+
+function HomeTopThreeReasons() {
+  const { t } = useTranslation()
+  const items = [
+    { title: t('top3.s1.title'), body: t('top3.s1.body') },
+    { title: t('top3.s2.title'), body: t('top3.s2.body') },
+    { title: t('top3.s3.title'), body: t('top3.s3.body') },
+  ]
+  return (
+    <Section>
+      <ContainerSm>
+        <motion.article {...fadeUp} className="max-w-3xl mx-auto">
+          <h2 className="font-display text-[clamp(1.5rem,3vw,2rem)] font-bold text-ink mb-6 text-center">
+            {t('top3.title')}
+          </h2>
+          <ol className="space-y-5 list-decimal pl-5 marker:font-semibold marker:text-navy">
+            {items.map((item) => (
+              <li key={item.title} className="pl-1">
+                <h3 className="font-display text-lg font-semibold text-ink mb-1">{item.title}</h3>
+                <p className="text-sm text-muted leading-relaxed">{item.body}</p>
+              </li>
+            ))}
+          </ol>
+        </motion.article>
+      </ContainerSm>
+    </Section>
+  )
+}
+
+function HomeTopFiveSignals() {
+  const { t } = useTranslation()
+  const items = [
+    { title: t('top5.s1.title'), body: t('top5.s1.body') },
+    { title: t('top5.s2.title'), body: t('top5.s2.body') },
+    { title: t('top5.s3.title'), body: t('top5.s3.body') },
+    { title: t('top5.s4.title'), body: t('top5.s4.body') },
+    { title: t('top5.s5.title'), body: t('top5.s5.body') },
+  ]
+  return (
+    <Section className="bg-cream-2">
+      <ContainerSm>
+        <motion.article {...fadeUp} className="max-w-3xl mx-auto">
+          <h2 className="font-display text-[clamp(1.5rem,3vw,2rem)] font-bold text-ink mb-6 text-center">
+            {t('top5.title')}
+          </h2>
+          <ol className="space-y-5 list-decimal pl-5 marker:font-semibold marker:text-navy">
+            {items.map((item) => (
+              <li key={item.title} className="pl-1">
+                <h3 className="font-display text-lg font-semibold text-ink mb-1">{item.title}</h3>
+                <p className="text-sm text-muted leading-relaxed">{item.body}</p>
+              </li>
+            ))}
+          </ol>
+        </motion.article>
+      </ContainerSm>
+    </Section>
+  )
+}
+
 export default function Home() {
   return (
     <>
       <Hero />
-      <ServiceFacts titleKey="serviceFacts.title.home" className="bg-cream-2 py-12 sm:py-16" />
-      <HomeSeoIntro />
-      <Divider />
+      <IntegratorStrip />
       <Problem />
-      <Divider />
       <Agitation />
-      <Divider />
       <Solution />
-      <Divider />
       <HowItWorks />
-      <Divider />
       <Examples />
-      <Divider />
-      <Benefits />
-      <Divider />
       <WhyUs />
-      <Divider />
       <Credibility />
-      <Divider />
+      <Benefits />
       <PricingPreview />
-      <Divider />
       <FAQ />
       <FinalCTA />
+      <HomeSeoIntro />
+      <HomeQueryAnswers />
+      <HomeTopThreeReasons />
+      <HomeTopFiveSignals />
+      <ServiceFacts titleKey="serviceFacts.title.home" className="bg-cream-2 py-12 sm:py-16" />
     </>
   )
 }

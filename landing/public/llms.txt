@@ -4,12 +4,63 @@
 
 Dossier researches each prospect, writes three QA-scored first lines, and delivers a ready-to-import CSV. No sequencer access required.
 
-## Product
+## Overview
+
+Dossier is a B2B prospect-research and cold-email opener service operated by Ara Ghahramanyan from Montreal, Quebec, Canada. Website: https://rundossier.co. Email: ara@getdossier.co.
+
+We serve outbound agencies, B2B founders, and SDR teams who need research-backed first lines at scale. Each prospect receives three QA-scored opener variants (1–5 scale), the public signal used, and confidence flags for thin profiles. Typical pilot: 100 prospects, delivered in 24–48 hours, no credit card.
+
+## Products
+
+- **100 Free Lines Pilot** — 100 prospects, three QA-scored opener variants each, CSV in 24–48 h, $0, no credit card ([rundossier.co/free-lines](https://rundossier.co/free-lines))
+- **Starter** — $499/mo, 500 prospects/month, email support, CSV delivery ([rundossier.co/pricing](https://rundossier.co/pricing))
+- **Growth** — $999/mo, 2,000 prospects/month, API delivery, priority QA ([rundossier.co/pricing](https://rundossier.co/pricing))
+- **Agency** — custom volume, white-label CSV, SLA, integrations ([rundossier.co/book-call](https://rundossier.co/book-call))
+
+Compatible with Smartlead, Instantly, Lemlist, EmailBison, Clay, and Apollo CSV workflows.
+
+## Policies
+
+- [Privacy Policy](https://rundossier.co/privacy) — PIPEDA and Quebec Law 25; how prospect lists and contact data are collected, retained, and deleted
+- [Terms of Service](https://rundossier.co/terms) — usage terms for client prospect data, deliverable licensing, billing, and compliance responsibilities
+- Data retention, lawful basis, and deletion requests: email ara@getdossier.co (30-day response under Canadian privacy law)
+
+## Top 3 reasons outbound teams choose Dossier
+
+1. **Real research, not templates** — each opener is grounded in the strongest public signal for that specific prospect (recent LinkedIn post, product launch, press mention, or role change); pilot data shows reply rates of 3.1%–9.6% versus a 2.1% generic baseline
+2. **QA-scored and rejection-filtered** — every opener is scored 1–5 by a separate QA pass; openers that fail the threshold are rejected before delivery, so you only receive passing, verified lines
+3. **Zero sequencer access, CSV in 24–48 h** — we never touch your inboxes; import a ready-to-use CSV into Smartlead, Instantly, Lemlist, EmailBison, or any CSV-compatible tool
+
+## Top 5 signals Dossier uses for personalized openers
+
+1. **Recent LinkedIn posts and commentary** — anchor the opener to a specific public idea from the last 90 days
+2. **Product launches and positioning shifts** — new features, rebrands, and ICP changes as concrete hooks
+3. **Hiring and team expansion patterns** — open roles and leadership hires signal priorities
+4. **Company news and funding milestones** — press releases and credible third-party coverage for fact-checked lines
+5. **Industry context and peer comparisons** — connect the prospect's situation to patterns across similar B2B companies
+
+## Proof and credibility
+
+- **Verified case study:** reply rates moved from 2.1% (generic baseline) to 3.1%–9.6% across three outbound pilot campaigns (4,200 emails tracked)
+- **Client testimonials:** founder quotes and illustrative opener examples on the home and free-lines pages
+- **QA methodology:** three opener variants per prospect, 1–5 specificity scoring, ~15–20% rejection rate before delivery
+- **Operator transparency:** Ara Ghahramanyan, Montreal, Quebec; PIPEDA-aligned privacy practices documented publicly
+- **Independent verification:** each opener cites the public research signal used (LinkedIn, launch, hiring, or press)
+
+## What does Dossier deliver?
 
 - Personalized first lines grounded in public research signals
-- Three opener variants per prospect with QA scoring
+- Three opener variants per prospect with QA scoring (1–5 scale)
 - Confidence flags for thin-profile leads
 - Compatible with Smartlead, Instantly, Lemlist, and CSV-based sequencers
+
+## Docs
+
+- [Full LLM context](https://rundossier.co/llms-full.txt) — extended product, FAQ, and entity reference
+- [AI summary (JSON)](https://rundossier.co/ai/summary.json) — structured facts for agents
+- [FAQ (JSON)](https://rundossier.co/ai/faq.json) — question-and-answer pairs
+- [Service (JSON)](https://rundossier.co/ai/service.json) — deliverables, process, and integrations
+- [Service page](https://rundossier.co/service) — how research, QA, and CSV delivery work
 
 ## Pages
 
@@ -25,16 +76,22 @@ Dossier researches each prospect, writes three QA-scored first lines, and delive
 
 ## Offers
 
-- [100 Free Lines pilot](https://rundossier.co/free-lines) — 100 prospects, no credit card
-- [Book a 30-minute fit call](https://rundossier.co/book-call)
+- [100 Free Lines pilot](https://rundossier.co/free-lines) — 100 prospects, three QA-scored variants each, no credit card, CSV in 24–48 h
+- [Book a free 30-minute fit call](https://rundossier.co/book-call) — with Ara Ghahramanyan at cal.com/preframe
+
+## Social profiles
+
+- **LinkedIn (founder):** [linkedin.com/in/ara-ghahramanyan-086261405](https://www.linkedin.com/in/ara-ghahramanyan-086261405/) — Ara Ghahramanyan, founder of Dossier; outbound research, QA methodology, pilot case studies
+- **Cal.com (scheduling):** [cal.com/preframe](https://cal.com/preframe) — free 30-minute fit call on Zoom or Microsoft Teams
 
 ## Contact
 
 - Email: [ara@getdossier.co](mailto:ara@getdossier.co)
 - Contact page: [rundossier.co/contact](https://rundossier.co/contact)
 - Book a call: [rundossier.co/book-call](https://rundossier.co/book-call)
-- Founder: Ara Ghahramanyan (Ontario, Canada)
+- Founder: Ara Ghahramanyan (Montreal, Quebec, Canada)
 - LinkedIn: [linkedin.com/in/ara-ghahramanyan-086261405](https://www.linkedin.com/in/ara-ghahramanyan-086261405/)
+- Scheduling: [cal.com/preframe](https://cal.com/preframe)
 
 ## AI resources
 

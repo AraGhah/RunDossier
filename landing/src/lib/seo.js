@@ -21,22 +21,40 @@ export function absoluteUrl(path = '/') {
   return `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`
 }
 
-export function buildOrganizationSchema() {
-  const tel = legalPhoneTel()
-  const contactPoint = {
-    '@type': 'ContactPoint',
-    contactType: 'customer support',
-    email: CONTACT.email,
-    areaServed: 'Worldwide',
-    availableLanguage: ['English', 'French'],
-    ...(tel ? { telephone: tel } : {}),
-    hoursAvailable: {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      opens: '09:00',
-      closes: '17:00',
+export function resolveTelephone(phoneOverride = '') {
+  const raw = (phoneOverride || '').trim() || legalPhoneTel()
+  if (!raw) return ''
+  const digits = raw.replace(/[^\d+]/g, '')
+  return digits.startsWith('+') ? digits : `+${digits.replace(/^\+/, '')}`
+}
+
+export function buildOrganizationSchema({ phone = '' } = {}) {
+  const tel = resolveTelephone(phone)
+  const contactPoint = [
+    {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: CONTACT.email,
+      url: `${SITE_URL}/contact`,
+      areaServed: 'Worldwide',
+      availableLanguage: ['English', 'French'],
+      ...(tel ? { telephone: tel } : {}),
+      hoursAvailable: {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '09:00',
+        closes: '17:00',
+      },
     },
-  }
+    {
+      '@type': 'ContactPoint',
+      contactType: 'sales',
+      url: 'https://cal.com/preframe',
+      availableLanguage: ['English', 'French'],
+      areaServed: 'Worldwide',
+      description: 'Book a free 30-minute fit call with Ara Ghahramanyan (Dossier) via Zoom or Microsoft Teams.',
+    },
+  ]
 
   return {
     '@type': 'Organization',
@@ -69,8 +87,8 @@ export function buildOrganizationSchema() {
   }
 }
 
-export function buildLocalBusinessSchema() {
-  const tel = legalPhoneTel()
+export function buildLocalBusinessSchema({ phone = '' } = {}) {
+  const tel = resolveTelephone(phone)
   return {
     '@type': 'ProfessionalService',
     '@id': `${SITE_URL}/#localbusiness`,
@@ -92,13 +110,22 @@ export function buildLocalBusinessSchema() {
       { '@type': 'Place', name: 'Worldwide' },
     ],
     openingHours: LEGAL_BUSINESS_HOURS,
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'customer support',
-      email: LEGAL_EMAIL,
-      ...(tel ? { telephone: tel } : {}),
-      areaServed: 'Worldwide',
-    },
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        contactType: 'customer support',
+        email: LEGAL_EMAIL,
+        url: `${SITE_URL}/contact`,
+        ...(tel ? { telephone: tel } : {}),
+        areaServed: 'Worldwide',
+      },
+      {
+        '@type': 'ContactPoint',
+        contactType: 'sales',
+        url: 'https://cal.com/preframe',
+        areaServed: 'Worldwide',
+      },
+    ],
     parentOrganization: { '@id': `${SITE_URL}/#organization` },
   }
 }
@@ -165,7 +192,8 @@ export function buildServiceSchema() {
   return {
     '@type': 'Service',
     '@id': `${SITE_URL}/#service`,
-    name: `${SITE_NAME}, Personalized Outbound Openers`,
+    name: SITE_NAME,
+    alternateName: 'Personalized outbound openers for B2B cold email',
     description:
       'Done-for-you prospect research and QA-scored personalized first lines for cold email, delivered as a CSV for your sequencer.',
     provider: {
@@ -264,7 +292,25 @@ export function buildJsonLdGraph({
   }
 }
 
+/** Separate JSON-LD nodes for schema-stacking audits (one script tag per top-level entity). */
+export function buildJsonLdStack(options) {
+  return buildJsonLdGraph(options)['@graph']
+}
+
+export function stackedJsonLdScriptHtml(nodes, { indent = '    ' } = {}) {
+  return nodes
+    .map((node, i) => {
+      const payload = { '@context': 'https://schema.org', ...node }
+      const json = JSON.stringify(payload, null, 2)
+        .split('\n')
+        .map((line) => `${indent}${line}`)
+        .join('\n')
+      return `${indent}<script id="dossier-jsonld-${i}" type="application/ld+json">\n${json}\n${indent}</script>`
+    })
+    .join('\n')
+}
+
 export function pageTitle(suffix) {
-  if (!suffix) return `${SITE_NAME}, ${SITE_TAGLINE}`
+  if (!suffix) return `${SITE_NAME} | ${SITE_TAGLINE}`
   return `${suffix} | ${SITE_NAME}`
 }
