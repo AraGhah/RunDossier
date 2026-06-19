@@ -1,5 +1,6 @@
 import { query, queryOne } from '../db.js';
 import { runPersonalizeAgent, type FirstLineVariant, type ResearchBrief } from '../agents/personalize.agent.js';
+import { LLMJsonParseError } from '../utils/parse-json.js';
 import { runQAAgent, pickBestVariant, passesW45Criteria, type QABrief, type QAResult } from '../agents/qa.agent.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
@@ -119,29 +120,62 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
     let bestQa: QAResult[] = [];
     let bestPick: ReturnType<typeof pickBestVariant> = null;
 
+    let lastError: Error | null = null;
+    let lastRawOutput = '';
+
     for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
-      const variants = await runPersonalizeAgent(prospectId, brief, prompt.prompt_text, retryNotes);
-      const qaResults = await runQAAgent(prospectId, variants, qaBrief, qaPrompt);
-      const pick = pickBestVariant(variants, qaResults);
+      try {
+        const variants = await runPersonalizeAgent(prospectId, brief, prompt.prompt_text, retryNotes);
+        const qaResults = await runQAAgent(prospectId, variants, qaBrief, qaPrompt);
+        const pick = pickBestVariant(variants, qaResults);
 
-      if (pick && (!bestPick || pick.qa.qa_score > bestPick.qa.qa_score)) {
-        bestVariants = variants;
-        bestQa = qaResults;
-        bestPick = pick;
+        if (pick && (!bestPick || pick.qa.qa_score > bestPick.qa.qa_score)) {
+          bestVariants = variants;
+          bestQa = qaResults;
+          bestPick = pick;
+        }
+
+        if (pick && pick.qa.qa_score >= config.qaScoreFloor) {
+          bestVariants = variants;
+          bestQa = qaResults;
+          bestPick = pick;
+          break;
+        }
+
+        retryNotes = buildRetryNotes(variants, qaResults);
+      } catch (attemptErr) {
+        // A bad model response (e.g. unparseable JSON / no variants) should not
+        // abort the whole job — retry with a stricter-format nudge and remember
+        // the real reason + raw output instead of failing generically.
+        lastError = attemptErr as Error;
+        if (attemptErr instanceof LLMJsonParseError) lastRawOutput = attemptErr.raw;
+        console.warn(
+          `[personalize] attempt ${attempt}/${config.maxRetries} failed for ${prospectId}: ${lastError.message}`
+        );
+        retryNotes =
+          '\n\nIMPORTANT: Return ONLY a valid JSON array of the variant objects — no markdown, no code fences, no prose.';
       }
-
-      if (pick && pick.qa.qa_score >= config.qaScoreFloor) {
-        bestVariants = variants;
-        bestQa = qaResults;
-        bestPick = pick;
-        break;
-      }
-
-      retryNotes = buildRetryNotes(variants, qaResults);
     }
 
     if (bestVariants.length === 0) {
-      throw new Error('Personalization produced no variants after retries');
+      // Persist the raw model output + parse error so the failure is debuggable
+      // and never hidden behind a generic message.
+      if (lastRawOutput) {
+        await query(
+          `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
+           VALUES ('personalize-raw-output', $1, $2, $3)`,
+          [
+            prospectId,
+            `raw model output (${lastRawOutput.length} chars): ${lastRawOutput.slice(0, 4000)}`,
+            config.maxRetries,
+          ]
+        ).catch(e => console.error('[personalize] raw output log error:', e));
+      }
+      throw new Error(
+        `Personalization produced no variants after ${config.maxRetries} attempts: ${
+          lastError ? lastError.message : 'no variants returned'
+        }`
+      );
     }
 
     const { passed, chosenVariant } = await persistVariants(
