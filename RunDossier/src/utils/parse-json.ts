@@ -54,15 +54,20 @@ function* jsonCandidates(text: string): Generator<string> {
   const fence = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if (fence?.[1]) yield fence[1];
 
-  // Object embedded in surrounding prose: first { ... last }
+  // JSON embedded in surrounding prose: slice the outermost { } or [ ].
   const objStart = trimmed.indexOf('{');
   const objEnd = trimmed.lastIndexOf('}');
-  if (objStart !== -1 && objEnd > objStart) yield trimmed.slice(objStart, objEnd + 1);
-
-  // Array embedded in surrounding prose: first [ ... last ]
   const arrStart = trimmed.indexOf('[');
   const arrEnd = trimmed.lastIndexOf(']');
-  if (arrStart !== -1 && arrEnd > arrStart) yield trimmed.slice(arrStart, arrEnd + 1);
+  const objSlice = objStart !== -1 && objEnd > objStart ? trimmed.slice(objStart, objEnd + 1) : null;
+  const arrSlice = arrStart !== -1 && arrEnd > arrStart ? trimmed.slice(arrStart, arrEnd + 1) : null;
+
+  // Prefer whichever structure's opening bracket appears first (the outermost one),
+  // so an array of objects isn't mis-extracted as just its first object.
+  const arrayFirst = arrStart !== -1 && (objStart === -1 || arrStart < objStart);
+  for (const slice of arrayFirst ? [arrSlice, objSlice] : [objSlice, arrSlice]) {
+    if (slice) yield slice;
+  }
 }
 
 /**

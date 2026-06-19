@@ -8,6 +8,7 @@ import { buildDeliveryCsv, isInternalEmail, type DeliveryRow } from '../utils/cs
 import { buildDeliveryEmailContent } from '../utils/delivery-email.js';
 import { isValidEmail, sendResendEmail, type SendResendEmailResult } from '../utils/resend.js';
 import { BEST_SHIPPED_LINE_LATERAL } from '../utils/first-line-status.js';
+import { recordDeliveryEvent } from '../utils/delivery-events.js';
 
 interface ClientRow {
   id: string;
@@ -243,11 +244,46 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
   });
   const deliveryId = ledger?.id ?? null;
 
+  // Audit: delivery created / marked ready.
+  await recordDeliveryEvent({
+    deliveryId,
+    clientId: client.id,
+    eventType: 'created',
+    status: 'delivery_ready',
+    metadata: {
+      prospect_count: deliverable.length,
+      internal_excluded: internalOnlyIds.length,
+      avg_fit_score: avgFit,
+    },
+  });
+
+  // Audit: flag as a retry if a previous delivery for this client ended in failure.
+  const priorFailures = await query<{ n: string }>(
+    `SELECT count(*)::text AS n FROM deliveries
+     WHERE client_id = $1 AND status IN ('email_failed', 'skipped_no_recipient')`,
+    [client.id]
+  ).catch(() => [] as { n: string }[]);
+  if (Number(priorFailures[0]?.n ?? 0) > 0) {
+    await recordDeliveryEvent({
+      deliveryId,
+      clientId: client.id,
+      eventType: 'retried',
+      status: 'delivery_ready',
+    });
+  }
+
   // All recipients internal → mark delivered, no email.
   if (decision.action === 'internal_only') {
     await markDelivered(allIds);
     await markBatchesDelivered(client.id);
     await updateDelivery(deliveryId, { status: 'skipped_internal_only' });
+    await recordDeliveryEvent({
+      deliveryId,
+      clientId: client.id,
+      eventType: 'skipped',
+      status: 'skipped_internal_only',
+      metadata: { internal_only: allIds.length },
+    });
     await notify(
       `W5 Livraison — ${client.name}\n` +
         `• ${allIds.length} prospect(s) marqués livrés (emails internes uniquement, CSV non envoyé)`
@@ -280,6 +316,13 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
       error: `client ${client.id} has no valid contact_email`,
     });
     await logDeliveryFailure(client.id, `missing/invalid recipient for client ${client.name}`);
+    await recordDeliveryEvent({
+      deliveryId,
+      clientId: client.id,
+      eventType: 'skipped',
+      status: 'skipped_no_recipient',
+      error: `client ${client.id} has no valid contact_email`,
+    });
     await notify(
       `W5 Livraison — ${client.name}\n` +
         `• ${deliverable.length} prospect(s) prêts mais aucun email client valide — non envoyé (en attente)`
@@ -316,6 +359,18 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
       emailedAt: result.ok,
       error: result.ok ? null : result.error ?? null,
     });
+    await recordDeliveryEvent({
+      deliveryId,
+      clientId: client.id,
+      eventType: result.ok ? 'emailed' : 'skipped',
+      status: outcome.deliveryStatus,
+      metadata: {
+        recipient: client.contact_email,
+        prospect_count: deliverable.length,
+        provider_message_id: result.id ?? null,
+      },
+      error: result.ok ? null : result.error ?? null,
+    });
   } else {
     await releaseClaim(allIds);
     await updateDelivery(deliveryId, {
@@ -325,6 +380,14 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
       error: result.error ?? 'unknown send error',
     });
     await logDeliveryFailure(client.id, result.error ?? 'email send failed');
+    await recordDeliveryEvent({
+      deliveryId,
+      clientId: client.id,
+      eventType: 'failed',
+      status: 'email_failed',
+      metadata: { recipient: client.contact_email, prospect_count: deliverable.length },
+      error: result.error ?? 'unknown send error',
+    });
   }
 
   const emailStatus =
