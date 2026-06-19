@@ -77,6 +77,8 @@ export const config = {
       : 'data/deliveries'),
   resendApiKey: optionalEnv('RESEND_API_KEY'),
   deliveryFromEmail: optionalEnv('DELIVERY_FROM_EMAIL') || 'deliveries@getdossier.co',
+  /** Optional Reply-To so client replies reach a real inbox even when the From domain is no-reply. */
+  deliveryReplyTo: optionalEnv('DELIVERY_REPLY_TO'),
 
   /** W1 prospect search */
   searchEnabled: process.env.SEARCH_ENABLED !== 'false',

@@ -146,4 +146,12 @@ export async function runScheduler(): Promise<void> {
   for (const p of stuckPersonalize) {
     await enqueuePersonalize(p.id);
   }
+
+  // Reaper: a delivery that crashed mid-flight can leave prospects stranded in
+  // 'delivering'. Hand any stuck for >15 min back to the ready pool so the next
+  // delivery cycle retries them (a normal send completes in seconds).
+  await query(
+    `UPDATE prospects SET status = 'personalized_qa_passed', updated_at = NOW()
+     WHERE status = 'delivering' AND updated_at < NOW() - INTERVAL '15 minutes'`
+  );
 }
