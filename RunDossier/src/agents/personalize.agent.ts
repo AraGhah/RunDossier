@@ -42,7 +42,9 @@ Research brief:
 ${researchBrief.research_summary}
 
 Top 3 signals:
-${JSON.stringify(researchBrief.top_3_signals)}${retryNotes}`;
+${JSON.stringify(researchBrief.top_3_signals)}
+
+OUTPUT FORMAT — respond with ONLY a JSON array of exactly ${config.variantCount} objects. No prose, commentary, markdown, or code fences. Each object must have the string keys "signal_used", "subject", "opener", "bridge". Even if the signals feel thin, still return your best ${config.variantCount} variants as JSON (do not explain why — the downstream QA step decides what ships).${retryNotes}`;
 
   const response = await client.messages.create({
     model: config.personalizeModel,
