@@ -1,5 +1,10 @@
 import { ApifyClient } from 'apify-client';
 import { config } from '../config.js';
+import {
+  ApifyScrapeError,
+  apifyErrorFromThrown,
+  classifyApifyFailure,
+} from '../utils/apify-error.js';
 
 const client = new ApifyClient({ token: config.apifyToken });
 
@@ -20,34 +25,53 @@ function publicIdentifierFromUrl(url: string): string | undefined {
   return match?.[1]?.replace(/\/$/, '');
 }
 
-function isPermissionError(message: string): boolean {
-  return /approve its permissions|approvePermissions/i.test(message);
-}
-
-function isQuotaError(message: string): boolean {
-  return /free user run limit|run limit exceeded|quota/i.test(message);
-}
-
-function isEmptyProfileError(message: string): boolean {
-  return /No LinkedIn profile returned/i.test(message);
-}
-
-/** Non-retryable LinkedIn scrape failures (bad URL, quota, permissions). */
+/** Non-retryable LinkedIn scrape failures (bad URL, quota, permissions, empty). */
 export function linkedinScrapeShouldRetry(err: Error): boolean {
+  if (err instanceof ApifyScrapeError) {
+    return !['auth', 'rate_limit', 'empty_dataset', 'bad_input'].includes(err.kind);
+  }
   const message = err.message;
-  if (isEmptyProfileError(message)) return false;
-  if (isQuotaError(message)) return false;
-  if (isPermissionError(message)) return false;
+  if (/No LinkedIn profile returned/i.test(message)) return false;
+  if (/free user run limit|run limit exceeded|quota/i.test(message)) return false;
+  if (/approve its permissions|approvePermissions/i.test(message)) return false;
   return true;
 }
 
-function quotaErrorMessage(): string {
+/** One Apify actor run + dataset read. Throws ApifyScrapeError on hard failure. */
+async function runProfileScrape(input: Record<string, unknown>): Promise<unknown | null> {
+  let run;
+  try {
+    run = await client.actor(config.apifyLinkedInActor).call(input);
+  } catch (err) {
+    throw apifyErrorFromThrown(config.apifyLinkedInActor, err);
+  }
+
+  const status = run.status ?? '';
+  const statusMessage = run.statusMessage ?? '';
+
+  if (status !== 'SUCCEEDED') {
+    throw new ApifyScrapeError(classifyApifyFailure({ status, statusMessage }), {
+      actorId: config.apifyLinkedInActor,
+      status,
+      statusMessage,
+      runId: run.id,
+      datasetId: run.defaultDatasetId,
+    });
+  }
+
+  const { items } = await client.dataset(run.defaultDatasetId).listItems();
   return (
-    'Quota Apify épuisé pour cet actor (plan gratuit: limite de runs). ' +
-    'Attendez le reset mensuel ou passez sur un plan payant: https://apify.com/pricing'
+    items.find(item => item && typeof item === 'object' && Object.keys(item as object).length > 0) ??
+    null
   );
 }
 
+/**
+ * Scrape a LinkedIn profile using a SINGLE Apify query (by canonical URL).
+ * A second query (by public identifier) runs only as a recoverable fallback
+ * when the first returns no profile. The number of Apify calls used is logged
+ * per prospect so cost can be monitored.
+ */
 export async function scrapeLinkedIn(profileUrl: string): Promise<unknown> {
   const url = normalizeProfileUrl(profileUrl);
 
@@ -61,48 +85,31 @@ export async function scrapeLinkedIn(profileUrl: string): Promise<unknown> {
   }
 
   const publicId = publicIdentifierFromUrl(url);
+  const base = {
+    profileScraperMode: PROFILE_SCRAPER_MODE,
+    proxyConfiguration: { useApifyProxy: true },
+  };
 
-  let run;
-  try {
-    run = await client.actor(config.apifyLinkedInActor).call({
-      urls: [url],
-      ...(publicId ? { publicIdentifiers: [publicId] } : {}),
-      profileScraperMode: PROFILE_SCRAPER_MODE,
-      proxyConfiguration: { useApifyProxy: true },
-    });
-  } catch (err) {
-    const message = (err as Error).message;
-    if (isPermissionError(message)) {
-      throw new Error(
-        `${message} — Ouvrez Apify → Actors → ${config.apifyLinkedInActor} → Approve permissions.`
-      );
-    }
-    if (isQuotaError(message)) {
-      throw new Error(quotaErrorMessage());
-    }
-    throw err;
+  let apifyCalls = 0;
+
+  // Primary: one query by canonical URL (the cheap, common path).
+  apifyCalls += 1;
+  let profile = await runProfileScrape({ urls: [url], ...base });
+
+  // Fallback: only when the URL query found nothing AND a public id is available.
+  if (!profile && publicId) {
+    apifyCalls += 1;
+    console.info(`[linkedin] ${url} — URL query empty, fallback to publicIdentifier (call ${apifyCalls})`);
+    profile = await runProfileScrape({ publicIdentifiers: [publicId], ...base });
   }
 
-  const statusMessage = run.statusMessage ?? '';
-  if (isQuotaError(statusMessage)) {
-    throw new Error(quotaErrorMessage());
-  }
-
-  if (run.status !== 'SUCCEEDED') {
-    throw new Error(
-      `Apify LinkedIn scrape failed (${run.status})${statusMessage ? `: ${statusMessage}` : ''}`
-    );
-  }
-
-  const { items } = await client.dataset(run.defaultDatasetId).listItems();
-  const profile = items.find(
-    item => item && typeof item === 'object' && Object.keys(item as object).length > 0
-  ) ?? null;
+  console.info(`[linkedin] ${url} scraped with ${apifyCalls} Apify call(s)`);
 
   if (!profile) {
-    throw new Error(
-      `No LinkedIn profile returned for ${url} — profil introuvable, privé, ou URL incorrecte.`
-    );
+    throw new ApifyScrapeError('empty_dataset', {
+      actorId: config.apifyLinkedInActor,
+      statusMessage: `No LinkedIn profile returned for ${url} — profil introuvable, privé, ou URL incorrecte.`,
+    });
   }
   return profile;
 }

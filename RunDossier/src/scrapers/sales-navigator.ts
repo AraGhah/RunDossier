@@ -1,5 +1,6 @@
 import { ApifyClient } from 'apify-client';
 import { config } from '../config.js';
+import { ApifyScrapeError, apifyErrorFromThrown, classifyApifyFailure } from '../utils/apify-error.js';
 
 const client = new ApifyClient({ token: config.apifyToken });
 
@@ -116,12 +117,22 @@ export async function scrapeSalesNavigatorSearch(
   if (cookie) input.cookie = cookie;
   if (userAgent) input.userAgent = userAgent;
 
-  const run = await client.actor(actorId).call(input);
+  let run;
+  try {
+    run = await client.actor(actorId).call(input);
+  } catch (err) {
+    throw apifyErrorFromThrown(actorId, err);
+  }
 
   if (run.status !== 'SUCCEEDED') {
-    throw new Error(
-      `Apify Sales Navigator scrape failed (${run.status})${run.statusMessage ? `: ${run.statusMessage}` : ''}`
-    );
+    const statusMessage = run.statusMessage ?? '';
+    throw new ApifyScrapeError(classifyApifyFailure({ status: run.status, statusMessage }), {
+      actorId,
+      status: run.status,
+      statusMessage,
+      runId: run.id,
+      datasetId: run.defaultDatasetId,
+    });
   }
 
   const { items } = await client.dataset(run.defaultDatasetId).listItems();
