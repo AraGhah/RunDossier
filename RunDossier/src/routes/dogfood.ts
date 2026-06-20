@@ -4,29 +4,30 @@ import { runDogfoodScrape } from '../jobs/dogfood-scrape.job.js';
 import { runDogfoodPromote } from '../jobs/dogfood-promote.job.js';
 import { logFunnelEvent, type FunnelStage } from '../utils/funnel-log.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { sendInternalError } from '../utils/safe-error.js';
 
 export function registerDogfoodRoutes(
   app: import('express').Express
 ): void {
-  app.post('/dogfood/scrape', requireAdmin, async (_req, res) => {
+  app.post('/dogfood/scrape', requireAdmin, async (req, res) => {
     try {
       const result = await runDogfoodScrape();
       res.json({ ok: true, ...result });
     } catch (err) {
-      res.status(500).json({ ok: false, error: (err as Error).message });
+      sendInternalError(res, req, err, 'dogfood_scrape_failed');
     }
   });
 
-  app.post('/dogfood/promote', requireAdmin, async (_req, res) => {
+  app.post('/dogfood/promote', requireAdmin, async (req, res) => {
     try {
       const result = await runDogfoodPromote();
       res.json({ ok: true, ...result });
     } catch (err) {
-      res.status(500).json({ ok: false, error: (err as Error).message });
+      sendInternalError(res, req, err, 'dogfood_promote_failed');
     }
   });
 
-  app.get('/dogfood/review-queue', requireAdmin, async (_req, res) => {
+  app.get('/dogfood/review-queue', requireAdmin, async (req, res) => {
     try {
       const rows = await query<Record<string, unknown>>(
         `SELECT sq.id AS queue_id, sq.status AS queue_status, sq.created_at,
@@ -41,11 +42,11 @@ export function registerDogfoodRoutes(
       );
       res.json({ count: rows.length, prospects: rows });
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'dogfood_review_queue_failed');
     }
   });
 
-  app.get('/dogfood/funnel', requireAdmin, async (_req, res) => {
+  app.get('/dogfood/funnel', requireAdmin, async (req, res) => {
     try {
       const summary = await query<{ stage: string; count: string }>(
         `SELECT stage, COUNT(*)::text AS count
@@ -56,7 +57,7 @@ export function registerDogfoodRoutes(
       );
       res.json({ funnel: summary });
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'dogfood_funnel_summary_failed');
     }
   });
 
@@ -78,7 +79,7 @@ export function registerDogfoodRoutes(
       await logFunnelEvent(prospectId, stage, req.body?.metadata ?? {});
       res.json({ ok: true });
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'dogfood_funnel_event_failed');
     }
   });
 }

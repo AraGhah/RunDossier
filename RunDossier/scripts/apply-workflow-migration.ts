@@ -28,6 +28,8 @@ async function main(): Promise<void> {
   await applySql('sql/migrations/007_prospect_search.sql');
   await applySql('sql/migrations/008_apollo_research.sql');
   await applySql('sql/migrations/009_prospects_updated_at.sql');
+  await applySql('sql/migrations/013_telegram_bot.sql');
+  await applySql('sql/migrations/014_workflow_runs.sql');
   await applySql('sql/seeds/workflow-prompts.sql');
   console.log('Workflow W2–W5 migrations complete.');
   await pool.end();

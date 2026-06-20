@@ -1,10 +1,9 @@
 import type { Request, Response } from 'express';
 import { queryOne } from '../db.js';
 import { notify } from '../notify.js';
+import { containsMarkup, sanitizeEmail, sanitizeOptionalUrl, sanitizeText } from '../utils/sanitize.js';
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX = { name: 120, email: 254, company: 200, sequencer: 80, url: 500 } as const;
-
 /** Common free-mail domains — pilot form expects a work email. */
 const FREE_EMAIL_DOMAINS = new Set([
   'gmail.com', 'googlemail.com', 'yahoo.com', 'hotmail.com', 'outlook.com',
@@ -26,17 +25,6 @@ function trimField(value: unknown, max: number): string {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
-function normalizeUrl(value: string): string | null {
-  if (!value) return null;
-  try {
-    const parsed = new URL(value.startsWith('http') ? value : `https://${value}`);
-    if (!['http:', 'https:'].includes(parsed.protocol)) return null;
-    return parsed.toString();
-  } catch {
-    return null;
-  }
-}
-
 function isWorkEmail(email: string): boolean {
   const domain = email.split('@')[1]?.toLowerCase();
   return Boolean(domain && !FREE_EMAIL_DOMAINS.has(domain));
@@ -56,19 +44,19 @@ export async function handlePilotSubmit(req: Request, res: Response): Promise<vo
     return;
   }
 
-  const name = trimField(body.name, MAX.name);
-  const email = trimField(body.email, MAX.email).toLowerCase();
-  const company = trimField(body.company, MAX.company);
-  const sequencer = trimField(body.sequencer, MAX.sequencer) || null;
-  const rawUrl = trimField(body.url, MAX.url);
-  const profileUrl = rawUrl ? normalizeUrl(rawUrl) : null;
+  const name = sanitizeText(body.name, MAX.name);
+  const email = sanitizeEmail(body.email);
+  const company = sanitizeText(body.company, MAX.company);
+  const sequencer = sanitizeText(body.sequencer, MAX.sequencer) || null;
+  const rawUrl = sanitizeText(body.url, MAX.url);
+  const profileUrl = rawUrl ? sanitizeOptionalUrl(rawUrl) : null;
 
   if (!name || !email || !company) {
     res.status(400).json({ ok: false, error: 'name, email, and company are required' });
     return;
   }
-  if (!EMAIL_RE.test(email)) {
-    res.status(400).json({ ok: false, error: 'Invalid email address' });
+  if ([name, company, sequencer ?? ''].some((field) => field && containsMarkup(field))) {
+    res.status(400).json({ ok: false, error: 'Invalid characters in submission' });
     return;
   }
   if (!isWorkEmail(email)) {

@@ -15,5 +15,8 @@ export function securityHeaders(req: Request, res: Response, next: NextFunction)
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }
 
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+
   next();
 }

@@ -51,6 +51,12 @@ export const config = {
   apifyLinkedInActor: optionalEnv('APIFY_LINKEDIN_ACTOR') || 'harvestapi~linkedin-profile-scraper',
   telegramBotToken: optionalEnv('TELEGRAM_BOT_TOKEN'),
   telegramChatId: optionalEnv('TELEGRAM_CHAT_ID'),
+  /** Webhook secret token (X-Telegram-Bot-Api-Secret-Token header) */
+  telegramWebhookSecret: optionalEnv('TELEGRAM_WEBHOOK_SECRET'),
+  /** Long-polling mode for local dev (do not use with webhook) */
+  telegramPolling: process.env.TELEGRAM_POLLING === 'true',
+  /** Skip hourly digest when pipeline had zero activity (default: quiet) */
+  telegramDigestQuiet: process.env.TELEGRAM_DIGEST_QUIET !== 'false',
   podcastIndexKey: optionalEnv('PODCASTINDEX_KEY') || optionalEnv('PODCAST_INDEX_KEY'),
   podcastIndexSecret: optionalEnv('PODCASTINDEX_SECRET') || optionalEnv('PODCAST_INDEX_SECRET'),
   port: Number.isFinite(rawPort) && rawPort > 0 && rawPort <= 65535 ? rawPort : 3000,
@@ -60,10 +66,10 @@ export const config = {
   /** W4.5 — independent QA judge (n8n: models/gemini-2.5-pro) */
   qaModel: 'gemini-2.5-pro' as const,
 
-  confidenceFloor: 60,
-  qaScoreFloor: 7,
-  variantCount: 3,
-  maxRetries: 3,
+  confidenceFloor: parseInt(process.env.CONFIDENCE_FLOOR ?? '60', 10) || 60,
+  qaScoreFloor: parseInt(process.env.QA_SCORE_FLOOR ?? '7', 10) || 7,
+  variantCount: parseInt(process.env.VARIANT_COUNT ?? '3', 10) || 3,
+  maxRetries: parseInt(process.env.PERSONALIZE_MAX_RETRIES ?? '3', 10) || 3,
   batchFailAlertPct: 0.15,
   schedulerBatchSize: 50,
   intakeBatchSize: 50,
@@ -79,6 +85,21 @@ export const config = {
   deliveryFromEmail: optionalEnv('DELIVERY_FROM_EMAIL') || 'deliveries@getdossier.co',
   /** Optional Reply-To so client replies reach a real inbox even when the From domain is no-reply. */
   deliveryReplyTo: optionalEnv('DELIVERY_REPLY_TO'),
+  /** Gmail SMTP (app password) — fallback when Resend is not configured */
+  gmailUser: optionalEnv('GMAIL_USER'),
+  gmailAppPassword: optionalEnv('GMAIL_APP_PASSWORD'),
+  /** Admin inbox for delivery copies (your Gmail) */
+  gmailDeliveryTo: optionalEnv('GMAIL_DELIVERY_TO'),
+  /** Email provider: auto (Resend then Gmail), resend, or gmail */
+  deliveryEmailProvider: (optionalEnv('DELIVERY_EMAIL_PROVIDER') || 'auto').toLowerCase() as
+    | 'auto'
+    | 'resend'
+    | 'gmail',
+  /** Resend sandbox from when primary domain is unverified (tests + fallback) */
+  resendSandboxFrom: optionalEnv('RESEND_SANDBOX_FROM') || 'onboarding@resend.dev',
+  resendSandboxFallback: process.env.RESEND_SANDBOX_FALLBACK !== 'false',
+  /** Test email recipient — defaults to DELIVERY_REPLY_TO */
+  deliveryTestTo: optionalEnv('DELIVERY_TEST_TO') || optionalEnv('DELIVERY_REPLY_TO'),
 
   /** W1 prospect search */
   searchEnabled: process.env.SEARCH_ENABLED !== 'false',

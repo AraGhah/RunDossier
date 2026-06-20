@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeIntakeRecord, validateIntakeRecord } from './intake.js';
+import { normalizeIntakeRecord, validateIntakeRecord, nameCompanyDedupeKey } from './intake.js';
 
 describe('normalizeIntakeRecord', () => {
   it('normalizes linkedin URL and email', () => {
@@ -16,6 +16,12 @@ describe('normalizeIntakeRecord', () => {
     assert.equal(record.linkedin_url, 'https://www.linkedin.com/in/janedoe');
     assert.equal(record.email, 'jane@acme.com');
     assert.equal(record.title, 'VP Sales');
+  });
+});
+
+describe('nameCompanyDedupeKey', () => {
+  it('normalizes whitespace and case', () => {
+    assert.equal(nameCompanyDedupeKey('  Jane Doe ', ' Acme Corp '), 'jane doe|acme corp');
   });
 });
 

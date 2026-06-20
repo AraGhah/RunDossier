@@ -13,6 +13,9 @@ import { notify } from '../notify.js';
 import { config } from '../config.js';
 import { loadActivePrompt } from '../utils/prompts.js';
 import { logFunnelEvent } from '../utils/funnel-log.js';
+import { evaluateResearchQuality } from '../utils/research-quality.js';
+import { formatApifyFailureForDb } from '../utils/apify-failure-log.js';
+import { ApifyScrapeError } from '../utils/apify-error.js';
 
 interface Prospect {
   id: string;
@@ -117,10 +120,19 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
       systemPrompt
     );
 
-    const status =
-      research.confidence_score < config.confidenceFloor
-        ? 'thin_research'
-        : 'research_complete';
+    const quality = evaluateResearchQuality(research);
+    const status = quality.acceptable ? 'research_complete' : 'thin_research';
+
+    if (!quality.acceptable) {
+      await query(
+        `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
+         VALUES ('research-quality', $1, $2, 0)`,
+        [
+          prospectId,
+          `thin_research: ${quality.reason} (${quality.meaningfulSignalCount} signals, confidence ${quality.effectiveConfidence})`,
+        ]
+      ).catch((e) => console.error('[research] quality log error:', e));
+    }
 
     await query(
       `UPDATE prospects
@@ -146,10 +158,17 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
     }
 
   } catch (err) {
+    const failure = formatApifyFailureForDb(err, {
+      workflow: 'research',
+      entityId: prospectId,
+      retryCount: config.maxRetries,
+      requestType: err instanceof ApifyScrapeError ? 'apify_scrape' : 'research_pipeline',
+    });
+
     await query(
       `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
-       VALUES ('research', $1, $2, $3)`,
-      [prospectId, (err as Error).message, config.maxRetries]
+       VALUES ($1, $2, $3, $4)`,
+      [failure.workflow, failure.entityId, failure.message, failure.retryCount]
     ).catch(e => console.error('[research] failed_jobs insert error:', e));
 
     await query(

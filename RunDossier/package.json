@@ -9,6 +9,8 @@
     "start": "node dist/index.js",
     "fix-encoding": "powershell -NoProfile -Command \"$utf8 = New-Object System.Text.UTF8Encoding $false; Get-ChildItem -Recurse src -Filter *.ts | ForEach-Object { $b = [IO.File]::ReadAllBytes($_.FullName); if ($b.Length -ge 2 -and $b[1] -eq 0) { [IO.File]::WriteAllText($_.FullName, [IO.File]::ReadAllText($_.FullName, [Text.Encoding]::Unicode), $utf8); Write-Host Fixed $_.Name } }\"",
     "verify": "tsx scripts/verify-pipelines.ts",
+    "verify:full": "tsx scripts/run-final-verification.ts",
+    "verify:security": "tsx scripts/verify-security.ts",
     "ingest": "tsx scripts/ingest-prospects.ts",
     "repair": "tsx scripts/repair-incomplete-personalize.ts",
     "requeue": "tsx scripts/requeue-research.ts",
@@ -34,6 +36,7 @@
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.3",
+    "@types/nodemailer": "^8.0.1",
     "@types/pg": "^8.20.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
@@ -44,6 +47,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jose": "^6.2.3",
+    "nodemailer": "^9.0.1",
     "pg": "^8.21.0",
     "pg-boss": "^12.18.3"
   }

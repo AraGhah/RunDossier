@@ -2,6 +2,7 @@ import { query } from '../db.js';
 import { getBoss } from '../queue.js';
 import { config } from '../config.js';
 import { prospectHasShippedLineSql } from '../utils/first-line-status.js';
+import { reapStaleWorkflowRuns } from '../services/workflow-run.js';
 
 async function enqueueResearch(prospectId: string): Promise<void> {
   const boss = getBoss();
@@ -32,6 +33,10 @@ async function enqueuePersonalize(prospectId: string): Promise<void> {
 }
 
 export async function runScheduler(): Promise<void> {
+  await reapStaleWorkflowRuns().catch((e) =>
+    console.warn('[scheduler] stale workflow run reap:', (e as Error).message)
+  );
+
   const { schedulerBatchSize } = config;
 
   const queued = await query<{ id: string }>(
@@ -131,8 +136,32 @@ export async function runScheduler(): Promise<void> {
     if (enqueued) await enqueuePersonalize(enqueued.id);
   }
 
+  const personalizeRetry = await query<{ id: string }>(
+    `SELECT id FROM prospects WHERE status = 'personalization_failed' LIMIT $1`,
+    [schedulerBatchSize]
+  );
+  for (const p of personalizeRetry) {
+    const [claimed] = await query<{ id: string }>(
+      `UPDATE prospects SET status = 'research_complete'
+       WHERE id = $1 AND status = 'personalization_failed'
+       RETURNING id`,
+      [p.id]
+    );
+    if (!claimed) continue;
+    const [enqueued] = await query<{ id: string }>(
+      `UPDATE prospects SET status = 'personalization_in_progress'
+       WHERE id = $1 AND status = 'research_complete'
+       RETURNING id`,
+      [claimed.id]
+    );
+    if (enqueued) await enqueuePersonalize(enqueued.id);
+  }
+
   const stuckResearch = await query<{ id: string }>(
-    `SELECT id FROM prospects WHERE status = 'research_in_progress' LIMIT $1`,
+    `SELECT id FROM prospects
+     WHERE status = 'research_in_progress'
+       AND updated_at < NOW() - INTERVAL '10 minutes'
+     LIMIT $1`,
     [schedulerBatchSize]
   );
   for (const p of stuckResearch) {
@@ -140,7 +169,10 @@ export async function runScheduler(): Promise<void> {
   }
 
   const stuckPersonalize = await query<{ id: string }>(
-    `SELECT id FROM prospects WHERE status = 'personalization_in_progress' LIMIT $1`,
+    `SELECT id FROM prospects
+     WHERE status = 'personalization_in_progress'
+       AND updated_at < NOW() - INTERVAL '10 minutes'
+     LIMIT $1`,
     [schedulerBatchSize]
   );
   for (const p of stuckPersonalize) {

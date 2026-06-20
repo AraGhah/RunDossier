@@ -4,6 +4,7 @@ import { registerDogfoodRoutes } from './routes/dogfood.js';
 import { registerSearchRoutes } from './routes/search.js';
 import { registerProspectRoutes } from './routes/prospects.js';
 import { registerJobRoutes } from './routes/jobs.js';
+import { registerTelegramRoutes } from './routes/telegram.js';
 import { handlePilotSubmit } from './routes/pilot.js';
 import { handleIntakeSubmit } from './routes/intake.js';
 import { handleAdminToken, handlePilotToken } from './routes/auth.js';
@@ -12,6 +13,7 @@ import { requireJwt } from './middleware/auth.js';
 import { securityHeaders } from './middleware/security-headers.js';
 import { rateLimit } from './middleware/rate-limit.js';
 import { requestIdMiddleware } from './middleware/request-id.js';
+import { handleSecurityTxt } from './routes/security.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { healthCache } from './utils/cache.js';
 
@@ -56,6 +58,9 @@ export function createApp() {
     res.json(payload);
   });
 
+  app.get('/.well-known/security.txt', handleSecurityTxt);
+  app.get('/security.txt', handleSecurityTxt);
+
   app.post('/api/auth/token', limitAuthToken, (req, res) => { void handleAdminToken(req, res); });
   app.get('/api/pilot/token', limitPilotToken, (req, res) => { void handlePilotToken(req, res); });
   app.post(
@@ -84,6 +89,8 @@ export function createApp() {
 
   app.use('/api/jobs', limitAdmin);
   registerJobRoutes(app);
+
+  registerTelegramRoutes(app);
 
   app.use((_req: Request, res: Response) => {
     res.status(404).json({ error: 'Not found' });
