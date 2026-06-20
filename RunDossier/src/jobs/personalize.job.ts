@@ -80,8 +80,8 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
 
   try {
     const [prospect] = await query<Prospect>(
-      `UPDATE prospects SET status = 'personalization_in_progress'
-       WHERE id = $1 AND status IN ('research_complete', 'personalization_in_progress')
+      `UPDATE prospects SET status = 'personalization_in_progress', updated_at = NOW()
+       WHERE id = $1 AND status IN ('research_complete', 'qa_failed', 'personalization_failed')
        RETURNING id, name, title, company, client_id, research_summary, top_3_signals,
                  buying_triggers, COALESCE(source, 'manual') AS source`,
       [prospectId]

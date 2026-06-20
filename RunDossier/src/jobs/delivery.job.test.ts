@@ -58,8 +58,15 @@ describe('resolveSendOutcome', () => {
     });
   });
 
-  it('finalizes CSV-only (no crash) when the provider is not configured', () => {
+  it('does NOT finalize when provider is not configured (default — retry next cycle)', () => {
     assert.deepEqual(resolveSendOutcome({ ok: false, skipped: true }), {
+      finalize: false,
+      deliveryStatus: 'email_failed',
+    });
+  });
+
+  it('finalizes CSV-only when DELIVERY_CSV_ONLY is enabled', () => {
+    assert.deepEqual(resolveSendOutcome({ ok: false, skipped: true }, { csvOnly: true }), {
       finalize: true,
       deliveryStatus: 'skipped_not_configured',
     });

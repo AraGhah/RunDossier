@@ -10,6 +10,8 @@
     "fix-encoding": "powershell -NoProfile -Command \"$utf8 = New-Object System.Text.UTF8Encoding $false; Get-ChildItem -Recurse src -Filter *.ts | ForEach-Object { $b = [IO.File]::ReadAllBytes($_.FullName); if ($b.Length -ge 2 -and $b[1] -eq 0) { [IO.File]::WriteAllText($_.FullName, [IO.File]::ReadAllText($_.FullName, [Text.Encoding]::Unicode), $utf8); Write-Host Fixed $_.Name } }\"",
     "verify": "tsx scripts/verify-pipelines.ts",
     "verify:full": "tsx scripts/run-final-verification.ts",
+    "verify:audit": "tsx scripts/run-production-audit.ts",
+    "icp:100": "tsx scripts/run-icp-100-batch.ts",
     "verify:security": "tsx scripts/verify-security.ts",
     "ingest": "tsx scripts/ingest-prospects.ts",
     "repair": "tsx scripts/repair-incomplete-personalize.ts",

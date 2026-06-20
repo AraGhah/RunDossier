@@ -57,12 +57,20 @@ export function planDelivery(opts: {
  * does NOT finalize, so the rows are retried on the next cycle (no silent loss);
  * a "not configured" skip finalizes to preserve the CSV-only delivery mode.
  */
-export function resolveSendOutcome(result: Pick<SendDeliveryEmailResult, 'ok' | 'skipped'>): {
+export function resolveSendOutcome(
+  result: Pick<SendDeliveryEmailResult, 'ok' | 'skipped'>,
+  opts?: { csvOnly?: boolean }
+): {
   finalize: boolean;
   deliveryStatus: Extract<DeliveryLedgerStatus, 'email_sent' | 'email_failed' | 'skipped_not_configured'>;
 } {
   if (result.ok) return { finalize: true, deliveryStatus: 'email_sent' };
-  if (result.skipped) return { finalize: true, deliveryStatus: 'skipped_not_configured' };
+  if (result.skipped) {
+    if (opts?.csvOnly) {
+      return { finalize: true, deliveryStatus: 'skipped_not_configured' };
+    }
+    return { finalize: false, deliveryStatus: 'email_failed' };
+  }
   return { finalize: false, deliveryStatus: 'email_failed' };
 }
 
@@ -388,7 +396,7 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
     attachments: [{ filename, content: Buffer.from(csv, 'utf8') }],
   });
 
-  const outcome = resolveSendOutcome(result);
+  const outcome = resolveSendOutcome(result, { csvOnly: config.deliveryCsvOnly });
 
   if (outcome.finalize) {
     await markDelivered(allIds);
@@ -452,7 +460,10 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
   return outcome.finalize ? deliverable.length : 0;
 }
 
-export async function runDeliveryForClient(clientId: string): Promise<number> {
+export async function runDeliveryForClient(
+  clientId: string,
+  opts?: { limit?: number }
+): Promise<number> {
   const client = await queryOne<ClientRow>(
     `SELECT id, name, contact_email, client_first_name FROM clients WHERE id = $1`,
     [clientId]
@@ -462,16 +473,26 @@ export async function runDeliveryForClient(clientId: string): Promise<number> {
     return 0;
   }
 
-  // Atomically claim the ready batch. Only one concurrent run wins these rows —
-  // this is what prevents the same delivery from being emailed twice when the
-  // per-prospect trigger and the hourly sweep overlap.
-  const claimed = await query<{ id: string }>(
-    `UPDATE prospects
-        SET status = 'delivering', updated_at = NOW()
-      WHERE client_id = $1 AND status = 'personalized_qa_passed'
-      RETURNING id`,
-    [clientId]
-  );
+  const claimed = opts?.limit
+    ? await query<{ id: string }>(
+        `UPDATE prospects
+            SET status = 'delivering', updated_at = NOW()
+          WHERE id IN (
+            SELECT id FROM prospects
+            WHERE client_id = $1 AND status = 'personalized_qa_passed'
+            ORDER BY confidence_score DESC NULLS LAST, updated_at
+            LIMIT $2
+          )
+          RETURNING id`,
+        [clientId, opts.limit]
+      )
+    : await query<{ id: string }>(
+        `UPDATE prospects
+            SET status = 'delivering', updated_at = NOW()
+          WHERE client_id = $1 AND status = 'personalized_qa_passed'
+          RETURNING id`,
+        [clientId]
+      );
   if (claimed.length === 0) return 0;
 
   const claimedIds = claimed.map(r => r.id);

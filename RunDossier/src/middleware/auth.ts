@@ -61,5 +61,5 @@ export async function requireAdmin(
     return;
   }
 
-  next();
+  res.status(503).json({ error: 'Admin auth not configured' });
 }

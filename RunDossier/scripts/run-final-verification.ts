@@ -17,6 +17,7 @@ interface Step {
 const steps: Step[] = [
   { name: 'build', cmd: 'npm', args: ['run', 'build'] },
   { name: 'unit-tests', cmd: 'npm', args: ['test'] },
+  { name: 'security', cmd: 'npm', args: ['run', 'verify:security'] },
   { name: 'e2e-db', cmd: 'npx', args: ['tsx', 'scripts/test-pipeline-e2e.ts'] },
   { name: 'delivery-email', cmd: 'npx', args: ['tsx', 'scripts/test-delivery-email.ts'] },
   { name: 'verify-pipelines', cmd: 'npm', args: ['run', 'verify'] },

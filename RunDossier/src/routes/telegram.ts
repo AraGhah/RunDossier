@@ -11,6 +11,11 @@ export function registerTelegramRoutes(app: import('express').Express): void {
       return;
     }
 
+    if (process.env.NODE_ENV === 'production' && !config.telegramWebhookSecret) {
+      res.status(503).json({ error: 'TELEGRAM_WEBHOOK_SECRET required in production' });
+      return;
+    }
+
     const secret = req.headers['x-telegram-bot-api-secret-token'];
     if (config.telegramWebhookSecret) {
       const provided = typeof secret === 'string' ? secret : '';

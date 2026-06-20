@@ -191,11 +191,12 @@ async function handleRunCommand(chatId: number): Promise<string> {
 
     const counts = await getPipelineCounts();
     return (
-      `✅ Run complet — ${run.id.slice(0, 8)}…\n` +
-      `• Scheduler: OK` +
+      `✅ Run lancé — ${run.id.slice(0, 8)}…\n` +
+      `• Scheduler: OK (W3/W4 s'exécutent en arrière-plan via workers)\n` +
       searchMsg +
       `\n${deliveryResult.split('\n').slice(1).join('\n')}\n` +
-      `• En file: ${counts.queued ?? 0} | Recherche: ${counts.research_in_progress ?? 0} | Perso: ${counts.personalization_in_progress ?? 0}`
+      `• En file: ${counts.queued ?? 0} | Recherche: ${counts.research_in_progress ?? 0} | Perso: ${counts.personalization_in_progress ?? 0}\n` +
+      `⏳ Utilisez /status — la recherche et la personnalisation ne sont pas synchrones.`
     );
   } catch (err) {
     await updateWorkflowRun(run.id, {
@@ -214,7 +215,7 @@ Commandes:
 /status — état du pipeline
 /search — lancer W1 (prospect search)
 /delivery — livrer les prospects QA OK (W5)
-/run — scheduler + W1 + livraison
+/run — scheduler + W1 + livraison (W3/W4 async — voir /status)
 /digest — rapport horaire immédiat
 /help — cette aide
 

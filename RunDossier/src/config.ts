@@ -98,6 +98,8 @@ export const config = {
   /** Resend sandbox from when primary domain is unverified (tests + fallback) */
   resendSandboxFrom: optionalEnv('RESEND_SANDBOX_FROM') || 'onboarding@resend.dev',
   resendSandboxFallback: process.env.RESEND_SANDBOX_FALLBACK !== 'false',
+  /** When true, finalize delivery without email if no provider is configured. */
+  deliveryCsvOnly: process.env.DELIVERY_CSV_ONLY === 'true',
   /** Test email recipient — defaults to DELIVERY_REPLY_TO */
   deliveryTestTo: optionalEnv('DELIVERY_TEST_TO') || optionalEnv('DELIVERY_REPLY_TO'),
 
