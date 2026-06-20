@@ -29,6 +29,8 @@ async function main(): Promise<void> {
   await applySql('sql/migrations/008_apollo_research.sql');
   await applySql('sql/migrations/009_prospects_updated_at.sql');
   await applySql('sql/migrations/010_audit_events.sql');
+  await applySql('sql/migrations/011_delivery_email_tracking.sql');
+  await applySql('sql/migrations/012_delivery_events.sql');
   await applySql('sql/migrations/013_telegram_bot.sql');
   await applySql('sql/migrations/014_workflow_runs.sql');
   await applySql('sql/migrations/015_telegram_log_duplicate.sql');
