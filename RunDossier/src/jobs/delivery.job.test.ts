@@ -58,8 +58,15 @@ describe('resolveSendOutcome', () => {
     });
   });
 
-  it('finalizes CSV-only (no crash) when the provider is not configured', () => {
+  it('does NOT finalize when provider is not configured (default — retry next cycle)', () => {
     assert.deepEqual(resolveSendOutcome({ ok: false, skipped: true }), {
+      finalize: false,
+      deliveryStatus: 'email_failed',
+    });
+  });
+
+  it('finalizes CSV-only when DELIVERY_CSV_ONLY is enabled', () => {
+    assert.deepEqual(resolveSendOutcome({ ok: false, skipped: true }, { csvOnly: true }), {
       finalize: true,
       deliveryStatus: 'skipped_not_configured',
     });
@@ -83,16 +90,68 @@ describe('isValidEmail', () => {
 
 describe('buildDeliveryEmailContent', () => {
   const rows: DeliveryRow[] = [
-    { name: 'A', title: 'VP', company: 'Acme', email: 'a@acme.com', subject: 's', opener: 'o', bridge: 'b', fit_score: 80 },
-    { name: 'B', title: 'Dir', company: 'Beta', email: 'b@beta.com', subject: 's', opener: 'o', bridge: 'b', fit_score: 90 },
+    {
+      client_name: 'Test',
+      prospect_name: 'A',
+      title: 'VP',
+      company: 'Acme',
+      company_domain: 'acme.com',
+      linkedin_url: 'https://linkedin.com/in/a',
+      email: 'a@acme.com',
+      research_signals: 'signal',
+      source_links: 'https://acme.com',
+      research_summary: 'summary',
+      confidence_score: 80,
+      subject: 's',
+      opener: 'o',
+      bridge: 'b',
+      variant_number: 1,
+      prospect_status: 'personalized_qa_passed',
+      batch_id: '',
+      delivery_id: '',
+      run_id: '',
+      generated_at: '2026-01-01T00:00:00.000Z',
+    },
+    {
+      client_name: 'Test',
+      prospect_name: 'B',
+      title: 'Dir',
+      company: 'Beta',
+      company_domain: 'beta.com',
+      linkedin_url: 'https://linkedin.com/in/b',
+      email: 'b@beta.com',
+      research_signals: 'signal',
+      source_links: 'https://beta.com',
+      research_summary: 'summary',
+      confidence_score: 90,
+      subject: 's',
+      opener: 'o',
+      bridge: 'b',
+      variant_number: 1,
+      prospect_status: 'personalized_qa_passed',
+      batch_id: '',
+      delivery_id: '',
+      run_id: '',
+      generated_at: '2026-01-01T00:00:00.000Z',
+    },
   ];
 
   it('includes the prospect count, fit summary and attached filename', () => {
     const { subject, html, text } = buildDeliveryEmailContent('Sam', rows.length, rows, 'delivery.csv');
     assert.match(subject, /2 personalized openers ready/);
-    assert.match(html, /Prospects delivered:<\/strong> 2/);
+    assert.match(html, /Average confidence score/);
     assert.match(html, /delivery\.csv/);
-    assert.match(text, /Average fit score: 85\/100/);
+    assert.match(text, /Average confidence score: 85\/100/);
+  });
+
+  it('includes delivery summary stats when provided', () => {
+    const { text } = buildDeliveryEmailContent('Sam', 1, rows.slice(0, 1), 'delivery.csv', {
+      delivered: 1,
+      thinResearchExcluded: 2,
+      deliveryId: 'del-1',
+    });
+    assert.match(text, /thin_research/);
+    assert.match(text, /del-1/);
   });
 
   it('escapes HTML in the greeting to avoid injection in the email body', () => {

@@ -136,25 +136,49 @@ export async function getProspectById(id: string): Promise<ProspectDetail | null
   return { ...prospect, first_lines, signals };
 }
 
+export const RESEARCH_RETRIGGER_ALLOWED = new Set([
+  'queued',
+  'research_failed',
+  'thin_research',
+  'research_complete',
+  'qa_failed',
+  'personalization_failed',
+]);
+
+export const RESEARCH_RETRIGGER_BLOCKED = new Set([
+  'delivered',
+  'delivering',
+  'personalized_qa_passed',
+  'research_in_progress',
+  'personalization_in_progress',
+]);
+
+export function validateResearchRetriggerStatus(status: string): void {
+  const normalized = status.trim();
+  if (RESEARCH_RETRIGGER_BLOCKED.has(normalized)) {
+    throw new Error(`Cannot re-research while status is ${normalized}`);
+  }
+  if (!RESEARCH_RETRIGGER_ALLOWED.has(normalized)) {
+    throw new Error(`Cannot re-research from status ${normalized}`);
+  }
+}
+
 export async function retriggerResearch(prospectId: string): Promise<{ ok: true; status: string }> {
   const [prospect] = await query<{ id: string; status: string }>(
-    `SELECT id, status FROM prospects WHERE id = $1`,
+    `SELECT id, trim(status) AS status FROM prospects WHERE id = $1`,
     [prospectId]
   );
   if (!prospect) {
     throw new Error('Prospect not found');
   }
 
-  const blocked = new Set(['research_in_progress', 'personalization_in_progress']);
-  if (blocked.has(prospect.status)) {
-    throw new Error(`Cannot re-research while status is ${prospect.status}`);
-  }
+  validateResearchRetriggerStatus(prospect.status);
 
   const [claimed] = await query<{ id: string }>(
-    `UPDATE prospects SET status = 'research_in_progress'
-     WHERE id = $1
+    `UPDATE prospects SET status = 'research_in_progress', updated_at = NOW()
+     WHERE id = $1 AND trim(status) = $2
      RETURNING id`,
-    [prospectId]
+    [prospectId, prospect.status]
   );
   if (!claimed) {
     throw new Error('Failed to claim prospect for research');

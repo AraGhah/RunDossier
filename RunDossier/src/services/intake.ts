@@ -1,5 +1,6 @@
 import { query } from '../db.js';
 import { config } from '../config.js';
+import { containsMarkup, sanitizeEmail, sanitizeText } from '../utils/sanitize.js';
 
 const LINKEDIN_PROFILE_RE =
   /^https:\/\/(www\.)?linkedin\.com\/in\/[a-z0-9_%-]{3,100}\/?(\?[^\s]*)?$/i;
@@ -31,6 +32,18 @@ export interface IngestOptions {
   source?: 'manual' | 'search' | 'dogfood';
 }
 
+function normalizeNameCompany(name: string, company?: string): { nameKey: string; companyKey: string } {
+  return {
+    nameKey: name.trim().toLowerCase().replace(/\s+/g, ' '),
+    companyKey: (company ?? '').trim().toLowerCase().replace(/\s+/g, ' '),
+  };
+}
+
+export function nameCompanyDedupeKey(name: string, company?: string): string {
+  const { nameKey, companyKey } = normalizeNameCompany(name, company);
+  return `${nameKey}|${companyKey}`;
+}
+
 function normalizeLinkedInUrl(raw: string): string {
   let url = raw.trim().toLowerCase();
   if (!url.startsWith('http')) url = `https://${url}`;
@@ -48,16 +61,24 @@ function normalizeLinkedInUrl(raw: string): string {
 }
 
 export function normalizeIntakeRecord(raw: Record<string, unknown>): IntakeRecord {
-  const name = String(raw.name ?? '').trim();
+  const name = sanitizeText(raw.name, 200);
   const linkedin_url = raw.linkedin_url != null && String(raw.linkedin_url).trim()
-    ? normalizeLinkedInUrl(String(raw.linkedin_url))
+    ? normalizeLinkedInUrl(sanitizeText(raw.linkedin_url, 2048))
     : undefined;
-  const email = raw.email != null && String(raw.email).trim()
-    ? String(raw.email).trim().toLowerCase()
-    : undefined;
-  const title = raw.title != null ? String(raw.title).trim() || undefined : undefined;
-  const company = raw.company != null ? String(raw.company).trim() || undefined : undefined;
-  const client_id = String(raw.client_id ?? DEFAULT_CLIENT_ID).trim();
+  const email = raw.email != null ? sanitizeEmail(raw.email) || undefined : undefined;
+  const title = raw.title != null ? sanitizeText(raw.title, 200) || undefined : undefined;
+  const company = raw.company != null ? sanitizeText(raw.company, 200) || undefined : undefined;
+  const client_id = sanitizeText(raw.client_id ?? DEFAULT_CLIENT_ID, 64) || DEFAULT_CLIENT_ID;
+
+  if (name && containsMarkup(name)) {
+    throw new Error('Invalid characters in name');
+  }
+  if (title && containsMarkup(title)) {
+    throw new Error('Invalid characters in title');
+  }
+  if (company && containsMarkup(company)) {
+    throw new Error('Invalid characters in company');
+  }
 
   return { name, linkedin_url, email, title, company, client_id };
 }
@@ -155,6 +176,21 @@ export async function ingestProspects(
           );
           if (existing) {
             skipped += 1;
+            await logIntakeFailure(`duplicate linkedin_url (status: ${existing.status})`, p);
+            continue;
+          }
+
+          const [recentDelivered] = await query<{ id: string }>(
+            `SELECT id FROM prospects
+             WHERE client_id = $1 AND linkedin_url = $2
+               AND status = 'delivered'
+               AND delivered_at >= NOW() - INTERVAL '90 days'
+             LIMIT 1`,
+            [clientId, p.linkedin_url]
+          );
+          if (recentDelivered) {
+            skipped += 1;
+            await logIntakeFailure('recently delivered prospect (90d dedup)', p);
             continue;
           }
         }
@@ -167,6 +203,24 @@ export async function ingestProspects(
           );
           if (existingEmail) {
             skipped += 1;
+            await logIntakeFailure('duplicate email', p);
+            continue;
+          }
+        }
+
+        if (p.name && p.company) {
+          const { nameKey, companyKey } = normalizeNameCompany(p.name, p.company);
+          const [existingNc] = await query<{ id: string; status: string }>(
+            `SELECT id, status FROM prospects
+             WHERE client_id = $1
+               AND lower(trim(name)) = $2
+               AND lower(trim(coalesce(company, ''))) = $3
+             LIMIT 1`,
+            [clientId, nameKey, companyKey]
+          );
+          if (existingNc) {
+            skipped += 1;
+            await logIntakeFailure(`duplicate name+company (status: ${existingNc.status})`, p);
             continue;
           }
         }

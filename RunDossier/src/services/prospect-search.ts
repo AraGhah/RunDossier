@@ -8,7 +8,7 @@ import {
   linkedinScrapeShouldRetry,
 } from '../scrapers/linkedin.js';
 import { ingestProspects, type IntakeRecord } from './intake.js';
-import { scoreIcpFit } from '../utils/icp-fit.js';
+import { scoreIcpFit, meetsColdEmailAgencyIcp } from '../utils/icp-fit.js';
 import { withRetry } from '../utils/retry.js';
 
 export interface ClientSearchProfile {
@@ -49,6 +49,14 @@ export interface CreateSearchProfileInput {
 }
 
 function matchesProfile(lead: SalesNavLead, profile: ClientSearchProfile): boolean {
+  if (!meetsColdEmailAgencyIcp({
+    title: lead.title,
+    company: lead.company,
+    employeeCount: lead.employeeCount,
+  }, profile.min_icp_score ?? 50)) {
+    return false;
+  }
+
   if (profile.title_keywords.length > 0) {
     const title = lead.title.toLowerCase();
     const hit = profile.title_keywords.some((kw) => title.includes(kw.toLowerCase().trim()));
@@ -59,15 +67,6 @@ function matchesProfile(lead: SalesNavLead, profile: ClientSearchProfile): boole
   if (employees != null) {
     if (profile.min_employees != null && employees < profile.min_employees) return false;
     if (profile.max_employees != null && employees > profile.max_employees) return false;
-  }
-
-  if (profile.min_icp_score != null) {
-    const icp = scoreIcpFit({
-      title: lead.title,
-      company: lead.company,
-      employeeCount: lead.employeeCount,
-    });
-    if (icp < profile.min_icp_score) return false;
   }
 
   return true;

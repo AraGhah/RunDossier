@@ -9,6 +9,7 @@ import {
   retriggerResearch,
   type IntakeRecord,
 } from '../services/prospect.service.js';
+import { sendInternalError } from '../utils/safe-error.js';
 
 function parseUuidParam(value: string | string[] | undefined): string | null {
   const id = Array.isArray(value) ? value[0] : value;
@@ -27,7 +28,7 @@ export function registerProspectRoutes(app: import('express').Express): void {
       const result = await listProspects({ status, clientId, limit, offset });
       res.json(result);
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'prospects_list_failed');
     }
   });
 
@@ -45,7 +46,7 @@ export function registerProspectRoutes(app: import('express').Express): void {
       }
       res.json({ prospect });
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'prospect_get_failed');
     }
   });
 
@@ -68,22 +69,26 @@ export function registerProspectRoutes(app: import('express').Express): void {
         res.status(409).json({ error: message });
         return;
       }
-      res.status(500).json({ error: message });
+      sendInternalError(res, req, err, 'prospect_research_retrigger_failed');
     }
   });
 
   app.post('/api/prospects/import', requireAdmin, async (req, res) => {
     const body = req.body;
     let records: IntakeRecord[];
-
-    if (Array.isArray(body)) {
-      records = body.map(row => normalizeIntakeRecord(row as Record<string, unknown>));
-    } else if (body && typeof body === 'object' && Array.isArray((body as { prospects?: unknown }).prospects)) {
-      records = ((body as { prospects: Record<string, unknown>[] }).prospects).map(row =>
-        normalizeIntakeRecord(row)
-      );
-    } else {
-      res.status(400).json({ error: 'Body must be a JSON array or { prospects: [...] }' });
+    try {
+      if (Array.isArray(body)) {
+        records = body.map(row => normalizeIntakeRecord(row as Record<string, unknown>));
+      } else if (body && typeof body === 'object' && Array.isArray((body as { prospects?: unknown }).prospects)) {
+        records = ((body as { prospects: Record<string, unknown>[] }).prospects).map(row =>
+          normalizeIntakeRecord(row)
+        );
+      } else {
+        res.status(400).json({ error: 'Body must be a JSON array or { prospects: [...] }' });
+        return;
+      }
+    } catch (err) {
+      res.status(400).json({ error: (err as Error).message });
       return;
     }
 
@@ -108,7 +113,7 @@ export function registerProspectRoutes(app: import('express').Express): void {
         message: `${result.inserted} prospect(s) queued for research`,
       });
     } catch (err) {
-      res.status(500).json({ error: 'Import failed', detail: (err as Error).message });
+      sendInternalError(res, req, err, 'prospects_import_failed');
     }
   });
 
@@ -126,7 +131,7 @@ export function registerProspectRoutes(app: import('express').Express): void {
       }
       res.json({ batch });
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'batch_get_failed');
     }
   });
 }

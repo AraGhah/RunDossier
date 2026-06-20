@@ -4,11 +4,13 @@ import { join } from 'node:path';
 import { query, queryOne } from '../db.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
-import { buildDeliveryCsv, isInternalEmail, type DeliveryRow } from '../utils/csv-delivery.js';
-import { buildDeliveryEmailContent } from '../utils/delivery-email.js';
-import { isValidEmail, sendResendEmail, type SendResendEmailResult } from '../utils/resend.js';
+import { buildDeliveryCsv, isInternalEmail, formatResearchSignals, extractCompanyDomain, type DeliveryRow } from '../utils/csv-delivery.js';
+import { buildDeliveryEmailContent, type DeliveryEmailStats } from '../utils/delivery-email.js';
+import { isValidEmail } from '../utils/resend.js';
+import { sendDeliveryEmail, type SendDeliveryEmailResult } from '../utils/send-delivery-email.js';
 import { BEST_SHIPPED_LINE_LATERAL } from '../utils/first-line-status.js';
 import { recordDeliveryEvent } from '../utils/delivery-events.js';
+import { countThinResearch, getPipelineCounts, getLatestWorkflowRunId } from '../services/workflow-run.js';
 
 interface ClientRow {
   id: string;
@@ -55,12 +57,20 @@ export function planDelivery(opts: {
  * does NOT finalize, so the rows are retried on the next cycle (no silent loss);
  * a "not configured" skip finalizes to preserve the CSV-only delivery mode.
  */
-export function resolveSendOutcome(result: Pick<SendResendEmailResult, 'ok' | 'skipped'>): {
+export function resolveSendOutcome(
+  result: Pick<SendDeliveryEmailResult, 'ok' | 'skipped'>,
+  opts?: { csvOnly?: boolean }
+): {
   finalize: boolean;
   deliveryStatus: Extract<DeliveryLedgerStatus, 'email_sent' | 'email_failed' | 'skipped_not_configured'>;
 } {
   if (result.ok) return { finalize: true, deliveryStatus: 'email_sent' };
-  if (result.skipped) return { finalize: true, deliveryStatus: 'skipped_not_configured' };
+  if (result.skipped) {
+    if (opts?.csvOnly) {
+      return { finalize: true, deliveryStatus: 'skipped_not_configured' };
+    }
+    return { finalize: false, deliveryStatus: 'email_failed' };
+  }
   return { finalize: false, deliveryStatus: 'email_failed' };
 }
 
@@ -92,7 +102,7 @@ async function ensureDeliveryDir(): Promise<string> {
 
 function averageFitScore(rows: DeliveryRow[]): number {
   if (rows.length === 0) return 0;
-  const sum = rows.reduce((acc, row) => acc + (row.fit_score ?? 0), 0);
+  const sum = rows.reduce((acc, row) => acc + (row.confidence_score ?? 0), 0);
   return Math.round(sum / rows.length);
 }
 
@@ -169,19 +179,27 @@ async function logDeliveryFailure(clientId: string, message: string): Promise<vo
  * Returns the number of prospects considered delivered.
  */
 async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Promise<number> {
+  const generatedAt = new Date().toISOString();
   const prospects = await query<{
     id: string;
     name: string;
     title: string | null;
     company: string | null;
     email: string | null;
+    linkedin_url: string | null;
     confidence_score: number | null;
+    research_summary: string | null;
+    top_3_signals: unknown;
+    status: string;
+    batch_id: string | null;
     subject: string;
     opener: string;
     bridge: string;
+    variant_number: number;
   }>(
-    `SELECT p.id, p.name, p.title, p.company, p.email, p.confidence_score,
-            fl.subject, fl.opener, fl.bridge
+    `SELECT p.id, p.name, p.title, p.company, p.email, p.linkedin_url,
+            p.confidence_score, p.research_summary, p.top_3_signals, p.status, p.batch_id,
+            fl.subject, fl.opener, fl.bridge, fl.variant_number
      FROM prospects p
      ${BEST_SHIPPED_LINE_LATERAL}
      WHERE p.id = ANY($1::uuid[])`,
@@ -196,19 +214,37 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
 
   if (prospects.length === 0) return 0;
 
-  const rows = prospects.map(p => ({
-    id: p.id,
-    row: {
-      name: p.name,
-      title: p.title ?? '',
-      company: p.company ?? '',
-      email: p.email ?? '',
-      subject: p.subject,
-      opener: p.opener,
-      bridge: p.bridge,
-      fit_score: p.confidence_score ?? 0,
-    } satisfies DeliveryRow,
-  }));
+  const deliveryIdPlaceholder = '';
+  const workflowRunId = await getLatestWorkflowRunId();
+
+  const rows = prospects.map((p) => {
+    const { text: researchSignals, sources: sourceLinks } = formatResearchSignals(p.top_3_signals);
+    return {
+      id: p.id,
+      row: {
+        client_name: client.name,
+        prospect_name: p.name,
+        title: p.title ?? '',
+        company: p.company ?? '',
+        company_domain: extractCompanyDomain(p.email, p.company ?? ''),
+        linkedin_url: p.linkedin_url ?? '',
+        email: p.email ?? '',
+        research_signals: researchSignals,
+        source_links: sourceLinks,
+        research_summary: p.research_summary ?? '',
+        confidence_score: p.confidence_score ?? 0,
+        subject: p.subject,
+        opener: p.opener,
+        bridge: p.bridge,
+        variant_number: p.variant_number ?? 1,
+        prospect_status: p.status,
+        batch_id: p.batch_id ?? '',
+        delivery_id: deliveryIdPlaceholder,
+        run_id: workflowRunId,
+        generated_at: generatedAt,
+      } satisfies DeliveryRow,
+    };
+  });
 
   const deliverableEntries = rows.filter(entry => !isInternalEmail(entry.row.email));
   const deliverable = deliverableEntries.map(entry => entry.row);
@@ -244,7 +280,10 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
   });
   const deliveryId = ledger?.id ?? null;
 
-  // Audit: delivery created / marked ready.
+  for (const entry of rows) {
+    entry.row.delivery_id = deliveryId ?? '';
+  }
+
   await recordDeliveryEvent({
     deliveryId,
     clientId: client.id,
@@ -331,22 +370,33 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
   }
 
   // Send.
+  const thinExcluded = await countThinResearch();
+  const pipelineCounts = await getPipelineCounts();
+  const emailStats: DeliveryEmailStats = {
+    delivered: deliverable.length,
+    thinResearchExcluded: thinExcluded,
+    qaFailed: pipelineCounts.qa_failed ?? 0,
+    researchFailed: pipelineCounts.research_failed ?? 0,
+    deliveryId: deliveryId ?? undefined,
+  };
+
   const { subject, html, text } = buildDeliveryEmailContent(
     client.client_first_name,
     deliverable.length,
     deliverable,
-    filename
+    filename,
+    emailStats
   );
-  const result = await sendResendEmail({
+  const result = await sendDeliveryEmail({
     to: client.contact_email as string,
     subject,
     html,
     text,
     replyTo: config.deliveryReplyTo || undefined,
-    attachments: [{ filename, content: Buffer.from(csv, 'utf8').toString('base64') }],
+    attachments: [{ filename, content: Buffer.from(csv, 'utf8') }],
   });
 
-  const outcome = resolveSendOutcome(result);
+  const outcome = resolveSendOutcome(result, { csvOnly: config.deliveryCsvOnly });
 
   if (outcome.finalize) {
     await markDelivered(allIds);
@@ -368,6 +418,7 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
         recipient: client.contact_email,
         prospect_count: deliverable.length,
         provider_message_id: result.id ?? null,
+        provider: result.provider ?? null,
       },
       error: result.ok ? null : result.error ?? null,
     });
@@ -392,9 +443,9 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
 
   const emailStatus =
     outcome.deliveryStatus === 'email_sent'
-      ? 'email envoyé'
+      ? `email envoyé (${result.provider ?? 'provider'})`
       : outcome.deliveryStatus === 'skipped_not_configured'
-        ? 'Resend non configuré — CSV seulement'
+        ? 'aucun provider email configuré — CSV seulement'
         : 'email échoué — retry au prochain cycle';
 
   await notify(
@@ -409,7 +460,10 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
   return outcome.finalize ? deliverable.length : 0;
 }
 
-export async function runDeliveryForClient(clientId: string): Promise<number> {
+export async function runDeliveryForClient(
+  clientId: string,
+  opts?: { limit?: number }
+): Promise<number> {
   const client = await queryOne<ClientRow>(
     `SELECT id, name, contact_email, client_first_name FROM clients WHERE id = $1`,
     [clientId]
@@ -419,16 +473,26 @@ export async function runDeliveryForClient(clientId: string): Promise<number> {
     return 0;
   }
 
-  // Atomically claim the ready batch. Only one concurrent run wins these rows —
-  // this is what prevents the same delivery from being emailed twice when the
-  // per-prospect trigger and the hourly sweep overlap.
-  const claimed = await query<{ id: string }>(
-    `UPDATE prospects
-        SET status = 'delivering', updated_at = NOW()
-      WHERE client_id = $1 AND status = 'personalized_qa_passed'
-      RETURNING id`,
-    [clientId]
-  );
+  const claimed = opts?.limit
+    ? await query<{ id: string }>(
+        `UPDATE prospects
+            SET status = 'delivering', updated_at = NOW()
+          WHERE id IN (
+            SELECT id FROM prospects
+            WHERE client_id = $1 AND status = 'personalized_qa_passed'
+            ORDER BY confidence_score DESC NULLS LAST, updated_at
+            LIMIT $2
+          )
+          RETURNING id`,
+        [clientId, opts.limit]
+      )
+    : await query<{ id: string }>(
+        `UPDATE prospects
+            SET status = 'delivering', updated_at = NOW()
+          WHERE client_id = $1 AND status = 'personalized_qa_passed'
+          RETURNING id`,
+        [clientId]
+      );
   if (claimed.length === 0) return 0;
 
   const claimedIds = claimed.map(r => r.id);

@@ -3,7 +3,7 @@ import { config } from '../config.js';
 import { logCost } from '../utils/cost-tracker.js';
 import { stripEmDashes } from '../utils/strip-emdash.js';
 import { extractTextContent, parseJsonFromLLM } from '../utils/parse-json.js';
-import { validateVariantFields } from '../utils/variant-validation.js';
+import { formatSignalsForPrompt, validateVariantFields } from '../utils/variant-validation.js';
 
 const client = new Anthropic({ apiKey: config.anthropicKey });
 
@@ -13,6 +13,7 @@ export interface ResearchBrief {
   company?: string;
   research_summary: string;
   top_3_signals: unknown;
+  buying_triggers?: unknown;
 }
 
 export interface FirstLineVariant {
@@ -27,22 +28,52 @@ interface VariantsWrapper {
   variants?: FirstLineVariant[];
 }
 
+function buildPersonalizationUserMessage(brief: ResearchBrief, retryNotes: string): string {
+  const signalsBlock = formatSignalsForPrompt(brief.top_3_signals);
+  const triggers =
+    brief.buying_triggers && Array.isArray(brief.buying_triggers) && brief.buying_triggers.length > 0
+      ? `\nBuying triggers (use only if grounded in signals above):\n${JSON.stringify(brief.buying_triggers, null, 2)}`
+      : '';
+
+  return `# Prospect profile
+Name: ${brief.name}
+Title: ${brief.title ?? ''}
+Company: ${brief.company ?? ''}
+
+# Research summary
+${brief.research_summary}
+
+# Verifiable signals (each variant must anchor on a DIFFERENT signal)
+${signalsBlock}
+${triggers}
+
+# Your task
+Write exactly ${config.variantCount} distinct first-line variants. Each variant must:
+1. Use ONE specific signal from above (set signal_used to a short label matching that signal)
+2. Open with a concrete observation a stranger could only know from this research — not flattery, not a pitch
+3. Bridge naturally to outbound / pipeline / deliverability / personalization (Preframe's domain)
+4. Feel like a sharp SDR wrote it in 30 seconds — casual, specific, zero AI slop
+
+# Output format
+Return ONLY valid JSON — no markdown, no preamble:
+{
+  "variants": [
+    { "variant_number": 1, "signal_used": "...", "subject": "...", "opener": "...", "bridge": "..." },
+    { "variant_number": 2, "signal_used": "...", "subject": "...", "opener": "...", "bridge": "..." },
+    { "variant_number": 3, "signal_used": "...", "subject": "...", "opener": "...", "bridge": "..." }
+  ]
+}
+
+If no signal is specific enough, set signal_used to "NONE" for that variant — do not invent facts.${retryNotes}`;
+}
+
 export async function runPersonalizeAgent(
   prospectId: string,
   researchBrief: ResearchBrief,
   systemPrompt: string,
   retryNotes = ''
 ): Promise<FirstLineVariant[]> {
-  const userMessage = `Prospect:
-Name: ${researchBrief.name}
-Title: ${researchBrief.title ?? ''}
-Company: ${researchBrief.company ?? ''}
-
-Research brief:
-${researchBrief.research_summary}
-
-Top 3 signals:
-${JSON.stringify(researchBrief.top_3_signals)}${retryNotes}`;
+  const userMessage = buildPersonalizationUserMessage(researchBrief, retryNotes);
 
   const response = await client.messages.create({
     model: config.personalizeModel,
@@ -59,7 +90,7 @@ ${JSON.stringify(researchBrief.top_3_signals)}${retryNotes}`;
     model: config.personalizeModel,
     inputTokens: response.usage.input_tokens,
     outputTokens: response.usage.output_tokens,
-  }).catch(err => console.error('[personalize] cost log failed:', err));
+  }).catch((err) => console.error('[personalize] cost log failed:', err));
 
   const parsed = parseJsonFromLLM<FirstLineVariant[] | VariantsWrapper>(text);
   const rawVariants = Array.isArray(parsed)
@@ -74,9 +105,9 @@ ${JSON.stringify(researchBrief.top_3_signals)}${retryNotes}`;
 
   const variants: FirstLineVariant[] = rawVariants.map((v, i) => {
     const signal_used = String(
-      (v as { signal_used?: string; angle?: string }).signal_used
-      ?? (v as { angle?: string }).angle
-      ?? 'NONE'
+      (v as { signal_used?: string; angle?: string }).signal_used ??
+        (v as { angle?: string }).angle ??
+        'NONE'
     ).trim();
     const subject = stripEmDashes(String(v.subject ?? '').trim());
     const opener = stripEmDashes(String(v.opener ?? '').trim());

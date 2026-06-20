@@ -1,14 +1,13 @@
 import { query } from '../db.js';
 import { runDeliveryForClient } from '../jobs/delivery.job.js';
 
-/** Statuses that still need pipeline work (including automatic retries). */
+/** Statuses that block delivery — actively in pipeline (not retryable failures). */
 const PIPELINE_ACTIVE_STATUSES = [
   'queued',
   'research_in_progress',
   'research_complete',
   'personalization_in_progress',
-  'research_failed',
-  'qa_failed',
+  'delivering',
 ] as const;
 
 /**

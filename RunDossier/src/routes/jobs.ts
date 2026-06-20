@@ -1,5 +1,6 @@
 import { requireAdmin } from '../middleware/auth.js';
 import { listFailedJobs, retryFailedJob } from '../services/jobs.service.js';
+import { sendInternalError } from '../utils/safe-error.js';
 
 function parseUuid(value: unknown): string | null {
   if (typeof value !== 'string' || !/^[0-9a-f-]{36}$/i.test(value)) return null;
@@ -15,7 +16,7 @@ export function registerJobRoutes(app: import('express').Express): void {
       const result = await listFailedJobs({ workflow, limit, offset });
       res.json(result);
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'failed_jobs_list');
     }
   });
 
@@ -39,7 +40,7 @@ export function registerJobRoutes(app: import('express').Express): void {
         res.status(400).json({ error: message });
         return;
       }
-      res.status(500).json({ error: message });
+      sendInternalError(res, req, err, 'failed_job_retry');
     }
   });
 }

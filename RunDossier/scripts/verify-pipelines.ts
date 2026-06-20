@@ -30,7 +30,7 @@ async function main(): Promise<void> {
   }
 
   try {
-    const tables = ['prospects', 'prospect_signals_raw', 'prompt_versions', 'first_lines', 'ai_costs', 'failed_jobs', 'clients', 'batches', 'client_search_profiles', 'search_runs'];
+    const tables = ['prospects', 'prospect_signals_raw', 'prompt_versions', 'first_lines', 'ai_costs', 'failed_jobs', 'clients', 'batches', 'client_search_profiles', 'search_runs', 'telegram_updates', 'telegram_command_log', 'workflow_runs'];
     for (const t of tables) {
       const [row] = await query<{ ok: boolean }>(
         `SELECT to_regclass($1) IS NOT NULL AS ok`, [`public.${t}`]
@@ -281,6 +281,33 @@ async function main(): Promise<void> {
     }
   } catch (e) {
     record('failed_jobs', false, (e as Error).message);
+  }
+
+  try {
+    const { deliveryEmailConfigured } = await import('../src/utils/send-delivery-email.js');
+    const { resendConfigured } = await import('../src/utils/resend.js');
+    const { gmailConfigured } = await import('../src/utils/gmail-smtp.js');
+    const ok = deliveryEmailConfigured();
+    const detail = ok
+      ? `Provider: ${resendConfigured() ? 'resend' : ''}${resendConfigured() && gmailConfigured() ? '+' : ''}${gmailConfigured() ? 'gmail' : ''}`
+      : 'Aucun fournisseur email (RESEND_API_KEY ou GMAIL_USER+GMAIL_APP_PASSWORD)';
+    record('delivery-email-config', ok, detail);
+  } catch (e) {
+    record('delivery-email-config', false, (e as Error).message);
+  }
+
+  try {
+    const [tg] = await query<{ ok: boolean }>(
+      `SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'telegram_updates') AS ok`
+    );
+    const botReady = Boolean(config.telegramBotToken);
+    record(
+      'telegram-bot',
+      tg?.ok === true,
+      botReady ? 'Tables bot OK, TELEGRAM_BOT_TOKEN configuré' : 'Tables bot OK (token absent en local — OK pour CI)'
+    );
+  } catch (e) {
+    record('telegram-bot', false, (e as Error).message);
   }
 
   const failedChecks = checks.filter((c) => !c.ok);

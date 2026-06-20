@@ -1,5 +1,6 @@
 import { query } from '../db.js';
 import { notify } from '../notify.js';
+import { config } from '../config.js';
 import type { DeliveryRunSummary } from './delivery.job.js';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -52,6 +53,34 @@ async function clientBreakdown(): Promise<string[]> {
   }
 
   return [...byClient.entries()].map(([name, lines]) => `  ${name}\n${lines.join('\n')}`);
+}
+
+export function shouldSendDigest(opts: {
+  deliverySummary?: DeliveryRunSummary;
+  newProspects: number;
+  searchLeads: number;
+  searchIngested: number;
+  researchedLastHour: number;
+  qaPassedLastHour: number;
+  deliveredLastHour: number;
+  recentFailureCount: number;
+  readyToDeliver: number;
+  pipelineActive: number;
+}): boolean {
+  if (!config.telegramDigestQuiet) return true;
+  if (opts.deliverySummary && (opts.deliverySummary.prospectsDelivered > 0 || opts.deliverySummary.errors.length > 0)) {
+    return true;
+  }
+  if (opts.recentFailureCount > 0) return true;
+  if (opts.readyToDeliver > 0 || opts.pipelineActive > 0) return true;
+  return (
+    opts.newProspects > 0 ||
+    opts.searchLeads > 0 ||
+    opts.searchIngested > 0 ||
+    opts.researchedLastHour > 0 ||
+    opts.qaPassedLastHour > 0 ||
+    opts.deliveredLastHour > 0
+  );
 }
 
 export async function runPipelineDigest(deliverySummary?: DeliveryRunSummary): Promise<void> {
@@ -121,6 +150,23 @@ export async function runPipelineDigest(deliverySummary?: DeliveryRunSummary): P
 
   const clientLines = await clientBreakdown();
   const searchRow = searchStats[0] ?? { leads: '0', ingested: '0' };
+
+  const digestMetrics = {
+    deliverySummary,
+    newProspects: Number(newProspects[0]?.count ?? 0),
+    searchLeads: Number(searchRow.leads ?? 0),
+    searchIngested: Number(searchRow.ingested ?? 0),
+    researchedLastHour: Number(researchedLastHour[0]?.count ?? 0),
+    qaPassedLastHour: Number(qaPassedLastHour[0]?.count ?? 0),
+    deliveredLastHour: Number(deliveredLastHour[0]?.count ?? 0),
+    recentFailureCount: recentFailures.length,
+    readyToDeliver: Number(readyToDeliver[0]?.count ?? 0),
+    pipelineActive: Number(pipelineActive[0]?.count ?? 0),
+  };
+
+  if (!shouldSendDigest(digestMetrics)) {
+    return;
+  }
 
   const lines: string[] = [
     '📊 Dossier — rapport horaire',

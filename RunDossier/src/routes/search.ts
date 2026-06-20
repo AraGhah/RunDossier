@@ -8,6 +8,7 @@ import {
   runAllEnabledSearches,
   type CreateSearchProfileInput,
 } from '../services/prospect-search.js';
+import { sendInternalError } from '../utils/safe-error.js';
 
 const SALES_NAV_URL_RE = /^https:\/\/(www\.)?linkedin\.com\/sales\/search\//i;
 
@@ -56,7 +57,7 @@ export function registerSearchRoutes(app: import('express').Express): void {
       const profiles = await listSearchProfiles(clientId);
       res.json({ count: profiles.length, profiles });
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'search_profiles_list_failed');
     }
   });
 
@@ -70,7 +71,7 @@ export function registerSearchRoutes(app: import('express').Express): void {
       const profile = await createSearchProfile(parsed);
       res.status(201).json({ ok: true, profile });
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'search_profile_create_failed');
     }
   });
 
@@ -105,7 +106,7 @@ export function registerSearchRoutes(app: import('express').Express): void {
 
       res.status(400).json({ error: 'Provide profile_id, client_id, or all: true' });
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'search_run_failed');
     }
   });
 
@@ -135,7 +136,7 @@ export function registerSearchRoutes(app: import('express').Express): void {
 
       res.json({ count: runs.length, runs });
     } catch (err) {
-      res.status(500).json({ error: (err as Error).message });
+      sendInternalError(res, req, err, 'search_runs_list_failed');
     }
   });
 }

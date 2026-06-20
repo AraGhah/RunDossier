@@ -59,11 +59,11 @@ export async function runDogfoodPromote(): Promise<{ queued: number; skipped: nu
          FROM first_lines fl
          WHERE fl.prospect_id = p.id
            AND fl.status IN (${SHIPPED_LINE_STATUSES.map(s => `'${s}'`).join(', ')})
-       ) >= $1
+           AND fl.is_chosen = true
+       ) >= 1
        AND NOT EXISTS (
          SELECT 1 FROM smartlead_queue sq WHERE sq.prospect_id = p.id
-       )`,
-    [config.variantCount]
+       )`
   );
 
   if (candidates.length === 0) {

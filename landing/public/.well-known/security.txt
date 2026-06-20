@@ -1,0 +1,7 @@
+# Security contact — Dossier / Preframe (ITSAP.60.005)
+Contact: mailto:ara@getdossier.co
+Expires: 2027-06-20T00:00:00.000Z
+Preferred-Languages: en, fr
+Canonical: https://getdossier.co/.well-known/security.txt
+Policy: https://github.com/getdossier/preframe/blob/main/SECURITY.md
+Acknowledgments: https://github.com/getdossier/preframe/blob/main/SECURITY.md

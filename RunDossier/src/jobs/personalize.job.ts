@@ -1,7 +1,7 @@
 import { query, queryOne } from '../db.js';
 import { runPersonalizeAgent, type FirstLineVariant, type ResearchBrief } from '../agents/personalize.agent.js';
 import { LLMJsonParseError } from '../utils/parse-json.js';
-import { runQAAgent, pickBestVariant, passesW45Criteria, type QABrief, type QAResult } from '../agents/qa.agent.js';
+import { runQAAgent, pickBestVariant, passesW45Criteria, maxQaScore, type QABrief, type QAResult } from '../agents/qa.agent.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
 import { loadActivePrompt } from '../utils/prompts.js';
@@ -16,6 +16,7 @@ interface Prospect {
   client_id: string | null;
   research_summary: string;
   top_3_signals: unknown;
+  buying_triggers?: unknown;
   source?: string;
 }
 
@@ -79,10 +80,10 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
 
   try {
     const [prospect] = await query<Prospect>(
-      `UPDATE prospects SET status = 'personalization_in_progress'
-       WHERE id = $1 AND status IN ('research_complete', 'personalization_in_progress')
+      `UPDATE prospects SET status = 'personalization_in_progress', updated_at = NOW()
+       WHERE id = $1 AND status IN ('research_complete', 'qa_failed', 'personalization_failed')
        RETURNING id, name, title, company, client_id, research_summary, top_3_signals,
-                 COALESCE(source, 'manual') AS source`,
+                 buying_triggers, COALESCE(source, 'manual') AS source`,
       [prospectId]
     );
     if (!prospect) return;
@@ -107,10 +108,13 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
       company: prospect.company ?? undefined,
       research_summary: prospect.research_summary,
       top_3_signals: prospect.top_3_signals,
+      buying_triggers: prospect.buying_triggers,
     };
 
     const qaBrief: QABrief = {
       name: prospect.name,
+      title: prospect.title,
+      company: prospect.company ?? undefined,
       research_summary: prospect.research_summary,
       top_3_signals: prospect.top_3_signals,
     };
@@ -119,6 +123,7 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
     let bestVariants: FirstLineVariant[] = [];
     let bestQa: QAResult[] = [];
     let bestPick: ReturnType<typeof pickBestVariant> = null;
+    let bestAttemptMaxScore = 0;
 
     let lastError: Error | null = null;
     let lastRawOutput = '';
@@ -128,19 +133,20 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
         const variants = await runPersonalizeAgent(prospectId, brief, prompt.prompt_text, retryNotes);
         const qaResults = await runQAAgent(prospectId, variants, qaBrief, qaPrompt);
         const pick = pickBestVariant(variants, qaResults);
+        const attemptMax = maxQaScore(qaResults);
 
         if (pick && (!bestPick || pick.qa.qa_score > bestPick.qa.qa_score)) {
           bestVariants = variants;
           bestQa = qaResults;
           bestPick = pick;
-        }
-
-        if (pick && pick.qa.qa_score >= config.qaScoreFloor) {
+          bestAttemptMaxScore = attemptMax;
+        } else if (!bestPick && (bestVariants.length === 0 || attemptMax > bestAttemptMaxScore)) {
           bestVariants = variants;
           bestQa = qaResults;
-          bestPick = pick;
-          break;
+          bestAttemptMaxScore = attemptMax;
         }
+
+        if (pick) break;
 
         retryNotes = buildRetryNotes(variants, qaResults);
       } catch (attemptErr) {
@@ -153,7 +159,7 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
           `[personalize] attempt ${attempt}/${config.maxRetries} failed for ${prospectId}: ${lastError.message}`
         );
         retryNotes =
-          '\n\nIMPORTANT: Return ONLY a valid JSON array of the variant objects — no markdown, no code fences, no prose.';
+          '\n\nIMPORTANT: Return ONLY valid JSON with a "variants" array of exactly 3 objects — no markdown, no code fences, no prose.';
       }
     }
 

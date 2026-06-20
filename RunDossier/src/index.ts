@@ -1,6 +1,7 @@
 import { config, validateConfig } from './config.js';
 import { app } from './app.js';
 import { startQueue, stopQueue } from './queue.js';
+import { startTelegramPolling, stopTelegramPolling } from './telegram/polling.js';
 import { notify } from './notify.js';
 import { pool } from './db.js';
 import { logger } from './utils/logger.js';
@@ -13,6 +14,7 @@ async function shutdown(signal: string): Promise<void> {
     await notify(`Preframe shutting down (${signal})`).catch(() => {});
     server?.close();
     await stopQueue();
+    stopTelegramPolling();
     await pool.end();
   } catch (err) {
     logger.error('shutdown_error', { error: (err as Error).message });
@@ -24,6 +26,7 @@ async function main(): Promise<void> {
   try {
     validateConfig();
     await startQueue();
+    startTelegramPolling();
     server = app.listen(config.port, () => {
       logger.info('server_started', { port: config.port });
     });
