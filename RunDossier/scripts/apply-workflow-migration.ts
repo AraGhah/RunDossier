@@ -34,6 +34,7 @@ async function main(): Promise<void> {
   await applySql('sql/migrations/013_telegram_bot.sql');
   await applySql('sql/migrations/014_workflow_runs.sql');
   await applySql('sql/migrations/015_telegram_log_duplicate.sql');
+  await applySql('sql/migrations/016_client_onboarding.sql');
   await applySql('sql/seeds/workflow-prompts.sql');
   console.log('Workflow W2–W5 migrations complete.');
   await pool.end();

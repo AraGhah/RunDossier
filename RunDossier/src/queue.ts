@@ -10,8 +10,9 @@ import { runDogfoodScrape } from './jobs/dogfood-scrape.job.js';
 import { runDogfoodPromote } from './jobs/dogfood-promote.job.js';
 import { runProspectSearchJob } from './jobs/prospect-search.job.js';
 import { runPiiRetention } from './jobs/pii-retention.job.js';
+import { runOnboardingTimers } from './jobs/onboarding-timers.job.js';
 
-const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention'] as const;
+const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention', 'onboarding-timers'] as const;
 
 /** pg-boss retries for transient worker failures (API timeouts, network blips). */
 const TRANSIENT_JOB_OPTIONS = {
@@ -113,6 +114,17 @@ export async function startQueue(): Promise<void> {
         await runPiiRetention();
       } catch (err) {
         console.error('[pii-retention] job error:', err);
+      }
+    }
+  });
+
+  await boss.schedule('onboarding-timers', '20 * * * *');
+  await boss.work('onboarding-timers', async (jobs) => {
+    for (const _job of jobs) {
+      try {
+        await runOnboardingTimers();
+      } catch (err) {
+        console.error('[onboarding-timers] job error:', err);
       }
     }
   });
