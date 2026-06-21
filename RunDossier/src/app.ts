@@ -7,6 +7,8 @@ import { registerJobRoutes } from './routes/jobs.js';
 import { registerTelegramRoutes } from './routes/telegram.js';
 import { handlePilotSubmit } from './routes/pilot.js';
 import { handleIntakeSubmit } from './routes/intake.js';
+import { registerOnboardingRoutes } from './routes/onboarding.js';
+import { registerDashboardRoutes } from './routes/dashboard.js';
 import { handleAdminToken, handlePilotToken } from './routes/auth.js';
 import { corsMiddleware } from './middleware/cors.js';
 import { requireJwt } from './middleware/auth.js';
@@ -29,7 +31,14 @@ export function createApp() {
   app.use(requestIdMiddleware);
   app.use(corsMiddleware);
   app.use(securityHeaders);
-  app.use(express.json({ limit: '512kb' }));
+  app.use(
+    express.json({
+      limit: '512kb',
+      verify: (req, _res, buf) => {
+        (req as unknown as { rawBody?: Buffer }).rawBody = buf;
+      },
+    }),
+  );
 
   const limitAuthToken = rateLimit({ keyPrefix: 'auth-token', windowMs: 15 * 60_000, max: 10 });
   const limitPilotToken = rateLimit({ keyPrefix: 'pilot-token', windowMs: 60_000, max: 20 });
@@ -76,6 +85,9 @@ export function createApp() {
     requireJwt({ role: 'admin' }),
     (req, res) => { void handleIntakeSubmit(req, res); },
   );
+
+  registerOnboardingRoutes(app);
+  registerDashboardRoutes(app);
 
   app.use('/dogfood', limitDogfood);
   registerDogfoodRoutes(app);

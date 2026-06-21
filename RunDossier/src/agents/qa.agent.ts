@@ -141,7 +141,9 @@ export async function runQAAgent(
   prospectId: string,
   variants: FirstLineVariant[],
   researchBrief: QABrief,
-  systemPrompt = DEFAULT_QA_PROMPT
+  systemPrompt = DEFAULT_QA_PROMPT,
+  model: string = config.qaModel,
+  fallbackModel?: string
 ): Promise<QAResult[]> {
   const userMessage = `Prospect:
 Name: ${researchBrief.name}
@@ -167,12 +169,23 @@ ${JSON.stringify(
   2
 )}`;
 
-  const { text, usage } = await geminiGenerateContent(systemPrompt, userMessage);
+  // Independent judge: Gemini, with a fallback model if the primary errors.
+  let usedModel = model;
+  let result;
+  try {
+    result = await geminiGenerateContent(systemPrompt, userMessage, model);
+  } catch (err) {
+    if (!fallbackModel || fallbackModel === model) throw err;
+    console.warn(`[qa] primary QA model ${model} failed (${(err as Error).message}); falling back to ${fallbackModel}`);
+    usedModel = fallbackModel;
+    result = await geminiGenerateContent(systemPrompt, userMessage, fallbackModel);
+  }
+  const { text, usage } = result;
 
   await logCost({
     agentName: 'qa_agent',
     prospectId,
-    model: config.qaModel,
+    model: usedModel,
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
   });

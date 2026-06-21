@@ -71,12 +71,13 @@ export async function runPersonalizeAgent(
   prospectId: string,
   researchBrief: ResearchBrief,
   systemPrompt: string,
-  retryNotes = ''
+  retryNotes = '',
+  model: string = config.personalizeModel
 ): Promise<FirstLineVariant[]> {
   const userMessage = buildPersonalizationUserMessage(researchBrief, retryNotes);
 
   const response = await client.messages.create({
-    model: config.personalizeModel,
+    model,
     max_tokens: 4000,
     system: systemPrompt,
     messages: [{ role: 'user', content: userMessage }],
@@ -87,7 +88,7 @@ export async function runPersonalizeAgent(
   await logCost({
     agentName: 'personalization_agent',
     prospectId,
-    model: config.personalizeModel,
+    model,
     inputTokens: response.usage.input_tokens,
     outputTokens: response.usage.output_tokens,
   }).catch((err) => console.error('[personalize] cost log failed:', err));

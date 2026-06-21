@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>Preframe — Client Onboarding Guide</title>
+<style>
+  :root{--ink:#1a1f29;--muted:#5b6776;--line:#e7ebf0;--bg:#ffffff;--soft:#f6f8fa;--accent:#2f6bff;--good:#1f7a3d}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:760px;margin:0 auto;padding:48px 22px 80px}
+  header h1{font-size:30px;line-height:1.2;margin:0 0 6px}
+  header p.lead{color:var(--muted);font-size:17px;margin:0 0 8px}
+  nav{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:26px 0 34px}
+  nav b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px}
+  nav a{color:var(--accent);text-decoration:none;font-size:14px;margin-right:14px;white-space:nowrap}
+  nav a:hover{text-decoration:underline}
+  h2{font-size:21px;margin:42px 0 10px;padding-top:8px}
+  h2 .n{color:var(--muted);font-weight:600;margin-right:8px}
+  p,li{color:var(--ink)}
+  .muted{color:var(--muted)}
+  ul,ol{padding-left:20px}li{margin:5px 0}
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:14px 0 6px}
+  .step{flex:1 1 120px;min-width:120px;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4}
+  .step b{display:block;font-size:11px;color:var(--accent);margin-bottom:3px}
+  .arrow{align-self:center;color:var(--muted);font-size:18px}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  code{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px}
+  .card{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .sla{display:flex;gap:12px;flex-wrap:wrap}
+  .sla .kpi{flex:1 1 200px;background:#eef5ef;border:1px solid #cfe6d4;border-radius:10px;padding:14px 16px}
+  .sla .kpi b{display:block;font-size:24px;color:var(--good)}
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Welcome to Preframe</h1>
+    <p class="lead">Everything you need to go from signed-up to sending. You can set this up yourself in a few minutes — no call required.</p>
+  </header>
+
+  <nav>
+    <b>On this page</b>
+    <a href="#how">How it works</a>
+    <a href="#need">What we need</a>
+    <a href="#csv">Reading your CSV</a>
+    <a href="#import">Importing to your sequencer</a>
+    <a href="#week1">Week 1</a>
+    <a href="#month1">Month 1</a>
+    <a href="#changes">Requesting changes</a>
+    <a href="#support">Support</a>
+  </nav>
+
+  <h2 id="how"><span class="n">1.</span>How Preframe works</h2>
+  <div class="flow">
+    <div class="step"><b>You</b>Define your ideal customer</div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>We source</b>Find matching prospects on LinkedIn</div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>We research</b>Read each prospect for real signals</div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>We write</b>A first line grounded in one real signal</div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>QA gate</b>Weak or generic lines are dropped</div>
+    <div class="arrow">&rarr;</div>
+    <div class="step"><b>You</b>Get a CSV, import, and send</div>
+  </div>
+  <p class="muted">Every opener references something specific and real — a post, a launch, a hire — never generic flattery. Lines that aren't grounded in a real signal never ship.</p>
+
+  <h2 id="need"><span class="n">2.</span>What we need from you</h2>
+  <p>You'll fill this in once on your onboarding form. We read it back to you for approval before sourcing anyone.</p>
+  <ul>
+    <li><b>Your ideal customer</b>, in plain English — role, niche, company type, and location.</li>
+    <li><b>Your offer</b> in one sentence — what you do for them.</li>
+    <li><b>2-3 first lines you love</b> (optional) — so we can match your voice.</li>
+    <li><b>Target accounts</b> (optional) — paste LinkedIn URLs or company names, or leave blank and we'll source by your ICP.</li>
+  </ul>
+
+  <h2 id="csv"><span class="n">3.</span>Reading your delivery CSV</h2>
+  <p>Each delivery is one CSV, one row per prospect, ready to send. The columns you'll use most:</p>
+  <table>
+    <thead><tr><th>Column</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td><code>prospect_name</code>, <code>title</code>, <code>company</code></td><td>Who the prospect is.</td></tr>
+      <tr><td><code>email</code></td><td>Verified email when we could find one. Blank means no deliverable address was found for that prospect.</td></tr>
+      <tr><td><code>linkedin_url</code></td><td>Their profile, for manual touches or LinkedIn outreach.</td></tr>
+      <tr><td><code>subject</code></td><td>A suggested subject line.</td></tr>
+      <tr><td><code>opener</code></td><td><b>The personalized first line.</b> This is the core of each row — lead with it.</td></tr>
+      <tr><td><code>bridge</code></td><td>One sentence connecting the opener to your offer.</td></tr>
+      <tr><td><code>research_signals</code>, <code>research_summary</code></td><td>The signal the line is built on, so you can see why it works.</td></tr>
+      <tr><td><code>confidence_score</code></td><td>Our research-fit score (0-100) for that prospect.</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">The file also includes <code>company_domain</code>, <code>source_links</code>, <code>variant_number</code>, and IDs for your records — ignore them unless you need them.</p>
+
+  <h2 id="import"><span class="n">4.</span>Importing to your sequencer</h2>
+  <div class="card">
+    <b>Smartlead</b>
+    <ol>
+      <li>Create a campaign &rarr; <b>Import leads</b> &rarr; upload the CSV.</li>
+      <li>Map <code>email</code> &rarr; Email. Map <code>opener</code>, <code>subject</code>, and <code>bridge</code> to custom variables.</li>
+      <li>In step 1 of your sequence, start with <code>{{opener}}</code>, then your <code>{{bridge}}</code> and pitch.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <b>Instantly</b>
+    <ol>
+      <li><b>Leads &rarr; Import &rarr; CSV.</b> Upload the file.</li>
+      <li>Map <code>email</code> to the email field; map <code>opener</code>/<code>subject</code>/<code>bridge</code> as custom variables.</li>
+      <li>Reference <code>{{opener}}</code> as your first line in step 1.</li>
+    </ol>
+  </div>
+  <p class="muted">If your sequencer requires an email per row, filter out rows where <code>email</code> is blank (or enrich those separately). The opener still works for LinkedIn or manual outreach.</p>
+
+  <h2 id="week1"><span class="n">5.</span>What to expect — Week 1</h2>
+  <ul>
+    <li>Your <b>first batch lands by email within 3 business days</b> of approving your ICP.</li>
+    <li>Review the openers, import them, and start sending.</li>
+    <li>See a line that misses? Reply to the delivery email and we'll recut it.</li>
+  </ul>
+
+  <h2 id="month1"><span class="n">6.</span>What to expect — Month 1</h2>
+  <ul>
+    <li>A <b>new batch on your agreed cadence</b> (weekly by default).</li>
+    <li><b>Day-14 check-in:</b> send us 2-3 replies you got, good or bad, and we tune targeting and voice.</li>
+    <li>Openers sharpen over the month as we learn what lands with your audience.</li>
+  </ul>
+
+  <h2 id="changes"><span class="n">7.</span>How to request changes</h2>
+  <p>Just tell us — reply to any delivery email or message us. Common requests:</p>
+  <ul>
+    <li>Adjust your ICP (titles, region, company size, angle).</li>
+    <li>Change cadence or pause for a week.</li>
+    <li>Flag a specific line — we'll recut it.</li>
+  </ul>
+
+  <h2 id="support"><span class="n">8.</span>Support</h2>
+  <div class="sla">
+    <div class="kpi"><b>&lt; 30 min</b>First response, via Slack (or email).</div>
+    <div class="kpi"><b>&lt; 24 hrs</b>Resolution on anything that needs a fix.</div>
+  </div>
+  <p class="muted">When something's off, we tell you the fix and the ETA — no runaround. Reach us at <a href="mailto:ara@getdossier.co">ara@getdossier.co</a>.</p>
+
+  <footer>
+    Preframe / Dossier client onboarding. Questions this doc didn't answer? Email <a href="mailto:ara@getdossier.co">ara@getdossier.co</a> and we'll add it here.
+  </footer>
+</div>
+</body>
+</html>

@@ -34,8 +34,13 @@ async function main(): Promise<void> {
   await applySql('sql/migrations/013_telegram_bot.sql');
   await applySql('sql/migrations/014_workflow_runs.sql');
   await applySql('sql/migrations/015_telegram_log_duplicate.sql');
+  await applySql('sql/migrations/016_client_onboarding.sql');
+  await applySql('sql/migrations/017_onboarding_form_fields.sql');
+  await applySql('sql/migrations/018_client_metrics.sql');
+  await applySql('sql/migrations/019_dead_letter_status.sql');
+  await applySql('sql/migrations/020_failed_jobs_dead_letter_at.sql');
   await applySql('sql/seeds/workflow-prompts.sql');
-  console.log('Workflow W2–W5 migrations complete.');
+  console.log('Workflow migrations complete.');
   await pool.end();
 }
 

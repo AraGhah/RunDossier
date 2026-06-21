@@ -128,6 +128,14 @@ export const config = {
   jwtPilotExpiresIn: optionalEnv('JWT_PILOT_EXPIRES_IN') || '15m',
 
   trustProxy: process.env.TRUST_PROXY === 'true',
+  /** Workflow 1 - client onboarding (Stripe + Tally) */
+  onboardingEnabled: process.env.ONBOARDING_ENABLED !== 'false',
+  stripeSecretKey: optionalEnv('STRIPE_SECRET_KEY'),
+  stripeWebhookSecret: optionalEnv('STRIPE_WEBHOOK_SECRET'),
+  tallyFormUrl: optionalEnv('TALLY_FORM_URL'),
+  tallySigningSecret: optionalEnv('TALLY_SIGNING_SECRET'),
+  appBaseUrl: optionalEnv('APP_BASE_URL') || 'http://localhost:3000',
+  onboardingFirstBatchSize: parseInt(process.env.ONBOARDING_FIRST_BATCH_SIZE ?? '25', 10) || 25,
 
   /** Comma-separated origins for landing → API (e.g. https://getdossier.co,http://localhost:5173) */
   corsOrigins: (optionalEnv('CORS_ORIGINS') || 'http://localhost:5173,http://127.0.0.1:5173')
