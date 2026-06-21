@@ -45,7 +45,7 @@ export function nameCompanyDedupeKey(name: string, company?: string): string {
 }
 
 function normalizeLinkedInUrl(raw: string): string {
-  let url = raw.trim().toLowerCase();
+  let url = raw.trim();
   if (!url.startsWith('http')) url = `https://${url}`;
   url = url.replace(/^http:\/\//i, 'https://');
   try {
