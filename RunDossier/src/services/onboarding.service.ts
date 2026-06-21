@@ -7,7 +7,7 @@ import { parseIcpBrief, type ParsedIcp } from '../agents/icp-parse.agent.js';
 import { sourceAndIngestForClient } from './icp-sourcing.js';
 
 const SELECT_COLS =
-  'id, name, contact_email, client_first_name, status, onboarding_token, approval_token, icp_brief, icp_parsed';
+  'id, name, contact_email, client_first_name, status, onboarding_token, approval_token, icp_brief, icp_parsed, form_submitted_at';
 
 export interface OnboardingClient {
   id: string;
@@ -19,6 +19,7 @@ export interface OnboardingClient {
   approval_token: string | null;
   icp_brief: string | null;
   icp_parsed: ParsedIcp | null;
+  form_submitted_at: string | null;
 }
 
 export interface CreateOnboardingInput {
@@ -27,6 +28,12 @@ export interface CreateOnboardingInput {
   firstName?: string;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
+}
+
+export interface OnboardingFormExtras {
+  offer?: string;
+  brandVoice?: string[];
+  targetAccounts?: string;
 }
 
 function generateApiKey(): { key: string; hash: string; prefix: string } {
@@ -51,9 +58,15 @@ export async function recordEvent(
 }
 
 function formLink(client: OnboardingClient): string {
-  if (!config.tallyFormUrl) return '';
-  const sep = config.tallyFormUrl.includes('?') ? '&' : '?';
-  return `${config.tallyFormUrl}${sep}client_token=${client.onboarding_token}`;
+  if (config.tallyFormUrl) {
+    const sep = config.tallyFormUrl.includes('?') ? '&' : '?';
+    return `${config.tallyFormUrl}${sep}client_token=${client.onboarding_token}`;
+  }
+  return `${config.appBaseUrl}/api/onboarding/form?token=${client.onboarding_token}`;
+}
+
+export async function getOnboardingClientByToken(token: string): Promise<OnboardingClient | null> {
+  return queryOne<OnboardingClient>(`SELECT ${SELECT_COLS} FROM clients WHERE onboarding_token = $1`, [token]);
 }
 
 /** Step 1-3: create client (onboarding), generate API key + tokens. */
@@ -100,7 +113,7 @@ export async function createOnboardingClient(
   return { client, apiKey: key, isNew: true };
 }
 
-/** Step 3: email the Tally onboarding form link. */
+/** Step 3: email the onboarding form link. */
 export async function sendOnboardingForm(client: OnboardingClient): Promise<void> {
   const url = formLink(client);
   const first = client.client_first_name || 'there';
@@ -128,7 +141,8 @@ export async function sendOnboardingForm(client: OnboardingClient): Promise<void
 /** Step 4-5: parse the submitted brief with Haiku, store it, email it back for approval. */
 export async function submitIcpBrief(
   onboardingToken: string,
-  brief: string
+  brief: string,
+  extras: OnboardingFormExtras = {}
 ): Promise<OnboardingClient | null> {
   const client = await queryOne<OnboardingClient>(
     `SELECT ${SELECT_COLS} FROM clients WHERE onboarding_token = $1`,
@@ -136,16 +150,29 @@ export async function submitIcpBrief(
   );
   if (!client) return null;
 
-  const parsed = await parseIcpBrief(brief);
+  const combined = extras.offer
+    ? `Ideal customer:\n${brief}\n\nOffer (what they sell):\n${extras.offer}`
+    : brief;
+  const parsed = await parseIcpBrief(combined);
   await query(
     `UPDATE clients
-       SET icp_brief = $2, icp_parsed = $3::jsonb, form_submitted_at = NOW(), status = 'pending_approval'
+       SET icp_brief = $2, icp_parsed = $3::jsonb, offer = $4,
+           brand_voice_samples = $5::jsonb, target_accounts = $6,
+           form_submitted_at = NOW(), status = 'pending_approval'
      WHERE id = $1`,
-    [client.id, brief, JSON.stringify(parsed)]
+    [
+      client.id,
+      brief,
+      JSON.stringify(parsed),
+      extras.offer ?? parsed.offer ?? null,
+      JSON.stringify(extras.brandVoice ?? []),
+      extras.targetAccounts ?? null,
+    ]
   );
   await recordEvent(client.id, 'icp_parsed', {
     summary: parsed.summary,
     search_query: parsed.search_query,
+    hasBrandVoice: Boolean(extras.brandVoice?.length),
   });
   await sendIcpConfirmation({ ...client, icp_parsed: parsed, icp_brief: brief, status: 'pending_approval' });
   return client;

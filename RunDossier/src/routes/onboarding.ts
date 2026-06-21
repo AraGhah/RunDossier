@@ -7,6 +7,7 @@ import {
   submitIcpBrief,
   approveAndKickoff,
 } from '../services/onboarding.service.js';
+import { handleOnboardingFormPage, handleOnboardingFormSubmit } from './onboarding-form.js';
 
 type RawReq = Request & { rawBody?: Buffer };
 type TallyField = { label?: string; key?: string; value?: unknown };
@@ -121,6 +122,13 @@ export async function handleTallyWebhook(req: RawReq, res: Response): Promise<vo
   const fields = body?.data?.fields ?? [];
   const token = extractField(fields, /client.?token|token|client.?id/i);
   const brief = extractBrief(fields);
+  const offer = extractField(fields, /offer|what.*sell|value.?prop/i);
+  const brandVoice = extractField(fields, /first.?line|brand.?voice|example|sample/i)
+    .split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 3);
+  const targetAccounts = extractField(fields, /account|target.?list|companies|csv/i);
   res.status(200).json({ received: true });
 
   if (!token || !brief) {
@@ -128,7 +136,11 @@ export async function handleTallyWebhook(req: RawReq, res: Response): Promise<vo
     return;
   }
   try {
-    const client = await submitIcpBrief(token, brief);
+    const client = await submitIcpBrief(token, brief, {
+      offer: offer || undefined,
+      brandVoice,
+      targetAccounts: targetAccounts || undefined,
+    });
     if (!client) console.error('[tally] no client for token', token.slice(0, 8));
   } catch (err) {
     console.error('[tally] parse error:', (err as Error).message);
@@ -173,5 +185,11 @@ export function registerOnboardingRoutes(app: Express): void {
   });
   app.get('/api/onboarding/approve', (req, res) => {
     void handleApprove(req, res);
+  });
+  app.get('/api/onboarding/form', (req, res) => {
+    void handleOnboardingFormPage(req, res);
+  });
+  app.post('/api/onboarding/form', (req, res) => {
+    void handleOnboardingFormSubmit(req, res);
   });
 }

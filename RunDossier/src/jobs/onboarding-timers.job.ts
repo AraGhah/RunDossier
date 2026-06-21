@@ -2,7 +2,7 @@ import { query } from '../db.js';
 import { sendFollowUp, pauseStalled, type OnboardingClient } from '../services/onboarding.service.js';
 
 const COLS =
-  'id, name, contact_email, client_first_name, status, onboarding_token, approval_token, icp_brief, icp_parsed';
+  'id, name, contact_email, client_first_name, status, onboarding_token, approval_token, icp_brief, icp_parsed, form_submitted_at';
 
 /** 72h with no form -> follow-up (once); 7 days -> pause + alert. */
 export async function runOnboardingTimers(): Promise<void> {

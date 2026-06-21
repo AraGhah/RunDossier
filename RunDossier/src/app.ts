@@ -8,6 +8,7 @@ import { registerTelegramRoutes } from './routes/telegram.js';
 import { handlePilotSubmit } from './routes/pilot.js';
 import { handleIntakeSubmit } from './routes/intake.js';
 import { registerOnboardingRoutes } from './routes/onboarding.js';
+import { registerDashboardRoutes } from './routes/dashboard.js';
 import { handleAdminToken, handlePilotToken } from './routes/auth.js';
 import { corsMiddleware } from './middleware/cors.js';
 import { requireJwt } from './middleware/auth.js';
@@ -86,6 +87,7 @@ export function createApp() {
   );
 
   registerOnboardingRoutes(app);
+  registerDashboardRoutes(app);
 
   app.use('/dogfood', limitDogfood);
   registerDogfoodRoutes(app);
