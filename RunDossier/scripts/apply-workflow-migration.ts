@@ -37,6 +37,8 @@ async function main(): Promise<void> {
   await applySql('sql/migrations/016_client_onboarding.sql');
   await applySql('sql/migrations/017_onboarding_form_fields.sql');
   await applySql('sql/migrations/018_client_metrics.sql');
+  await applySql('sql/migrations/019_dead_letter_status.sql');
+  await applySql('sql/migrations/020_failed_jobs_dead_letter_at.sql');
   await applySql('sql/seeds/workflow-prompts.sql');
   console.log('Workflow migrations complete.');
   await pool.end();

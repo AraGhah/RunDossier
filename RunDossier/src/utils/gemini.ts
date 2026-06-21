@@ -21,11 +21,11 @@ interface GeminiResponse {
   error?: { message?: string };
 }
 
-/** Call Gemini generateContent (W4.5 QA judge — matches n8n gemini-2.5-pro). */
+/** Call Gemini generateContent (W4.5 QA judge). model accepts any model id. */
 export async function geminiGenerateContent(
   systemPrompt: string,
   userPrompt: string,
-  model = config.qaModel
+  model: string = config.qaModel
 ): Promise<GeminiGenerateResult> {
   const apiKey = config.googleApiKey;
   if (!apiKey) {

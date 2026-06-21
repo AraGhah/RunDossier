@@ -8,6 +8,17 @@ import { loadActivePrompt } from '../utils/prompts.js';
 import { logFunnelEvent } from '../utils/funnel-log.js';
 import { maybeRunDeliveryForClient } from '../utils/delivery-trigger.js';
 
+// --- Workflow 4 escalation config (override via env) ---------------------------
+// Generation ladder: cheap model first, escalate only when QA rejects the batch.
+const LADDER: string[] = (process.env.PERSONALIZE_LADDER
+  ? process.env.PERSONALIZE_LADDER.split(',').map((s) => s.trim()).filter(Boolean)
+  : ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6', 'claude-opus-4-8']);
+// QA judge — Gemini, deliberately a different model family than the generators.
+const QA_PRIMARY = process.env.QA_MODEL_PRIMARY?.trim() || 'gemini-2.0-flash';
+const QA_FALLBACK = process.env.QA_MODEL_FALLBACK?.trim() || 'gemini-2.5-pro';
+const COST_CAP_USD = Number(process.env.PER_PROSPECT_COST_CAP || '0.25') || 0.25;
+const MAX_REGENERATIONS = Number(process.env.MAX_REGENERATIONS || String(LADDER.length)) || LADDER.length;
+
 interface Prospect {
   id: string;
   name: string;
@@ -20,10 +31,19 @@ interface Prospect {
   source?: string;
 }
 
+/** Cumulative AI spend logged against this prospect (research + personalize + QA). */
+async function prospectCostUsd(prospectId: string): Promise<number> {
+  const row = await queryOne<{ c: string }>(
+    `SELECT COALESCE(SUM(cost_usd), 0)::text AS c FROM ai_costs WHERE prospect_id = $1`,
+    [prospectId]
+  );
+  return Number(row?.c ?? 0);
+}
+
 function buildRetryNotes(variants: FirstLineVariant[], qaResults: QAResult[]): string {
   const rejected = variants
-    .map(v => {
-      const qa = qaResults.find(q => q.variant_number === v.variant_number);
+    .map((v) => {
+      const qa = qaResults.find((q) => q.variant_number === v.variant_number);
       if (!qa || passesW45Criteria(qa)) return null;
       return `Variant ${v.variant_number} (${v.signal_used}): score ${qa.qa_score}/10 — ${qa.qa_reason}`;
     })
@@ -37,14 +57,15 @@ async function persistVariants(
   prospectId: string,
   variants: FirstLineVariant[],
   qaResults: QAResult[],
-  promptId: string
+  promptId: string,
+  modelUsed: string
 ): Promise<{ passed: boolean; chosenVariant: number | null }> {
   await query('DELETE FROM first_lines WHERE prospect_id = $1', [prospectId]);
 
   const best = pickBestVariant(variants, qaResults);
 
   for (const variant of variants) {
-    const qa = qaResults.find(q => q.variant_number === variant.variant_number);
+    const qa = qaResults.find((q) => q.variant_number === variant.variant_number);
     const passed = qa ? passesW45Criteria(qa) : false;
     const isChosen = best?.variant.variant_number === variant.variant_number;
 
@@ -62,7 +83,7 @@ async function persistVariants(
         qa?.human_ness_score ?? 0, qa?.relevance_score ?? 0,
         qa?.length_ok ?? false, qa?.grounded ?? false,
         qa?.qa_verdict ?? 'reject', qa?.qa_reason ?? '',
-        config.personalizeModel, promptId,
+        modelUsed, promptId,
         passed ? 'qa_passed' : 'qa_failed',
         isChosen,
       ]
@@ -110,7 +131,6 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
       top_3_signals: prospect.top_3_signals,
       buying_triggers: prospect.buying_triggers,
     };
-
     const qaBrief: QABrief = {
       name: prospect.name,
       title: prospect.title,
@@ -119,114 +139,113 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
       top_3_signals: prospect.top_3_signals,
     };
 
+    const baselineCost = await prospectCostUsd(prospectId);
+    const ladder = LADDER.slice(0, MAX_REGENERATIONS);
+
     let retryNotes = '';
     let bestVariants: FirstLineVariant[] = [];
     let bestQa: QAResult[] = [];
-    let bestPick: ReturnType<typeof pickBestVariant> = null;
-    let bestAttemptMaxScore = 0;
-
+    let bestModel = ladder[0];
+    let bestMaxScore = -1;
     let lastError: Error | null = null;
     let lastRawOutput = '';
+    let costStopped = false;
 
-    for (let attempt = 1; attempt <= config.maxRetries; attempt++) {
+    for (let i = 0; i < ladder.length; i++) {
+      const model = ladder[i];
+      const spent = (await prospectCostUsd(prospectId)) - baselineCost;
+      if (spent >= COST_CAP_USD) {
+        console.warn(`[personalize] ${prospectId} cost cap reached ($${spent.toFixed(3)} >= $${COST_CAP_USD}) before rung ${i + 1} (${model}) — stopping ladder`);
+        costStopped = true;
+        break;
+      }
+
+      console.log(`[personalize] ${prospectId} rung ${i + 1}/${ladder.length} generate=${model} qa=${QA_PRIMARY} spent=$${spent.toFixed(3)}`);
       try {
-        const variants = await runPersonalizeAgent(prospectId, brief, prompt.prompt_text, retryNotes);
-        const qaResults = await runQAAgent(prospectId, variants, qaBrief, qaPrompt);
+        const variants = await runPersonalizeAgent(prospectId, brief, prompt.prompt_text, retryNotes, model);
+        const qaResults = await runQAAgent(prospectId, variants, qaBrief, qaPrompt, QA_PRIMARY, QA_FALLBACK);
         const pick = pickBestVariant(variants, qaResults);
         const attemptMax = maxQaScore(qaResults);
+        console.log(`[personalize] ${prospectId} rung ${i + 1} (${model}) -> QA max ${attemptMax}/10, ship=${pick ? 'YES' : 'no'}`);
 
-        if (pick && (!bestPick || pick.qa.qa_score > bestPick.qa.qa_score)) {
+        if (attemptMax > bestMaxScore) {
           bestVariants = variants;
           bestQa = qaResults;
-          bestPick = pick;
-          bestAttemptMaxScore = attemptMax;
-        } else if (!bestPick && (bestVariants.length === 0 || attemptMax > bestAttemptMaxScore)) {
-          bestVariants = variants;
-          bestQa = qaResults;
-          bestAttemptMaxScore = attemptMax;
+          bestModel = model;
+          bestMaxScore = attemptMax;
         }
 
-        if (pick) break;
+        if (pick) {
+          const { chosenVariant } = await persistVariants(prospectId, variants, qaResults, prompt.id, model);
+          await query(`UPDATE prospects SET status = 'personalized_qa_passed', updated_at = NOW() WHERE id = $1`, [prospectId]);
+          const total = (await prospectCostUsd(prospectId)) - baselineCost;
+          await notify(`W4 shipped: ${prospect.name} via ${model} (variant ${chosenVariant}, QA ${pick.qa.qa_score}/10, $${total.toFixed(3)})`);
+          if (prospect.source === 'dogfood') {
+            await logFunnelEvent(prospectId, 'personalized', { chosenVariant, model });
+          }
+          if (prospect.client_id) {
+            try {
+              await maybeRunDeliveryForClient(prospect.client_id);
+            } catch (deliveryErr) {
+              console.error('[personalize] delivery trigger error:', deliveryErr);
+            }
+          }
+          return;
+        }
 
-        retryNotes = buildRetryNotes(variants, qaResults);
+        const escalation =
+          i + 1 < ladder.length
+            ? `\n\nThe independent QA judge rejected every variant. A stronger model will now retry — push specificity and human-ness above ${config.qaScoreFloor}/10 and anchor each line on a different concrete signal.`
+            : '';
+        retryNotes = buildRetryNotes(variants, qaResults) + escalation;
       } catch (attemptErr) {
-        // A bad model response (e.g. unparseable JSON / no variants) should not
-        // abort the whole job — retry with a stricter-format nudge and remember
-        // the real reason + raw output instead of failing generically.
         lastError = attemptErr as Error;
         if (attemptErr instanceof LLMJsonParseError) lastRawOutput = attemptErr.raw;
-        console.warn(
-          `[personalize] attempt ${attempt}/${config.maxRetries} failed for ${prospectId}: ${lastError.message}`
-        );
+        console.warn(`[personalize] ${prospectId} rung ${i + 1} (${model}) errored: ${lastError.message}`);
         retryNotes =
           '\n\nIMPORTANT: Return ONLY valid JSON with a "variants" array of exactly 3 objects — no markdown, no code fences, no prose.';
       }
     }
 
-    if (bestVariants.length === 0) {
-      // Persist the raw model output + parse error so the failure is debuggable
-      // and never hidden behind a generic message.
-      if (lastRawOutput) {
-        await query(
-          `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
-           VALUES ('personalize-raw-output', $1, $2, $3)`,
-          [
-            prospectId,
-            `raw model output (${lastRawOutput.length} chars): ${lastRawOutput.slice(0, 4000)}`,
-            config.maxRetries,
-          ]
-        ).catch(e => console.error('[personalize] raw output log error:', e));
-      }
-      throw new Error(
-        `Personalization produced no variants after ${config.maxRetries} attempts: ${
-          lastError ? lastError.message : 'no variants returned'
-        }`
-      );
+    // Ladder exhausted (or cost-capped) with no shipping variant -> terminal dead-letter.
+    if (bestVariants.length > 0) {
+      await persistVariants(prospectId, bestVariants, bestQa, prompt.id, bestModel);
     }
+    const totalSpent = (await prospectCostUsd(prospectId)) - baselineCost;
+    const reason = costStopped
+      ? `cost cap $${COST_CAP_USD} reached ($${totalSpent.toFixed(3)})`
+      : `no variant met ship criteria after ladder [${ladder.join(' -> ')}] (best QA ${Math.max(0, bestMaxScore)}/10, $${totalSpent.toFixed(3)})`;
 
-    const { passed, chosenVariant } = await persistVariants(
-      prospectId,
-      bestVariants,
-      bestQa,
-      prompt.id
-    );
-
-    const newStatus = passed ? 'personalized_qa_passed' : 'qa_failed';
-
-    await query('UPDATE prospects SET status = $1 WHERE id = $2', [newStatus, prospectId]);
-
-    await notify(
-      passed
-        ? `W4/W4.5 passed: ${prospect.name} (chosen variant ${chosenVariant})`
-        : `W4/W4.5 failed: ${prospect.name} (no variant met ship criteria)`
-    );
-
-    if (passed && prospect.source === 'dogfood') {
-      await logFunnelEvent(prospectId, 'personalized', { chosenVariant });
+    if (lastRawOutput) {
+      await query(
+        `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
+         VALUES ('personalize-raw-output', $1, $2, $3)`,
+        [prospectId, `raw model output (${lastRawOutput.length} chars): ${lastRawOutput.slice(0, 4000)}`, ladder.length]
+      ).catch((e) => console.error('[personalize] raw output log error:', e));
     }
+    await query(
+      `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
+       VALUES ('personalize-dead-letter', $1, $2, $3)`,
+      [prospectId, `dead-lettered: ${reason}${lastError ? ' | last error: ' + lastError.message : ''}`, ladder.length]
+    ).catch((e) => console.error('[personalize] dead-letter log error:', e));
 
-    if (passed && prospect.client_id) {
-      try {
-        await maybeRunDeliveryForClient(prospect.client_id);
-      } catch (deliveryErr) {
-        console.error('[personalize] delivery trigger error:', deliveryErr);
-      }
-    }
-
+    await query(`UPDATE prospects SET status = 'dead_letter', updated_at = NOW() WHERE id = $1`, [prospectId]);
+    await notify(`W4 dead-letter: ${prospect.name} — ${reason}`);
   } catch (err) {
+    // Genuine infra/exception (DB, missing prompt, etc.) -> retryable, not dead-letter.
     await query(
       `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
        VALUES ('personalize', $1, $2, $3)`,
-      [prospectId, (err as Error).message, config.maxRetries]
-    ).catch(e => console.error('[personalize] failed_jobs insert error:', e));
+      [prospectId, (err as Error).message, MAX_REGENERATIONS]
+    ).catch((e) => console.error('[personalize] failed_jobs insert error:', e));
 
     await query(
       `UPDATE prospects SET status = 'personalization_failed'
        WHERE id = $1 AND status = 'personalization_in_progress'`,
       [prospectId]
-    ).catch(e => console.error('[personalize] status reset error:', e));
+    ).catch((e) => console.error('[personalize] status reset error:', e));
 
-    await notify(`Personalize failed: ${prospectId}\n${(err as Error).message}`);
+    await notify(`Personalize errored: ${prospectId}\n${(err as Error).message}`);
     throw err;
   }
 }

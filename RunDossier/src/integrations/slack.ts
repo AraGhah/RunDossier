@@ -1,7 +1,7 @@
 /**
  * Slack posting integration (bot token -> chat.postMessage).
- * Proves the Slack delivery path for later (Step 60 wires it into delivery).
- * Reads SLACK_BOT_TOKEN from the environment; no extra config wiring needed.
+ * Proves the Slack delivery path; Step 38 (failure digest) and Step 60 (delivery) use it.
+ * Reads SLACK_BOT_TOKEN from the environment.
  */
 const SLACK_POST_URL = 'https://slack.com/api/chat.postMessage';
 
@@ -57,7 +57,7 @@ export interface DeliverySummary {
 
 /** Format a delivery summary as Slack text + Block Kit. */
 export function formatDeliverySummary(s: DeliverySummary): { text: string; blocks: unknown[] } {
-  const fit = s.avgFitScore != null ? ` · avg fit ${s.avgFitScore}/100` : '';
+  const fit = s.avgFitScore != null ? ` - avg fit ${s.avgFitScore}/100` : '';
   const next = s.nextDeliveryDate ? ` Next batch: ${s.nextDeliveryDate}.` : '';
   const text = `Dossier delivery for ${s.clientName}: ${s.count} personalized openers ready${fit}.${next}`;
   const fields: unknown[] = [
@@ -69,7 +69,7 @@ export function formatDeliverySummary(s: DeliverySummary): { text: string; block
   const blocks: unknown[] = [
     { type: 'header', text: { type: 'plain_text', text: `New delivery: ${s.count} openers ready` } },
     { type: 'section', fields },
-    { type: 'context', elements: [{ type: 'mrkdwn', text: 'Sent by Dossier · full CSV delivered by email' }] },
+    { type: 'context', elements: [{ type: 'mrkdwn', text: 'Sent by Dossier - full CSV delivered by email' }] },
   ];
   return { text, blocks };
 }

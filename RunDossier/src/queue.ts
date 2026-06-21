@@ -11,8 +11,9 @@ import { runDogfoodPromote } from './jobs/dogfood-promote.job.js';
 import { runProspectSearchJob } from './jobs/prospect-search.job.js';
 import { runPiiRetention } from './jobs/pii-retention.job.js';
 import { runOnboardingTimers } from './jobs/onboarding-timers.job.js';
+import { runFailureDigest } from './jobs/failure-digest.job.js';
 
-const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention', 'onboarding-timers'] as const;
+const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention', 'onboarding-timers', 'failure-digest'] as const;
 
 /** pg-boss retries for transient worker failures (API timeouts, network blips). */
 const TRANSIENT_JOB_OPTIONS = {
@@ -129,7 +130,19 @@ export async function startQueue(): Promise<void> {
     }
   });
 
-  console.log('[queue] Started — jobs registered');
+  // Daily ops pulse at 08:00 - dead-letter / failure digest.
+  await boss.schedule('failure-digest', '0 8 * * *');
+  await boss.work('failure-digest', async (jobs) => {
+    for (const _job of jobs) {
+      try {
+        await runFailureDigest();
+      } catch (err) {
+        console.error('[failure-digest] job error:', err);
+      }
+    }
+  });
+
+  console.log('[queue] Started - jobs registered');
 }
 
 export async function stopQueue(): Promise<void> {
@@ -139,7 +152,7 @@ export async function stopQueue(): Promise<void> {
   }
 }
 
-/** Connectivity check only — does not register workers or run jobs. */
+/** Connectivity check only - does not register workers or run jobs. */
 export async function probePgBoss(): Promise<void> {
   const probe = new PgBoss({
     connectionString: config.databaseUrl,
