@@ -73,9 +73,12 @@ async function main() {
   const seen = new Set();
   const prospects = [];
   for (const it of items) {
-    const url =
-      it.linkedinUrl ||
-      (it.publicIdentifier ? `https://www.linkedin.com/in/${it.publicIdentifier}` : null);
+    // Prefer a clean vanity handle; fall back to the (case-sensitive) encoded URL.
+    const pid = typeof it.publicIdentifier === 'string' ? it.publicIdentifier : '';
+    const cleanHandle = pid && !/^AC[A-Za-z0-9_-]{12,}$/.test(pid);
+    const url = cleanHandle
+      ? `https://www.linkedin.com/in/${pid}`
+      : it.linkedinUrl || (pid ? `https://www.linkedin.com/in/${pid}` : null);
     if (!url || seen.has(url)) continue;
     seen.add(url);
     const name =
