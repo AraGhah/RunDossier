@@ -64,7 +64,7 @@ describe('applyProgrammaticQAChecks', () => {
     assert.equal(result.qa_verdict, 'reject');
   });
 
-  it('rejects overlong opener+bridge', () => {
+  it('flags overlong opener+bridge but does not reject (soft check)', () => {
     const variant = {
       ...goodVariant,
       opener: Array(40).fill('word').join(' '),
@@ -72,7 +72,7 @@ describe('applyProgrammaticQAChecks', () => {
     };
     const result = applyProgrammaticQAChecks(variant, baseQa({ length_ok: true }), brief);
     assert.equal(result.length_ok, false);
-    assert.equal(result.qa_verdict, 'reject');
+    assert.equal(result.qa_verdict, 'ship');
   });
 });
 

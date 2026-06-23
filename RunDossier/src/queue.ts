@@ -28,14 +28,16 @@ export function getBoss(): PgBoss { return boss; }
 
 export async function startQueue(): Promise<void> {
   logDatabaseSslConfig();
-  boss = new PgBoss({    connectionString: config.databaseUrl,
+  boss = new PgBoss({
+    connectionString: config.databaseUrl,
     ssl: getPgSslConfig(),
+    maintenanceIntervalSeconds: 300,
   });
   boss.on('error', (err: Error) => console.error('[pg-boss] error:', err));
   await boss.start();
 
   for (const name of QUEUES) {
-    await boss.createQueue(name);
+    await boss.createQueue(name, { deleteAfterSeconds: 259200 });
   }
 
   await boss.work<{ prospectId: string }>(
@@ -164,10 +166,11 @@ export async function probePgBoss(): Promise<void> {
   const probe = new PgBoss({
     connectionString: config.databaseUrl,
     ssl: getPgSslConfig(),
+    maintenanceIntervalSeconds: 300,
   });  probe.on('error', (err: Error) => console.error('[pg-boss] probe error:', err));
   await probe.start();
   for (const name of QUEUES) {
-    await probe.createQueue(name);
+    await probe.createQueue(name, { deleteAfterSeconds: 259200 });
   }
   await probe.stop({ graceful: true, timeout: 10_000 });
 }

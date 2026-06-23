@@ -1,5 +1,5 @@
 /**
- * Apply the warm-pilot + batch-cost + cost-governor migrations (021-024) to Supabase, in order.
+ * Apply the warm-pilot + batch-cost + cost-governor + security migrations (021-025) to Supabase, in order.
  * These are idempotent and were already applied to production on 2026-06-22; this script
  * exists so a fresh database reaches the same state.
  * Usage: npx tsx scripts/apply-warmpilot-cost-migrations.ts
@@ -18,6 +18,7 @@ const MIGRATIONS = [
   '022_pilot_requests_upsert_rpc.sql',
   '023_batch_cost_rollup.sql',
   '024_ai_costs_indexes.sql',
+  '025_security_rls_and_search_path.sql',
 ];
 
 async function main(): Promise<void> {
