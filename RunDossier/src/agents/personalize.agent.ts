@@ -49,10 +49,12 @@ ${triggers}
 
 # Your task
 Write exactly ${config.variantCount} distinct first-line variants. Each variant must:
-1. Use ONE specific signal from above (set signal_used to a short label matching that signal)
-2. Open with a concrete observation a stranger could only know from this research — not flattery, not a pitch
-3. Bridge naturally to outbound / pipeline / deliverability / personalization (Preframe's domain)
-4. Feel like a sharp SDR wrote it in 30 seconds — casual, specific, zero AI slop
+1. Use ONE specific signal from above (set signal_used to a short label matching that signal).
+2. Open with a concrete observation a stranger could only know from this research. Not flattery, not a pitch.
+3. State why that signal matters for their outbound (the operational consequence it creates), then bridge to pipeline, deliverability, or personalization. Describe their challenge, not our features.
+4. Feel like a sharp SDR wrote it in 30 seconds: casual, specific, zero AI slop.
+5. Specificity test: if this exact line could be sent to 100 other prospects, it is not specific enough.
+6. Use no dashes of any kind (no em-dashes, en-dashes, or " - "). Use commas or periods.
 
 # Output format
 Return ONLY valid JSON — no markdown, no preamble:
