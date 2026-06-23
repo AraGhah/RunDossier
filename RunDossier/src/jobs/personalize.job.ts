@@ -4,6 +4,7 @@ import { LLMJsonParseError } from '../utils/parse-json.js';
 import { runQAAgent, pickBestVariant, passesW45Criteria, maxQaScore, type QABrief, type QAResult } from '../agents/qa.agent.js';
 import { notify } from '../notify.js';
 import { config } from '../config.js';
+import { effectivePerProspectCapUsd } from '../utils/cost-governor.js';
 import { loadActivePrompt } from '../utils/prompts.js';
 import { logFunnelEvent } from '../utils/funnel-log.js';
 import { maybeRunDeliveryForClient } from '../utils/delivery-trigger.js';
@@ -16,7 +17,9 @@ const LADDER: string[] = (process.env.PERSONALIZE_LADDER
 // QA judge — Gemini, deliberately a different model family than the generators.
 const QA_PRIMARY = process.env.QA_MODEL_PRIMARY?.trim() || 'gemini-2.0-flash';
 const QA_FALLBACK = process.env.QA_MODEL_FALLBACK?.trim() || 'gemini-2.5-pro';
-const COST_CAP_USD = Number(process.env.PER_PROSPECT_COST_CAP || '0.25') || 0.25;
+// Hard per-prospect retry budget. effectivePerProspectCapUsd() clamps to a $0.25
+// ceiling — PER_PROSPECT_COST_CAP can only LOWER it (tests), never bypass it upward.
+const COST_CAP_USD = effectivePerProspectCapUsd();
 const MAX_REGENERATIONS = Number(process.env.MAX_REGENERATIONS || String(LADDER.length)) || LADDER.length;
 
 interface Prospect {

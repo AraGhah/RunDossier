@@ -12,8 +12,9 @@ import { runProspectSearchJob } from './jobs/prospect-search.job.js';
 import { runPiiRetention } from './jobs/pii-retention.job.js';
 import { runOnboardingTimers } from './jobs/onboarding-timers.job.js';
 import { runFailureDigest } from './jobs/failure-digest.job.js';
+import { runCostGovernor } from './jobs/cost-governor.job.js';
 
-const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention', 'onboarding-timers', 'failure-digest'] as const;
+const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention', 'onboarding-timers', 'failure-digest', 'cost-governor'] as const;
 
 /** pg-boss retries for transient worker failures (API timeouts, network blips). */
 const TRANSIENT_JOB_OPTIONS = {
@@ -131,6 +132,12 @@ export async function startQueue(): Promise<void> {
   });
 
   // Daily ops pulse at 08:00 - dead-letter / failure digest.
+  // Cost Governor v1 — daily 01:00. Tier soft-caps + global ceiling -> Telegram alert.
+  await boss.schedule('cost-governor', '0 1 * * *');
+  await boss.work('cost-governor', async (jobs) => {
+    for (const _job of jobs) await runCostGovernor();
+  });
+
   await boss.schedule('failure-digest', '0 8 * * *');
   await boss.work('failure-digest', async (jobs) => {
     for (const _job of jobs) {
