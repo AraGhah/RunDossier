@@ -1,0 +1,11 @@
+Name,Persona,Company,Email,LinkedIn URL,Relationship,Mutual / how warm,Warmth (1-5),Channel,Variant,Status,Contacted (date),Follow-up 1 (date),Follow-up 2 (date),Replied (date),Reply sentiment,Pilot sent (date),Outcome,Owner,Notes
+,agency_founder,,,,,,,both,A,new,,,,,,,pending,ara,
+,dfy_sdr_agency,,,,,,,both,B,new,,,,,,,pending,ara,
+,head_of_sales,,,,,,,both,C,new,,,,,,,pending,ara,
+,sdr_lead,,,,,,,both,D,new,,,,,,,pending,ara,
+,revops,,,,,,,both,E,new,,,,,,,pending,ara,
+,saas_founder,,,,,,,both,F,new,,,,,,,pending,ara,
+,appointment_setter,,,,,,,both,G,new,,,,,,,pending,ara,
+,fractional_cro,,,,,,,both,H,new,,,,,,,pending,ara,
+,gtm_marketer,,,,,,,both,I,new,,,,,,,pending,ara,
+,community_peer,,,,,,,both,J,new,,,,,,,pending,ara,

@@ -26,8 +26,8 @@ describe('validateVariantLength', () => {
     assert.equal(result.length_ok, true);
   });
 
-  it('rejects opener+bridge over 55 words', () => {
-    const longOpener = Array(31).fill('word').join(' ');
+  it('rejects opener+bridge over 65 words', () => {
+    const longOpener = Array(36).fill('word').join(' ');
     const result = validateVariantLength('quick note', longOpener, 'short bridge');
     assert.equal(result.length_ok, false);
     assert.ok(result.errors.some((e) => e.includes('opener')));

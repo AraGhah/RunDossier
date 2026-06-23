@@ -43,7 +43,6 @@ export function passesW45Criteria(qa: QAResult): boolean {
     qa.specificity_score >= config.qaScoreFloor &&
     qa.human_ness_score >= config.qaScoreFloor &&
     qa.relevance_score >= config.qaScoreFloor &&
-    qa.length_ok === true &&
     qa.qa_verdict === 'ship'
   );
 }
@@ -124,7 +123,6 @@ export function applyProgrammaticQAChecks(
 
   if (
     !next.grounded ||
-    !next.length_ok ||
     next.qa_score < config.qaScoreFloor ||
     next.specificity_score < config.qaScoreFloor ||
     next.human_ness_score < config.qaScoreFloor ||

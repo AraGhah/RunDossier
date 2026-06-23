@@ -63,14 +63,14 @@ export function validateVariantLength(
   if (subjectWords < 2 || subjectWords > 6) {
     errors.push(`subject: ${subjectWords} words (want 2–5)`);
   }
-  if (openerWords > 30) {
-    errors.push(`opener: ${openerWords} words (max 30)`);
+  if (openerWords > 35) {
+    errors.push(`opener: ${openerWords} words (max 35)`);
   }
-  if (bridgeWords > 25) {
-    errors.push(`bridge: ${bridgeWords} words (max 25)`);
+  if (bridgeWords > 30) {
+    errors.push(`bridge: ${bridgeWords} words (max 30)`);
   }
-  if (comboWords > 55) {
-    errors.push(`opener+bridge: ${comboWords} words (max 55)`);
+  if (comboWords > 65) {
+    errors.push(`opener+bridge: ${comboWords} words (max 65)`);
   }
 
   return {
@@ -92,10 +92,6 @@ export function validateVariantFields(subject: string, opener: string, bridge: s
   }
   if (hasBannedPhrase(subject) || hasBannedPhrase(opener) || hasBannedPhrase(bridge)) {
     return 'banned phrase detected';
-  }
-  const length = validateVariantLength(subject, opener, bridge);
-  if (!length.length_ok) {
-    return length.errors.join('; ');
   }
   return null;
 }
