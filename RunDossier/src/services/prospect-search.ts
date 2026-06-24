@@ -10,6 +10,7 @@ import {
 import { ingestProspects, type IntakeRecord } from './intake.js';
 import { scoreIcpFit, meetsIcpForSegment, parseProfileSegment } from '../utils/icp-fit.js';
 import { withRetry } from '../utils/retry.js';
+import { assertValidSalesNavSearchUrl, isValidSalesNavSearchUrl } from '../utils/sales-nav-url.js';
 
 export interface ClientSearchProfile {
   id: string;
@@ -173,6 +174,7 @@ export async function listSearchProfiles(clientId?: string): Promise<ClientSearc
 }
 
 export async function createSearchProfile(input: CreateSearchProfileInput): Promise<ClientSearchProfile> {
+  assertValidSalesNavSearchUrl(input.search_url);
   const [row] = await query<ClientSearchProfile>(
     `INSERT INTO client_search_profiles (
        client_id, name, search_url, title_keywords,
@@ -201,6 +203,7 @@ export async function createSearchProfile(input: CreateSearchProfileInput): Prom
 
 /** Idempotent create/update by client + profile name. */
 export async function upsertSearchProfile(input: CreateSearchProfileInput): Promise<ClientSearchProfile> {
+  assertValidSalesNavSearchUrl(input.search_url);
   const [existing] = await query<ClientSearchProfile>(
     `SELECT id, client_id, name, search_url, title_keywords,
             min_employees, max_employees, min_icp_score,
@@ -265,6 +268,11 @@ export async function runProspectSearch(
   const profile = await getSearchProfile(profileId);
   if (!profile) throw new Error(`Search profile not found: ${profileId}`);
   if (!profile.enabled) throw new Error(`Search profile disabled: ${profile.name}`);
+  if (!isValidSalesNavSearchUrl(profile.search_url)) {
+    throw new Error(
+      `Search profile "${profile.name}" has an invalid search_url — run npm run icp:apply after setting a full Sales Navigator URL in .env`
+    );
+  }
 
   const [run] = await query<{ id: string }>(
     `INSERT INTO search_runs (profile_id, client_id, status)

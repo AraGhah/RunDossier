@@ -16,6 +16,7 @@ import {
   reviewIcpProfileSetup,
 } from '../src/config/icp-profiles.js';
 import { upsertSearchProfile, listSearchProfiles } from '../src/services/prospect-search.js';
+import { describeSalesNavSearchUrl } from '../src/utils/sales-nav-url.js';
 
 function arg(name: string): string | undefined {
   const idx = process.argv.indexOf(name);
@@ -93,6 +94,12 @@ async function main(): Promise<void> {
 
     if (!url) {
       skipped.push(`${spec.name} (pas d'URL)`);
+      continue;
+    }
+
+    const urlReview = describeSalesNavSearchUrl(url);
+    if (!urlReview.valid) {
+      skipped.push(`${spec.name} (${urlReview.issue ?? 'URL invalide'})`);
       continue;
     }
 

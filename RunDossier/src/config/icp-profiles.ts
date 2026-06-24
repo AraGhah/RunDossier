@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { IcpSegment } from '../utils/icp-fit.js';
+import { describeSalesNavSearchUrl } from '../utils/sales-nav-url.js';
 
 export interface IcpProfileSpec {
   key: string;
@@ -60,12 +61,13 @@ export interface IcpSetupReview {
 
 export function reviewIcpProfileSetup(spec: IcpProfileSpec, url: string | null): IcpSetupReview {
   const qualityNotes: string[] = [];
-  const urlConfigured = Boolean(url);
+  const urlReview = describeSalesNavSearchUrl(url);
+  const urlConfigured = urlReview.configured;
 
   if (!urlConfigured) {
     qualityNotes.push(`URL manquante — définir ${spec.env_url_key} dans .env`);
-  } else if (!url!.includes('linkedin.com/sales/search')) {
-    qualityNotes.push('URL invalide — doit être une recherche Sales Navigator');
+  } else if (!urlReview.valid && urlReview.issue) {
+    qualityNotes.push(urlReview.issue);
   }
 
   if (spec.segment === 'agency_main') {
