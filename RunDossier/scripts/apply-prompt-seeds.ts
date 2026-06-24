@@ -13,8 +13,11 @@ import { validateConfig } from '../src/config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// NOTE: research_prompt_v2.sql is intentionally EXCLUDED. Its conservative confidence
+// guidance ("below 60 means thin, do not pad") scored good prospects below the 60 floor
+// and flooded thin_research (2026-06-23 yield regression). Research stays at v1 until a
+// calibrated v3 is written and tested. Do not re-add v2.
 const SEEDS = [
-  'research_prompt_v2.sql',
   'qa_prompt_v4.sql',
   'personalization_prompt_v4.sql',
 ];

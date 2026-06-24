@@ -23,6 +23,7 @@
     "pilot:migrate": "tsx scripts/apply-pilot-migration.ts",
     "workflow:migrate": "tsx scripts/apply-workflow-migration.ts",
     "audit:migrate": "tsx scripts/apply-audit-migration.ts",
+    "deliverability:migrate": "tsx scripts/apply-sender-domains-migration.ts",
     "search": "tsx scripts/run-prospect-search.ts",
     "governor:simulate": "tsx scripts/simulate-cost-spike.ts",
     "prompts:seed": "tsx scripts/apply-prompt-seeds.ts",

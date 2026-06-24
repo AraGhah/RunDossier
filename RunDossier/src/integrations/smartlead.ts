@@ -1,5 +1,7 @@
 import { config } from '../config.js';
 import { query } from '../db.js';
+import { coldSendAllowed } from '../services/deliverability/sender-guard.js';
+import { logger } from '../utils/logger.js';
 
 export interface SmartleadLeadPayload {
   prospectId: string;
@@ -19,8 +21,17 @@ function splitName(fullName: string): { firstName: string; lastName: string } {
   return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
 }
 
-/** Push to Smartlead API when configured; otherwise queue-only (review by hand). */
+/**
+ * Push to Smartlead API when configured AND the deliverability gate approves; otherwise
+ * queue-only (review by hand). The gate is server-side and fail-closed: it prevents cold
+ * sends from an unapproved or primary domain even when Smartlead credentials are present.
+ */
 export async function pushToSmartlead(payload: SmartleadLeadPayload): Promise<'pushed' | 'queued'> {
+  const gate = await coldSendAllowed();
+  if (!gate.allowed) {
+    logger.warn('smartlead_push_gated', { reason: gate.reason, domain: gate.domain, prospectId: payload.prospectId });
+    return 'queued';
+  }
   if (!config.smartleadApiKey || !config.smartleadCampaignId) {
     return 'queued';
   }
