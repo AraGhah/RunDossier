@@ -13,10 +13,11 @@ import { pool, query, queryOne } from '../src/db.js';
 import { config, validateConfig } from '../src/config.js';
 import { DEFAULT_CLIENT_ID } from '../src/services/intake.js';
 import {
-  createSearchProfile,
   getSearchProfile,
   runProspectSearch,
+  upsertSearchProfile,
 } from '../src/services/prospect-search.js';
+import { loadColdEmailAgencyIcpConfig, resolveProfileSearchUrl } from '../src/config/icp-profiles.js';
 import { createWorkflowRun, updateWorkflowRun } from '../src/services/workflow-run.js';
 import { runScheduler } from '../src/jobs/scheduler.job.js';
 import { handleResearch } from '../src/jobs/research.job.js';
@@ -133,42 +134,31 @@ async function ensureSearchProfile(): Promise<string> {
     if (!p) throw new Error(`Search profile not found: ${PROFILE_ID}`);
     return p.id;
   }
-  if (!SEARCH_URL?.trim()) {
+
+  const icp = loadColdEmailAgencyIcpConfig();
+  const mainSpec = icp.profiles.find((p) => p.key === 'main');
+  if (!mainSpec) throw new Error('ICP config missing main profile');
+
+  const searchUrl = SEARCH_URL?.trim() || resolveProfileSearchUrl(mainSpec);
+  if (!searchUrl) {
     throw new Error(
-      'Missing Sales Navigator URL. Set APIFY_SALES_NAV_SEARCH_URL or pass --search-url "https://www.linkedin.com/sales/search/..."'
+      'Missing Sales Navigator URL. Set APIFY_SALES_NAV_SEARCH_URL or pass --search-url'
     );
   }
 
-  const existing = await queryOne<{ id: string }>(
-    `SELECT id FROM client_search_profiles
-     WHERE client_id = $1 AND search_url = $2 AND enabled = true
-     LIMIT 1`,
-    [CLIENT_ID, SEARCH_URL.trim()]
-  );
-  if (existing?.id) return existing.id;
-
-  const profile = await createSearchProfile({
+  const profile = await upsertSearchProfile({
     client_id: CLIENT_ID,
-    name: `Cold Email Agencies ICP (${new Date().toISOString().slice(0, 10)})`,
-    search_url: SEARCH_URL.trim(),
-    title_keywords: [
-      'founder',
-      'co-founder',
-      'ceo',
-      'owner',
-      'managing director',
-      'head of outbound',
-      'head of growth',
-      'head of sales',
-    ],
-    min_employees: 5,
-    max_employees: 100,
-    min_icp_score: 50,
-    max_results_per_run: Math.min(100, Math.max(50, TARGET)),
-    enrich_profiles: true,
+    name: mainSpec.name,
+    search_url: searchUrl,
+    title_keywords: mainSpec.title_keywords,
+    min_employees: mainSpec.min_employees,
+    max_employees: mainSpec.max_employees,
+    min_icp_score: mainSpec.min_icp_score,
+    max_results_per_run: Math.min(mainSpec.max_results_per_run, Math.max(50, TARGET)),
+    enrich_profiles: mainSpec.enrich_profiles,
     enabled: true,
   });
-  console.log(`Created search profile: ${profile.id}`);
+  console.log(`Search profile ready: ${profile.id} (${profile.name})`);
   return profile.id;
 }
 

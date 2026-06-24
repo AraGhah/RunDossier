@@ -8,6 +8,7 @@ import { registerTelegramRoutes } from './routes/telegram.js';
 import { handlePilotSubmit } from './routes/pilot.js';
 import { handleIntakeSubmit } from './routes/intake.js';
 import { registerOnboardingRoutes } from './routes/onboarding.js';
+import { registerParentBatchRoutes } from './routes/parent-batches.js';
 import { registerDashboardRoutes } from './routes/dashboard.js';
 import { registerDeliverabilityRoutes } from './routes/deliverability.js';
 import { handleAdminToken, handlePilotToken } from './routes/auth.js';
@@ -99,7 +100,9 @@ export function createApp() {
 
   app.use('/api/prospects', limitAdmin);
   app.use('/api/batches', limitAdmin);
+  app.use('/api/parent-batches', limitAdmin);
   registerProspectRoutes(app);
+  registerParentBatchRoutes(app);
 
   app.use('/api/jobs', limitAdmin);
   registerJobRoutes(app);

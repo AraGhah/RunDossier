@@ -1,0 +1,130 @@
+{
+  "version": "1.0.0",
+  "client_id": "cd435b0e-6767-499f-99cd-c42a14a18a35",
+  "saved_search_instructions": {
+    "locations": ["United States", "Canada", "United Kingdom"],
+    "seniority": ["Owner / Partner", "CXO", "VP", "Director"],
+    "company_headcount": { "min": 5, "max": 100, "sweet_spot": "10-50" },
+    "industries_include": [
+      "Marketing and Advertising",
+      "Business Consulting and Services"
+    ],
+    "industries_exclude_note": "Exclude broad unrelated industries in Sales Nav if results are noisy."
+  },
+  "profiles": [
+    {
+      "key": "main",
+      "name": "Dossier ICP — Cold Email Agencies (Main)",
+      "saved_search_name": "Dossier — Cold Email Agencies (Main)",
+      "env_url_key": "APIFY_SALES_NAV_SEARCH_URL",
+      "segment": "agency_main",
+      "linkedin_service_categories_include": [
+        "Email Marketing",
+        "Demand Generation",
+        "Lead Generation"
+      ],
+      "linkedin_service_categories_exclude": [
+        "Marketing",
+        "Operations",
+        "Coaching & Mentoring",
+        "Consulting"
+      ],
+      "title_keywords": [
+        "founder",
+        "co-founder",
+        "ceo",
+        "owner",
+        "managing director",
+        "head of outbound",
+        "head of growth",
+        "head of sales",
+        "vp sales",
+        "director of sales",
+        "director of business development"
+      ],
+      "company_keywords_hint": [
+        "cold email",
+        "lead gen",
+        "lead generation",
+        "outbound",
+        "appointment setting",
+        "demand gen",
+        "email marketing",
+        "sdr"
+      ],
+      "min_employees": 5,
+      "max_employees": 100,
+      "min_icp_score": 55,
+      "max_results_per_run": 40,
+      "enrich_profiles": true,
+      "enabled": true
+    },
+    {
+      "key": "consulting",
+      "name": "Dossier ICP — GTM & Outbound Consultants",
+      "saved_search_name": "Dossier — GTM Outbound Consultants",
+      "env_url_key": "APIFY_SALES_NAV_SEARCH_URL_CONSULTING",
+      "segment": "consulting",
+      "linkedin_service_categories_include": ["Consulting"],
+      "linkedin_service_categories_exclude": [
+        "Marketing",
+        "Operations",
+        "Coaching & Mentoring",
+        "Email Marketing",
+        "Demand Generation",
+        "Lead Generation"
+      ],
+      "title_keywords": [
+        "founder",
+        "owner",
+        "partner",
+        "principal",
+        "managing director",
+        "managing partner"
+      ],
+      "company_keywords_hint": [
+        "gtm",
+        "go-to-market",
+        "outbound",
+        "revenue",
+        "demand gen",
+        "demand generation",
+        "cold email",
+        "pipeline",
+        "sales development",
+        "appointment setting",
+        "fractional cro",
+        "fractional cmo"
+      ],
+      "min_employees": 1,
+      "max_employees": 50,
+      "min_icp_score": 50,
+      "max_results_per_run": 30,
+      "enrich_profiles": true,
+      "enabled": true
+    }
+  ],
+  "global_exclusions": {
+    "titles_and_companies": [
+      "recruiter",
+      "recruiting",
+      "staffing",
+      "copywriter",
+      "freelance",
+      "freelancer",
+      "coach",
+      "coaching",
+      "mentor",
+      "mentoring",
+      "in-house",
+      "employee at",
+      "virtual assistant",
+      "va agency",
+      "seo only",
+      "social media only",
+      "branding only",
+      "creative agency only"
+    ],
+    "notes": "Freelancers, copywriters, recruiters, coaches, in-house marketers, and generic agencies without outbound/lead-gen signals are excluded post-scrape by icp-fit.ts."
+  }
+}

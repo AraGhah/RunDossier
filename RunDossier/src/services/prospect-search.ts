@@ -8,7 +8,7 @@ import {
   linkedinScrapeShouldRetry,
 } from '../scrapers/linkedin.js';
 import { ingestProspects, type IntakeRecord } from './intake.js';
-import { scoreIcpFit, meetsColdEmailAgencyIcp } from '../utils/icp-fit.js';
+import { scoreIcpFit, meetsIcpForSegment, parseProfileSegment } from '../utils/icp-fit.js';
 import { withRetry } from '../utils/retry.js';
 
 export interface ClientSearchProfile {
@@ -33,6 +33,11 @@ export interface SearchRunResult {
   ingested: number;
   skipped: number;
   enriched: number;
+  prospectIds?: string[];
+}
+
+export interface RunProspectSearchOptions {
+  parentBatchId?: string;
 }
 
 export interface CreateSearchProfileInput {
@@ -49,11 +54,18 @@ export interface CreateSearchProfileInput {
 }
 
 function matchesProfile(lead: SalesNavLead, profile: ClientSearchProfile): boolean {
-  if (!meetsColdEmailAgencyIcp({
-    title: lead.title,
-    company: lead.company,
-    employeeCount: lead.employeeCount,
-  }, profile.min_icp_score ?? 50)) {
+  const segment = parseProfileSegment(profile.name);
+  if (
+    !meetsIcpForSegment(
+      {
+        title: lead.title,
+        company: lead.company,
+        employeeCount: lead.employeeCount,
+      },
+      segment,
+      profile.min_icp_score ?? 50
+    )
+  ) {
     return false;
   }
 
@@ -72,7 +84,8 @@ function matchesProfile(lead: SalesNavLead, profile: ClientSearchProfile): boole
   return true;
 }
 
-function leadToIntakeRecord(lead: SalesNavLead, clientId: string): IntakeRecord {
+function leadToIntakeRecord(lead: SalesNavLead, clientId: string, profile: ClientSearchProfile): IntakeRecord {
+  const segment = parseProfileSegment(profile.name);
   return {
     name: lead.name,
     linkedin_url: lead.linkedinUrl,
@@ -80,11 +93,14 @@ function leadToIntakeRecord(lead: SalesNavLead, clientId: string): IntakeRecord 
     company: lead.company || undefined,
     client_id: clientId,
     employee_count: lead.employeeCount,
-    icp_fit_score: scoreIcpFit({
-      title: lead.title,
-      company: lead.company,
-      employeeCount: lead.employeeCount,
-    }),
+    icp_fit_score: scoreIcpFit(
+      {
+        title: lead.title,
+        company: lead.company,
+        employeeCount: lead.employeeCount,
+      },
+      segment
+    ),
   };
 }
 
@@ -183,6 +199,54 @@ export async function createSearchProfile(input: CreateSearchProfileInput): Prom
   return row;
 }
 
+/** Idempotent create/update by client + profile name. */
+export async function upsertSearchProfile(input: CreateSearchProfileInput): Promise<ClientSearchProfile> {
+  const [existing] = await query<ClientSearchProfile>(
+    `SELECT id, client_id, name, search_url, title_keywords,
+            min_employees, max_employees, min_icp_score,
+            max_results_per_run, enrich_profiles, enabled
+     FROM client_search_profiles
+     WHERE client_id = $1 AND name = $2
+     LIMIT 1`,
+    [input.client_id, input.name.trim()]
+  );
+
+  if (existing) {
+    const [updated] = await query<ClientSearchProfile>(
+      `UPDATE client_search_profiles
+       SET search_url = $3,
+           title_keywords = $4,
+           min_employees = $5,
+           max_employees = $6,
+           min_icp_score = $7,
+           max_results_per_run = $8,
+           enrich_profiles = $9,
+           enabled = $10,
+           updated_at = NOW()
+       WHERE id = $1 AND client_id = $2
+       RETURNING id, client_id, name, search_url, title_keywords,
+                 min_employees, max_employees, min_icp_score,
+                 max_results_per_run, enrich_profiles, enabled`,
+      [
+        existing.id,
+        input.client_id,
+        input.search_url.trim(),
+        input.title_keywords ?? [],
+        input.min_employees ?? null,
+        input.max_employees ?? null,
+        input.min_icp_score ?? null,
+        input.max_results_per_run ?? config.searchDefaultMaxResults,
+        input.enrich_profiles ?? true,
+        input.enabled ?? true,
+      ]
+    );
+    if (!updated) throw new Error('Failed to update search profile');
+    return updated;
+  }
+
+  return createSearchProfile(input);
+}
+
 export async function getSearchProfile(profileId: string): Promise<ClientSearchProfile | null> {
   const [row] = await query<ClientSearchProfile>(
     `SELECT id, client_id, name, search_url, title_keywords,
@@ -194,7 +258,10 @@ export async function getSearchProfile(profileId: string): Promise<ClientSearchP
   return row ?? null;
 }
 
-export async function runProspectSearch(profileId: string): Promise<SearchRunResult> {
+export async function runProspectSearch(
+  profileId: string,
+  options: RunProspectSearchOptions = {}
+): Promise<SearchRunResult> {
   const profile = await getSearchProfile(profileId);
   if (!profile) throw new Error(`Search profile not found: ${profileId}`);
   if (!profile.enabled) throw new Error(`Search profile disabled: ${profile.name}`);
@@ -209,7 +276,7 @@ export async function runProspectSearch(profileId: string): Promise<SearchRunRes
 
   const finish = async (
     status: 'completed' | 'failed',
-    stats: Partial<SearchRunResult> & { error?: string }
+    stats: Partial<SearchRunResult> & { error?: string; prospectIds?: string[] }
   ): Promise<SearchRunResult> => {
     await query(
       `UPDATE search_runs
@@ -234,6 +301,7 @@ export async function runProspectSearch(profileId: string): Promise<SearchRunRes
       ingested: stats.ingested ?? 0,
       skipped: stats.skipped ?? 0,
       enriched: stats.enriched ?? 0,
+      prospectIds: stats.prospectIds,
     };
   };
 
@@ -244,9 +312,12 @@ export async function runProspectSearch(profileId: string): Promise<SearchRunRes
     });
 
     const filtered = rawLeads.filter((lead) => matchesProfile(lead, profile));
-    const intakeRecords = filtered.map((lead) => leadToIntakeRecord(lead, profile.client_id));
+    const intakeRecords = filtered.map((lead) => leadToIntakeRecord(lead, profile.client_id, profile));
 
-    const intake = await ingestProspects(intakeRecords, { source: 'search' });
+    const intake = await ingestProspects(intakeRecords, {
+      source: 'search',
+      parentBatchId: options.parentBatchId,
+    });
 
     const leadByUrl = new Map(filtered.map((l) => [l.linkedinUrl, l]));
     for (const prospectId of intake.prospectIds) {
@@ -278,6 +349,7 @@ export async function runProspectSearch(profileId: string): Promise<SearchRunRes
       ingested: intake.inserted,
       skipped: intake.skipped + intake.invalid,
       enriched,
+      prospectIds: intake.prospectIds,
     });
 
     if (result.ingested > 0) {

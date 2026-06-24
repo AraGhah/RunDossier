@@ -11,6 +11,22 @@ import { sendDeliveryEmail, type SendDeliveryEmailResult } from '../utils/send-d
 import { BEST_SHIPPED_LINE_LATERAL } from '../utils/first-line-status.js';
 import { recordDeliveryEvent } from '../utils/delivery-events.js';
 import { countThinResearch, getPipelineCounts, getLatestWorkflowRunId } from '../services/workflow-run.js';
+import {
+  getParentBatch,
+  getParentBatchProgress,
+  refreshParentBatchCounters,
+  completeParentBatch,
+  markParentBatchDelivering,
+  countProspectsForParentBatch,
+  resetParentBatchToProcessing,
+  markParentBatchStalled,
+} from '../services/parent-batch.js';
+import {
+  shouldDeliverParentBatch,
+  resolveParentBatchCompletion,
+  readyToDeliverCount,
+} from '../utils/batch-progress.js';
+import { reconcileDeliveryCounts } from '../utils/batch-reconciliation.js';
 
 interface ClientRow {
   id: string;
@@ -125,11 +141,12 @@ async function markDelivered(ids: string[]): Promise<void> {
   );
 }
 
-async function markBatchesDelivered(clientId: string): Promise<void> {
+async function markBatchesDelivered(batchIds: string[]): Promise<void> {
+  if (batchIds.length === 0) return;
   await query(
     `UPDATE batches SET status = 'delivered'
-     WHERE client_id = $1 AND status IN ('queued', 'processing')`,
-    [clientId]
+     WHERE id = ANY($1::uuid[]) AND status IN ('queued', 'processing')`,
+    [batchIds]
   );
 }
 
@@ -173,12 +190,22 @@ async function logDeliveryFailure(clientId: string, message: string): Promise<vo
   ).catch(e => console.error('[delivery] failed_jobs insert error:', e));
 }
 
+export interface DeliverClaimedResult {
+  delivered: number;
+  deliveryId: string | null;
+  finalized: boolean;
+  csvRowCount: number;
+}
+
 /**
  * Build the CSV, email it to the client, and finalize statuses for a batch of
  * prospects that have already been atomically claimed (status 'delivering').
- * Returns the number of prospects considered delivered.
  */
-async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Promise<number> {
+async function deliverClaimedBatch(
+  client: ClientRow,
+  claimedIds: string[],
+  opts?: { parentBatchId?: string; parentBatchStats?: DeliveryEmailStats }
+): Promise<DeliverClaimedResult> {
   const generatedAt = new Date().toISOString();
   const prospects = await query<{
     id: string;
@@ -212,7 +239,9 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
   const missingLineIds = claimedIds.filter(id => !fetchedIds.has(id));
   if (missingLineIds.length > 0) await releaseClaim(missingLineIds);
 
-  if (prospects.length === 0) return 0;
+  if (prospects.length === 0) {
+    return { delivered: 0, deliveryId: null, finalized: false, csvRowCount: 0 };
+  }
 
   const deliveryIdPlaceholder = '';
   const workflowRunId = await getLatestWorkflowRunId();
@@ -313,8 +342,9 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
 
   // All recipients internal → mark delivered, no email.
   if (decision.action === 'internal_only') {
+    const batchIds = [...new Set(prospects.map((p) => p.batch_id).filter(Boolean) as string[])];
     await markDelivered(allIds);
-    await markBatchesDelivered(client.id);
+    await markBatchesDelivered(batchIds);
     await updateDelivery(deliveryId, { status: 'skipped_internal_only' });
     await recordDeliveryEvent({
       deliveryId,
@@ -327,7 +357,12 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
       `W5 Livraison — ${client.name}\n` +
         `• ${allIds.length} prospect(s) marqués livrés (emails internes uniquement, CSV non envoyé)`
     );
-    return allIds.length;
+    return {
+      delivered: allIds.length,
+      deliveryId,
+      finalized: true,
+      csvRowCount: 0,
+    };
   }
 
   // CSV body lives in memory and is what we attach — disk archiving is best-effort.
@@ -366,13 +401,19 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
       `W5 Livraison — ${client.name}\n` +
         `• ${deliverable.length} prospect(s) prêts mais aucun email client valide — non envoyé (en attente)`
     );
-    return 0;
+    return { delivered: 0, deliveryId, finalized: false, csvRowCount: deliverable.length };
   }
-
-  // Send.
-  const thinExcluded = await countThinResearch();
-  const pipelineCounts = await getPipelineCounts();
+  const thinExcluded = opts?.parentBatchStats?.thinResearchExcluded ?? (opts?.parentBatchId
+    ? (await countProspectsForParentBatch(opts.parentBatchId)).thin_research
+    : await countThinResearch());
+  const pipelineCounts = opts?.parentBatchId
+    ? await countProspectsForParentBatch(opts.parentBatchId).then((c) => ({
+        qa_failed: c.qa_failed,
+        research_failed: c.research_failed,
+      }))
+    : await getPipelineCounts();
   const emailStats: DeliveryEmailStats = {
+    ...(opts?.parentBatchStats ?? {}),
     delivered: deliverable.length,
     thinResearchExcluded: thinExcluded,
     qaFailed: pipelineCounts.qa_failed ?? 0,
@@ -399,8 +440,9 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
   const outcome = resolveSendOutcome(result, { csvOnly: config.deliveryCsvOnly });
 
   if (outcome.finalize) {
+    const batchIds = [...new Set(prospects.map((p) => p.batch_id).filter(Boolean) as string[])];
     await markDelivered(allIds);
-    await markBatchesDelivered(client.id);
+    await markBatchesDelivered(batchIds);
     await updateDelivery(deliveryId, {
       status: outcome.deliveryStatus,
       filename,
@@ -457,13 +499,29 @@ async function deliverClaimedBatch(client: ClientRow, claimedIds: string[]): Pro
       `\n• Destinataire: ${client.contact_email} (${emailStatus})`
   );
 
-  return outcome.finalize ? deliverable.length : 0;
+  return {
+    delivered: outcome.finalize ? deliverable.length : 0,
+    deliveryId,
+    finalized: outcome.finalize,
+    csvRowCount: deliverable.length,
+  };
 }
 
 export async function runDeliveryForClient(
   clientId: string,
   opts?: { limit?: number }
 ): Promise<number> {
+  const activeParent = await query<{ id: string }>(
+    `SELECT id FROM parent_batches
+     WHERE client_id = $1 AND status IN ('queued', 'processing', 'delivering')
+     LIMIT 1`,
+    [clientId]
+  );
+  if (activeParent[0]?.id) {
+    console.log('[delivery] skipping client with active parent batch:', clientId);
+    return 0;
+  }
+
   const client = await queryOne<ClientRow>(
     `SELECT id, name, contact_email, client_first_name FROM clients WHERE id = $1`,
     [clientId]
@@ -498,7 +556,8 @@ export async function runDeliveryForClient(
   const claimedIds = claimed.map(r => r.id);
 
   try {
-    return await deliverClaimedBatch(client, claimedIds);
+    const result = await deliverClaimedBatch(client, claimedIds);
+    return result.delivered;
   } catch (err) {
     // Never strand a claim — release it and log so the next cycle retries.
     console.error('[delivery] batch error, releasing claim:', clientId, err);
@@ -506,6 +565,174 @@ export async function runDeliveryForClient(
     await logDeliveryFailure(client.id, (err as Error).message);
     return 0;
   }
+}
+
+export interface ParentBatchDeliveryResult {
+  delivered: number;
+  deliveryId: string | null;
+  fullyComplete: boolean;
+  finalized: boolean;
+}
+
+/** @deprecated use finalized field */
+export type ParentBatchDeliveryLegacy = ParentBatchDeliveryResult;
+
+/**
+ * Final delivery for a parent batch — claims up to (requested - already_delivered)
+ * QA-passed prospects and sends one email. Called only by the orchestrator when
+ * shouldDeliverParentBatch() is true.
+ */
+export async function runDeliveryForParentBatch(parentBatchId: string): Promise<ParentBatchDeliveryResult> {
+  const batch = await getParentBatch(parentBatchId);
+  if (!batch) {
+    console.warn('[delivery] unknown parent batch:', parentBatchId);
+    return { delivered: 0, deliveryId: null, fullyComplete: false, finalized: false };
+  }
+
+  const progress = await getParentBatchProgress(parentBatchId);
+  if (!progress || !shouldDeliverParentBatch(progress)) {
+    return { delivered: 0, deliveryId: null, fullyComplete: false, finalized: false };
+  }
+
+  const claimed = await markParentBatchDelivering(parentBatchId);
+  if (!claimed) {
+    return { delivered: 0, deliveryId: batch.delivery_id, fullyComplete: false, finalized: false };
+  }
+
+  const stillNeeded = Math.max(0, batch.requested_prospect_count - progress.counts.delivered);
+  const claimLimit = progress.sourceExhausted
+    ? readyToDeliverCount(progress.counts)
+    : Math.min(readyToDeliverCount(progress.counts), stillNeeded);
+
+  const client = await queryOne<ClientRow>(
+    `SELECT id, name, contact_email, client_first_name FROM clients WHERE id = $1`,
+    [batch.client_id]
+  );
+  if (!client) {
+    await completeParentBatch(parentBatchId, { status: 'failed', errorMessage: 'Client not found' });
+    return { delivered: 0, deliveryId: null, fullyComplete: false, finalized: false };
+  }
+
+  const claimedRows = await query<{ id: string }>(
+    `UPDATE prospects
+        SET status = 'delivering', updated_at = NOW()
+      WHERE id IN (
+        SELECT id FROM prospects
+        WHERE parent_batch_id = $1 AND status = 'personalized_qa_passed'
+        ORDER BY confidence_score DESC NULLS LAST, updated_at
+        LIMIT $2
+      )
+      RETURNING id`,
+    [parentBatchId, claimLimit]
+  );
+
+  if (claimedRows.length === 0) {
+    await resetParentBatchToProcessing(
+      parentBatchId,
+      'Delivery gate open but no prospects claimed — retry next cycle'
+    );
+    return { delivered: 0, deliveryId: null, fullyComplete: false, finalized: false };
+  }
+
+  const reconciliation = reconcileDeliveryCounts({
+    parentBatchId,
+    requested: batch.requested_prospect_count,
+    claimedIds: claimedRows.map((r) => r.id),
+    counts: progress.counts,
+    sourceExhausted: progress.sourceExhausted,
+  });
+  if (!reconciliation.ok) {
+    await releaseClaim(claimedRows.map((r) => r.id));
+    await resetParentBatchToProcessing(parentBatchId, reconciliation.errors.join('; '));
+    await logDeliveryFailure(batch.client_id, reconciliation.errors.join('; '));
+    return { delivered: 0, deliveryId: null, fullyComplete: false, finalized: false };
+  }
+
+  const completion = resolveParentBatchCompletion(progress);
+  const counts = progress.counts;
+  const parentStats: DeliveryEmailStats = {
+    requested: batch.requested_prospect_count,
+    delivered: claimedRows.length,
+    thinResearchExcluded: counts.thin_research,
+    qaFailed: counts.qa_failed,
+    researchFailed: counts.research_failed,
+    permanentlyFailed: counts.dead_letter + counts.research_failed,
+    replacementUsed: batch.replacement_used,
+    fullyComplete: completion.fullyComplete,
+    partialReason: completion.reason,
+    deliveryId: undefined,
+    parentBatchId: parentBatchId,
+  };
+
+  let deliveryResult: DeliverClaimedResult = {
+    delivered: 0,
+    deliveryId: null,
+    finalized: false,
+    csvRowCount: 0,
+  };
+  try {
+    deliveryResult = await deliverClaimedBatch(client, claimedRows.map((r) => r.id), {
+      parentBatchId,
+      parentBatchStats: parentStats,
+    });
+  } catch (err) {
+    console.error('[delivery] parent batch error:', parentBatchId, err);
+    await releaseClaim(claimedRows.map((r) => r.id));
+    await resetParentBatchToProcessing(parentBatchId, (err as Error).message);
+    await logDeliveryFailure(batch.client_id, (err as Error).message);
+    return { delivered: 0, deliveryId: null, fullyComplete: false, finalized: false };
+  }
+
+  if (!deliveryResult.finalized || deliveryResult.delivered === 0) {
+    await resetParentBatchToProcessing(
+      parentBatchId,
+      'Delivery not finalized — prospects released for retry'
+    );
+    return {
+      delivered: 0,
+      deliveryId: deliveryResult.deliveryId,
+      fullyComplete: false,
+      finalized: false,
+    };
+  }
+
+  const postReconcile = reconcileDeliveryCounts({
+    parentBatchId,
+    requested: batch.requested_prospect_count,
+    claimedIds: claimedRows.map((r) => r.id),
+    counts: progress.counts,
+    csvRowCount: deliveryResult.csvRowCount,
+    deliveryLedgerCount: deliveryResult.delivered,
+    sourceExhausted: progress.sourceExhausted,
+  });
+  if (!postReconcile.ok) {
+    const msg = postReconcile.errors.join('; ');
+    await logDeliveryFailure(batch.client_id, msg);
+    await markParentBatchStalled(parentBatchId, `Reconciliation failed after delivery: ${msg}`);
+    return {
+      delivered: deliveryResult.delivered,
+      deliveryId: deliveryResult.deliveryId,
+      fullyComplete: false,
+      finalized: false,
+    };
+  }
+
+  await refreshParentBatchCounters(parentBatchId);
+  const completed = await completeParentBatch(parentBatchId, {
+    status: completion.status,
+    deliveryId: deliveryResult.deliveryId,
+    errorMessage: completion.fullyComplete ? null : completion.reason ?? null,
+  });
+  if (!completed) {
+    await resetParentBatchToProcessing(parentBatchId, 'Failed to finalize parent batch status');
+  }
+
+  return {
+    delivered: deliveryResult.delivered,
+    deliveryId: deliveryResult.deliveryId,
+    fullyComplete: completion.fullyComplete,
+    finalized: true,
+  };
 }
 
 export async function runDelivery(): Promise<DeliveryRunSummary> {
@@ -517,9 +744,15 @@ export async function runDelivery(): Promise<DeliveryRunSummary> {
   };
 
   const clients = await query<{ client_id: string }>(
-    `SELECT DISTINCT client_id
-     FROM prospects
-     WHERE status = 'personalized_qa_passed' AND client_id IS NOT NULL`
+    `SELECT DISTINCT p.client_id
+     FROM prospects p
+     WHERE p.status = 'personalized_qa_passed'
+       AND p.client_id IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM parent_batches pb
+         WHERE pb.client_id = p.client_id
+           AND pb.status IN ('queued', 'processing', 'delivering')
+       )`
   );
 
   for (const { client_id } of clients) {
