@@ -32,7 +32,8 @@
     "prompts:seed": "tsx scripts/apply-prompt-seeds.ts",
     "test": "tsx --test src/**/*.test.ts",
     "test:coverage": "node --import tsx --test --experimental-test-coverage --test-coverage-include=src/utils/** --test-coverage-include=src/middleware/** src/**/*.test.ts",
-    "audit:deps": "npm audit --audit-level=high"
+    "audit:deps": "npm audit --audit-level=high",
+    "recover": "tsx scripts/recover-dead-letters.ts"
   },
   "engines": {
     "node": ">=22.12.0"

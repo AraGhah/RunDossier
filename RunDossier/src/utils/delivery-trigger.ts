@@ -1,9 +1,16 @@
 import { query } from '../db.js';
 import { runDeliveryForClient } from '../jobs/delivery.job.js';
 import { getActiveParentBatchForClient } from '../services/parent-batch.js';
-import { shouldRunDelivery, PIPELINE_ACTIVE_STATUSES } from './batch-progress.js';
+import { shouldRunDelivery, PIPELINE_ACTIVE_STATUSES, RETRYABLE_STATUSES } from './batch-progress.js';
 
 export { shouldRunDelivery, PIPELINE_ACTIVE_STATUSES };
+
+/**
+ * Statuses that BLOCK legacy delivery: still-active pipeline OR still-retryable.
+ * Including retryable failures (incl. transient provider outages now routed here)
+ * prevents shipping a partial batch as final while prospects can still recover.
+ */
+const PENDING_STATUSES: string[] = [...PIPELINE_ACTIVE_STATUSES, ...RETRYABLE_STATUSES];
 
 /**
  * Legacy client-level delivery trigger.
@@ -20,7 +27,7 @@ export async function maybeRunDeliveryForClient(clientId: string): Promise<void>
      FROM prospects
      WHERE client_id = $1
        AND trim(status) = ANY($2::text[])`,
-    [clientId, PIPELINE_ACTIVE_STATUSES]
+    [clientId, PENDING_STATUSES]
   );
 
   const [ready] = await query<{ count: string }>(

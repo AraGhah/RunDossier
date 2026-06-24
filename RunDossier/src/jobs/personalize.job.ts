@@ -9,6 +9,7 @@ import { loadActivePrompt } from '../utils/prompts.js';
 import { logFunnelEvent } from '../utils/funnel-log.js';
 import { maybeRunDeliveryForClient } from '../utils/delivery-trigger.js';
 import { assessPersonalizeGate, isModelRefusalText } from '../utils/personalize-gate.js';
+import { isTransientProviderError } from '../utils/provider-error.js';
 
 // --- Workflow 4 escalation config (override via env) ---------------------------
 // Generation ladder: cheap model first, escalate only when QA rejects the batch.
@@ -61,7 +62,7 @@ async function persistVariants(
   prospectId: string,
   variants: FirstLineVariant[],
   qaResults: QAResult[],
-  promptId: string,
+  promptId: string | null,
   modelUsed: string
 ): Promise<{ passed: boolean; chosenVariant: number | null }> {
   await query('DELETE FROM first_lines WHERE prospect_id = $1', [prospectId]);
@@ -132,13 +133,21 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
       return;
     }
 
-    const prompt = await queryOne<{ id: string; prompt_text: string }>(
+    const promptRow = await queryOne<{ id: string; prompt_text: string }>(
       `SELECT id, prompt_text FROM prompt_versions
        WHERE agent_name = 'personalization_agent' AND active_bool = true
        ORDER BY version DESC LIMIT 1`
     );
-    if (!prompt?.prompt_text) {
-      throw new Error('No active personalization prompt found');
+    // Fall back to a built-in prompt when the DB hasn't been seeded yet.
+    // Run `npm run prompts:seed` to replace this with the calibrated v4 prompt.
+    const DEFAULT_PERSONALIZATION_PROMPT =
+      'You are a senior cold-email personalization writer. Given a prospect profile and research signals, write exactly 3 distinct first-line variants (subject + opener + bridge). Each variant must anchor on a DIFFERENT verifiable signal. Be specific, casual, and human. Never invent facts. Return ONLY valid JSON with a "variants" array.';
+    const prompt = {
+      id: promptRow?.id ?? null,
+      prompt_text: promptRow?.prompt_text?.trim() || DEFAULT_PERSONALIZATION_PROMPT,
+    };
+    if (!promptRow) {
+      console.warn('[personalize] No active prompt in prompt_versions — using built-in default. Run `npm run prompts:seed` to apply the calibrated v4 prompt.');
     }
 
     const qaPrompt = await loadActivePrompt(
@@ -223,6 +232,24 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
         retryNotes = buildRetryNotes(variants, qaResults) + escalation;
       } catch (attemptErr) {
         lastError = attemptErr as Error;
+        // Transient provider outage (e.g. Gemini/Anthropic credits depleted, 429,
+        // 5xx, network): leave the prospect RETRYABLE instead of burning the ladder
+        // and dead-lettering it. The scheduler retries it (uncapped) until the
+        // outage clears, so the batch resumes automatically.
+        if (isTransientProviderError(attemptErr)) {
+          await query(
+            `UPDATE prospects SET status = 'personalization_failed', updated_at = NOW()
+             WHERE id = $1 AND status = 'personalization_in_progress'`,
+            [prospectId]
+          ).catch(() => {});
+          await query(
+            `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
+             VALUES ('personalize-provider-outage', $1, $2, 0)`,
+            [prospectId, `transient provider outage (auto-retry, not dead-lettered): ${lastError.message.slice(0, 500)}`]
+          ).catch(() => {});
+          console.warn(`[personalize] ${prospectId} transient provider outage — left retryable: ${lastError.message}`);
+          return;
+        }
         if (attemptErr instanceof LLMJsonParseError) {
           lastRawOutput = attemptErr.raw;
           if (isModelRefusalText(attemptErr.raw)) {

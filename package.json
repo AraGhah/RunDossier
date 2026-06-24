@@ -1,0 +1,24 @@
+{
+  "name": "preframe",
+  "version": "1.0.0",
+  "description": "B2B prospect research and personalization pipeline. Preframe automatically researches prospects, generates hyper-personalized cold email openers, and delivers them at scale — powered by Claude AI, Apify, and n8n.",
+  "main": "index.js",
+  "type": "commonjs",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"No root-level tests. Run tests from RunDossier/ with npm test\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AraGhah/RunDossier.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AraGhah/RunDossier/issues"
+  },
+  "homepage": "https://github.com/AraGhah/RunDossier#readme"
+}
