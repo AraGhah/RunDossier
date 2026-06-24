@@ -1,0 +1,67 @@
+{
+  "record_type": "dossier_apollo_icp_product",
+  "version": "1.0.0",
+  "generated_at": "2026-06-24",
+  "source": "Ara Ghahramanyan, described in Cowork session 2026-06-24; verified before publish",
+  "apollo": {
+    "team_id": "69ef9b96f6d770000d7cdf24",
+    "user_id": "69ef9b97f6d770000d7ce095",
+    "context_center_profile_id": "6a3c03f4250bde000c2f159d",
+    "icp_id": "6a3c03f4250bde000c2f159e",
+    "default_product_id": "6a3c0403cc58a6000cf40aa4",
+    "approved": true,
+    "published_at": "2026-06-24"
+  },
+  "icp": {
+    "profile_name": "Outbound Agencies & B2B SaaS ICP",
+    "company_or_product_name": "Dossier",
+    "domain": "getdossier.co",
+    "company_overview": "Dossier is a research and personalization agency for cold email and outbound teams. We deliver done-for-you prospect research, verified buying signals, and ready-to-send personalized copy — subject lines, openers, and email angles — so clients run outbound campaigns that feel genuinely relevant at scale.",
+    "customer_profile": "Small to mid-sized cold email agencies, lead-generation agencies, and B2B SaaS companies that rely on outbound to generate pipeline. Typical buyers: founders, agency owners, CEOs, Heads of Growth, sales leaders, and outbound managers. Markets: US, Canada, and UK (English-speaking).",
+    "customer_pain_points": "Most outbound teams either send generic AI-written personalization that prospects ignore, or spend too much time on manual research for every lead. They struggle to find real, recent, prospect-specific signals — hiring, launches, funding, company changes — and turn them into credible, relevant outreach at scale.",
+    "value_proposition": "Dossier finds real, recent, prospect-specific signals and turns them into credible, ready-to-send personalization. Clients get the relevance of manual research at the speed and scale of automation — without operating another tool, because Dossier delivers it as a managed service.",
+    "product_differentiators": "Combines research, signal selection, and copy production into one managed service that delivers outreach-ready personalization, rather than handing clients another tool to operate (vs. Clay, Instantly, Smartlead and other platforms with built-in AI personalization) or relying on manual research by VAs or in-house SDR teams. Weak or unsupported research is excluded before delivery.",
+    "primary_competitors": "Clay, Instantly, Smartlead, and other outbound platforms with built-in AI personalization; also manual research done by virtual assistants or in-house SDR teams.",
+    "icp_fit_criteria": "Runs outbound/cold email as a primary pipeline channel; roughly 1-50 employees; agency (cold email / lead-gen) or B2B SaaS; English-speaking market (US/CA/UK); send volume high enough that manual per-lead research doesn't scale.",
+    "high_value_fit_criteria": "Cold email or lead-gen agency running campaigns for multiple clients; dedicated outbound/SDR function; actively hiring SDR/growth/outbound roles; already paying for data, enrichment, or personalization tools.",
+    "disqualification_criteria": "Purely inbound/brand-led with no outbound motion; non-English-speaking markets; large enterprises with in-house research teams unlikely to outsource; pre-product companies with no outbound yet.",
+    "social_proof": "Early-stage proof is in the process rather than published claims: every prospect is researched using real company and individual signals, and weak or unsupported research is excluded before delivery. No public client names or performance metrics yet — do not fabricate them.",
+    "call_to_action": "A short call to assess fit with the prospect's outbound motion; if there's a fit, start with a focused pilot batch before a larger monthly engagement.",
+    "research_sources": "Real company and individual buying signals: hiring activity and job postings, product launches, funding rounds, leadership and company changes, and related company news.",
+    "preferred_tone": "Direct"
+  },
+  "products": [
+    {
+      "id": "6a3c0403cc58a6000cf40aa4",
+      "name": "Done-for-You Prospect Research & Personalization",
+      "is_default": true,
+      "one_sentence_description": "Prospect research, verified buying signals, and ready-to-send personalized cold email copy — subject lines, openers, and angles — delivered as a managed service for outbound teams.",
+      "includes": [
+        "Prospect research built on real company and individual signals",
+        "Verified buying signals: hiring activity, product launches, funding rounds, leadership and company changes",
+        "Ready-to-send copy: personalized subject lines, openers, and email angles"
+      ]
+    }
+  ],
+  "personalization_variables": {
+    "native_apollo": ["first_name", "company", "title"],
+    "dossier_custom": ["research_signal", "personalized_opener", "bridge", "subject_line_a", "subject_line_b"],
+    "rules": [
+      "personalized_opener must come from Dossier research + QA, with a traceable source URL",
+      "never substitute generic Apollo AI opener",
+      "no unsupported merge fields may be sent",
+      "validate render and flag empty/broken variables before enrollment or CSV delivery"
+    ]
+  },
+  "assets": {
+    "sequence": {
+      "id": "6a3c0500335ed40010812f0e",
+      "name": "Dossier — Outbound Agencies & B2B SaaS (Cold → Fit Call)",
+      "status": "inactive_draft",
+      "steps": 4,
+      "channel": "email"
+    }
+  },
+  "plan_gated_features": ["people_database_search", "ab_testing"],
+  "sending_readiness_state": "not_ready"
+}

@@ -30,6 +30,7 @@ export interface IntakeResult {
 
 export interface IngestOptions {
   source?: 'manual' | 'search' | 'dogfood';
+  parentBatchId?: string;
 }
 
 function normalizeNameCompany(name: string, company?: string): { nameKey: string; companyKey: string } {
@@ -111,6 +112,7 @@ export async function ingestProspects(
   options: IngestOptions = {}
 ): Promise<IntakeResult> {
   const source = options.source ?? 'manual';
+  const parentBatchId = options.parentBatchId ?? null;
   const valid: IntakeRecord[] = [];
   let invalid = 0;
   let skipped = 0;
@@ -158,10 +160,10 @@ export async function ingestProspects(
       const chunk = clientRecords.slice(i, i + config.intakeBatchSize);
 
       const [batch] = await query<{ id: string }>(
-        `INSERT INTO batches (client_id, prospect_count, status)
-         VALUES ($1, 0, 'queued')
+        `INSERT INTO batches (client_id, prospect_count, status, parent_batch_id)
+         VALUES ($1, 0, 'queued', $2)
          RETURNING id`,
-        [clientId]
+        [clientId, parentBatchId]
       );
       if (!batch) continue;
       batchIds.push(batch.id);
@@ -176,7 +178,6 @@ export async function ingestProspects(
           );
           if (existing) {
             skipped += 1;
-            await logIntakeFailure(`duplicate linkedin_url (status: ${existing.status})`, p);
             continue;
           }
 
@@ -190,7 +191,6 @@ export async function ingestProspects(
           );
           if (recentDelivered) {
             skipped += 1;
-            await logIntakeFailure('recently delivered prospect (90d dedup)', p);
             continue;
           }
         }
@@ -203,7 +203,6 @@ export async function ingestProspects(
           );
           if (existingEmail) {
             skipped += 1;
-            await logIntakeFailure('duplicate email', p);
             continue;
           }
         }
@@ -220,14 +219,13 @@ export async function ingestProspects(
           );
           if (existingNc) {
             skipped += 1;
-            await logIntakeFailure(`duplicate name+company (status: ${existingNc.status})`, p);
             continue;
           }
         }
 
         const [row] = await query<{ id: string }>(
-          `INSERT INTO prospects (name, title, company, linkedin_url, email, client_id, batch_id, status, source, employee_count, icp_fit_score)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, 'queued', $8, $9, $10)
+          `INSERT INTO prospects (name, title, company, linkedin_url, email, client_id, batch_id, parent_batch_id, status, source, employee_count, icp_fit_score)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'queued', $9, $10, $11)
            RETURNING id`,
           [
             p.name,
@@ -237,6 +235,7 @@ export async function ingestProspects(
             p.email ?? null,
             clientId,
             batch.id,
+            parentBatchId,
             source,
             p.employee_count ?? null,
             p.icp_fit_score ?? null,

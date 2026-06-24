@@ -9,8 +9,7 @@ import {
   type CreateSearchProfileInput,
 } from '../services/prospect-search.js';
 import { sendInternalError } from '../utils/safe-error.js';
-
-const SALES_NAV_URL_RE = /^https:\/\/(www\.)?linkedin\.com\/sales\/search\//i;
+import { isValidSalesNavSearchUrl } from '../utils/sales-nav-url.js';
 
 function parseProfileBody(body: unknown): CreateSearchProfileInput | string {
   if (!body || typeof body !== 'object') return 'Invalid JSON body';
@@ -22,7 +21,7 @@ function parseProfileBody(body: unknown): CreateSearchProfileInput | string {
 
   if (!client_id) return 'client_id is required';
   if (!name) return 'name is required';
-  if (!search_url || !SALES_NAV_URL_RE.test(search_url)) {
+  if (!search_url || !isValidSalesNavSearchUrl(search_url)) {
     return 'search_url must be a LinkedIn Sales Navigator search URL';
   }
 

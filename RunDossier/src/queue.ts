@@ -14,7 +14,9 @@ import { runOnboardingTimers } from './jobs/onboarding-timers.job.js';
 import { runFailureDigest } from './jobs/failure-digest.job.js';
 import { runCostGovernor } from './jobs/cost-governor.job.js';
 
-const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention', 'onboarding-timers', 'failure-digest', 'cost-governor'] as const;
+import { runBatchOrchestratorJob } from './jobs/batch-orchestrator.job.js';
+
+const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'batch-orchestrator', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention', 'onboarding-timers', 'failure-digest', 'cost-governor'] as const;
 
 /** pg-boss retries for transient worker failures (API timeouts, network blips). */
 const TRANSIENT_JOB_OPTIONS = {
@@ -58,6 +60,17 @@ export async function startQueue(): Promise<void> {
   await boss.schedule('scheduler', '*/5 * * * *');
   await boss.work('scheduler', async (jobs) => {
     for (const _job of jobs) await runScheduler();
+  });
+
+  await boss.schedule('batch-orchestrator', '*/2 * * * *');
+  await boss.work('batch-orchestrator', async (jobs) => {
+    for (const _job of jobs) {
+      try {
+        await runBatchOrchestratorJob();
+      } catch (err) {
+        console.error('[batch-orchestrator] worker error:', err);
+      }
+    }
   });
 
   await boss.schedule('delivery', '0 * * * *');

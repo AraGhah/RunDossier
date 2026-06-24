@@ -71,8 +71,18 @@ export const config = {
   variantCount: parseInt(process.env.VARIANT_COUNT ?? '3', 10) || 3,
   maxRetries: parseInt(process.env.PERSONALIZE_MAX_RETRIES ?? '3', 10) || 3,
   batchFailAlertPct: 0.15,
-  schedulerBatchSize: 50,
-  intakeBatchSize: 50,
+  /** Internal chunk size for scheduler dequeue (per tick). Orchestrator re-runs until parent batch finishes. */
+  schedulerBatchSize: parseInt(process.env.SCHEDULER_BATCH_SIZE ?? '50', 10) || 50,
+  /** Internal intake chunk — multiple sub-batches share one parent_batch. */
+  intakeBatchSize: parseInt(process.env.INTAKE_BATCH_SIZE ?? '50', 10) || 50,
+  /** Parent-batch orchestrator: max prospects to source per replacement attempt. */
+  orchestratorSourceChunkSize: parseInt(process.env.ORCHESTRATOR_SOURCE_CHUNK ?? '50', 10) || 50,
+  /** Scheduler runs this many internal chunks per tick when parent batches are active. */
+  schedulerCyclesPerTick: parseInt(process.env.SCHEDULER_CYCLES_PER_TICK ?? '3', 10) || 3,
+  /** Alert when a parent batch has no DB progress for this many minutes. */
+  batchStallMinutes: parseInt(process.env.BATCH_STALL_MINUTES ?? '45', 10) || 45,
+  sourceExhaustionMissStreak: parseInt(process.env.SOURCE_EXHAUSTION_MISS_STREAK ?? '3', 10) || 3,
+  deliveringReapMinutes: parseInt(process.env.DELIVERING_REAP_MINUTES ?? '20', 10) || 20,
   notifyMaxLength: 4000,
 
   /** W5 delivery — writable in Docker (non-root); override with DELIVERY_DIR */
@@ -116,6 +126,7 @@ export const config = {
   apifySalesNavActor:
     optionalEnv('APIFY_SALES_NAV_ACTOR') || 'silentflow~linkedin-sales-navigator-scraper',
   apifySalesNavSearchUrl: optionalEnv('APIFY_SALES_NAV_SEARCH_URL'),
+  apifySalesNavSearchUrlConsulting: optionalEnv('APIFY_SALES_NAV_SEARCH_URL_CONSULTING'),
   linkedinSalesNavCookie: optionalEnv('LINKEDIN_SALES_NAV_COOKIE'),
   linkedinUserAgent: optionalEnv('LINKEDIN_USER_AGENT'),
   smartleadApiKey: optionalEnv('SMARTLEAD_API_KEY'),

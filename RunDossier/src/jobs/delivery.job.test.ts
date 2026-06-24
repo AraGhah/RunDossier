@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { planDelivery, resolveSendOutcome } from './delivery.job.js';
-import { shouldRunDelivery } from '../utils/delivery-trigger.js';
+import { shouldRunDelivery } from '../utils/batch-progress.js';
 import { isValidEmail } from '../utils/resend.js';
 import { buildDeliveryEmailContent } from '../utils/delivery-email.js';
 import type { DeliveryRow } from '../utils/csv-delivery.js';

@@ -8,14 +8,14 @@ import { effectivePerProspectCapUsd } from '../utils/cost-governor.js';
 import { loadActivePrompt } from '../utils/prompts.js';
 import { logFunnelEvent } from '../utils/funnel-log.js';
 import { maybeRunDeliveryForClient } from '../utils/delivery-trigger.js';
+import { assessPersonalizeGate, isModelRefusalText } from '../utils/personalize-gate.js';
 
 // --- Workflow 4 escalation config (override via env) ---------------------------
 // Generation ladder: cheap model first, escalate only when QA rejects the batch.
 const LADDER: string[] = (process.env.PERSONALIZE_LADDER
   ? process.env.PERSONALIZE_LADDER.split(',').map((s) => s.trim()).filter(Boolean)
   : ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6', 'claude-opus-4-8']);
-// QA judge — Gemini, deliberately a different model family than the generators.
-const QA_PRIMARY = process.env.QA_MODEL_PRIMARY?.trim() || 'gemini-2.0-flash';
+const QA_PRIMARY = process.env.QA_MODEL_PRIMARY?.trim() || config.qaModel;
 const QA_FALLBACK = process.env.QA_MODEL_FALLBACK?.trim() || 'gemini-2.5-pro';
 // Hard per-prospect retry budget. effectivePerProspectCapUsd() clamps to a $0.25
 // ceiling — PER_PROSPECT_COST_CAP can only LOWER it (tests), never bypass it upward.
@@ -31,6 +31,7 @@ interface Prospect {
   research_summary: string;
   top_3_signals: unknown;
   buying_triggers?: unknown;
+  confidence_score: number | null;
   source?: string;
 }
 
@@ -107,10 +108,29 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
       `UPDATE prospects SET status = 'personalization_in_progress', updated_at = NOW()
        WHERE id = $1 AND status IN ('research_complete', 'qa_failed', 'personalization_failed')
        RETURNING id, name, title, company, client_id, research_summary, top_3_signals,
-                 buying_triggers, COALESCE(source, 'manual') AS source`,
+                 buying_triggers, confidence_score, COALESCE(source, 'manual') AS source`,
       [prospectId]
     );
     if (!prospect) return;
+
+    const gate = assessPersonalizeGate({
+      research_summary: prospect.research_summary,
+      top_3_signals: prospect.top_3_signals,
+      confidence_score: prospect.confidence_score,
+    });
+    if (!gate.ok) {
+      await query(
+        `UPDATE prospects SET status = 'thin_research', updated_at = NOW() WHERE id = $1`,
+        [prospectId]
+      );
+      await query(
+        `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
+         VALUES ('personalize-skipped', $1, $2, 0)`,
+        [prospectId, `thin_research: ${gate.reason} (pre-personalize gate)`]
+      ).catch(() => {});
+      console.log(`[personalize] ${prospectId} skipped — ${gate.reason}`);
+      return;
+    }
 
     const prompt = await queryOne<{ id: string; prompt_text: string }>(
       `SELECT id, prompt_text FROM prompt_versions
@@ -203,7 +223,22 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
         retryNotes = buildRetryNotes(variants, qaResults) + escalation;
       } catch (attemptErr) {
         lastError = attemptErr as Error;
-        if (attemptErr instanceof LLMJsonParseError) lastRawOutput = attemptErr.raw;
+        if (attemptErr instanceof LLMJsonParseError) {
+          lastRawOutput = attemptErr.raw;
+          if (isModelRefusalText(attemptErr.raw)) {
+            await query(
+              `UPDATE prospects SET status = 'thin_research', updated_at = NOW() WHERE id = $1`,
+              [prospectId]
+            );
+            await query(
+              `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
+               VALUES ('personalize-refusal', $1, $2, 0)`,
+              [prospectId, `model refused: ${attemptErr.raw.slice(0, 500)}`]
+            ).catch(() => {});
+            console.log(`[personalize] ${prospectId} model refusal — thin_research`);
+            return;
+          }
+        }
         console.warn(`[personalize] ${prospectId} rung ${i + 1} (${model}) errored: ${lastError.message}`);
         retryNotes =
           '\n\nIMPORTANT: Return ONLY valid JSON with a "variants" array of exactly 3 objects — no markdown, no code fences, no prose.';
@@ -235,6 +270,16 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
     await query(`UPDATE prospects SET status = 'dead_letter', updated_at = NOW() WHERE id = $1`, [prospectId]);
     await notify(`W4 dead-letter: ${prospect.name} — ${reason}`);
   } catch (err) {
+    const message = (err as Error).message;
+    if (/returned no variants/i.test(message) || isModelRefusalText(message)) {
+      await query(
+        `UPDATE prospects SET status = 'thin_research', updated_at = NOW()
+         WHERE id = $1 AND status = 'personalization_in_progress'`,
+        [prospectId]
+      ).catch(() => {});
+      console.log(`[personalize] ${prospectId} thin_research after error: ${message}`);
+      return;
+    }
     // Genuine infra/exception (DB, missing prompt, etc.) -> retryable, not dead-letter.
     await query(
       `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)

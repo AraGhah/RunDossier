@@ -124,6 +124,10 @@ export async function runPipelineDigest(deliverySummary?: DeliveryRunSummary): P
       `SELECT workflow, error, created_at
        FROM failed_jobs
        WHERE created_at >= NOW() - INTERVAL '1 hour'
+         AND error NOT LIKE 'duplicate linkedin_url%'
+         AND error NOT LIKE 'duplicate email%'
+         AND error NOT LIKE 'duplicate name+company%'
+         AND error NOT LIKE 'recently delivered prospect%'
        ORDER BY created_at DESC
        LIMIT 5`,
     ),
