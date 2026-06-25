@@ -531,6 +531,9 @@ export async function runDeliveryForClient(
     return 0;
   }
 
+  const campaignGuard = `AND (campaign_id IS NULL OR campaign_id NOT IN (
+    SELECT id FROM campaigns WHERE status IN ('paused','cancelling','cancelled')
+  ))`;
   const claimed = opts?.limit
     ? await query<{ id: string }>(
         `UPDATE prospects
@@ -538,6 +541,7 @@ export async function runDeliveryForClient(
           WHERE id IN (
             SELECT id FROM prospects
             WHERE client_id = $1 AND status = 'personalized_qa_passed'
+            ${campaignGuard}
             ORDER BY confidence_score DESC NULLS LAST, updated_at
             LIMIT $2
           )
@@ -548,6 +552,7 @@ export async function runDeliveryForClient(
         `UPDATE prospects
             SET status = 'delivering', updated_at = NOW()
           WHERE client_id = $1 AND status = 'personalized_qa_passed'
+          ${campaignGuard}
           RETURNING id`,
         [clientId]
       );
