@@ -7,6 +7,7 @@ import { shouldSchedulerRetryResearch } from '../utils/research-retry.js';
 import { shouldSchedulerRetryPersonalize } from '../utils/personalize-retry.js';
 import { assessPersonalizeGate } from '../utils/personalize-gate.js';
 import { listActiveParentBatches } from '../services/parent-batch.js';
+import { isCampaignEligibleForWork } from '../services/campaign.service.js';
 
 async function enqueueResearch(prospectId: string): Promise<void> {
   const boss = getBoss();
@@ -56,18 +57,25 @@ export async function runScheduler(): Promise<void> {
 async function runSchedulerCycle(prioritizeParentBatchIds: string[]): Promise<void> {
   const { schedulerBatchSize } = config;
 
+  const campaignGuardSql = `AND (campaign_id IS NULL OR campaign_id NOT IN (
+    SELECT id FROM campaigns WHERE status IN ('paused','cancelling','cancelled')
+  ))`;
   const queued =
     prioritizeParentBatchIds.length > 0
       ? await query<{ id: string }>(
           `SELECT id FROM prospects
            WHERE status = 'queued'
              AND (parent_batch_id = ANY($2::uuid[]) OR parent_batch_id IS NULL)
+             ${campaignGuardSql}
            ORDER BY CASE WHEN parent_batch_id = ANY($2::uuid[]) THEN 0 ELSE 1 END, created_at
            LIMIT $1`,
           [schedulerBatchSize, prioritizeParentBatchIds]
         )
       : await query<{ id: string }>(
-          `SELECT id FROM prospects WHERE status = 'queued' ORDER BY created_at LIMIT $1`,
+          `SELECT id FROM prospects
+           WHERE status = 'queued'
+             ${campaignGuardSql}
+           ORDER BY created_at LIMIT $1`,
           [schedulerBatchSize]
         );
   for (const p of queued) {

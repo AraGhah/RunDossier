@@ -81,6 +81,116 @@ export async function enrichPersonViaApollo(
   return person;
 }
 
+// ---------------------------------------------------------------------------
+// Apollo People Search — used by campaign sourcing worker
+// ---------------------------------------------------------------------------
+
+const APOLLO_SEARCH_URL = 'https://api.apollo.io/api/v1/mixed_people/search';
+
+export interface ApolloPerson {
+  name: string;
+  linkedinUrl: string | null;
+  title: string | null;
+  company: string | null;
+  email: string | null;
+}
+
+export interface ApolloSearchOptions {
+  job_titles?: string[];
+  locations?: string[];
+  industry?: string;
+  seniority?: string[];
+  company_size?: string[];
+  keywords?: string[];
+  exclusion_keywords?: string[];
+  page?: number;
+  per_page?: number;
+}
+
+interface ApolloSearchResponse {
+  people?: Record<string, unknown>[];
+  contacts?: Record<string, unknown>[];
+  pagination?: { total_entries?: number; total_pages?: number };
+  error?: string;
+  error_message?: string;
+}
+
+function extractPersonFromApolloResult(row: Record<string, unknown>): ApolloPerson | null {
+  const name =
+    (typeof row.name === 'string' ? row.name : '') ||
+    [row.first_name, row.last_name].filter(s => typeof s === 'string' && s).join(' ');
+  if (!name.trim()) return null;
+
+  const linkedinUrl =
+    typeof row.linkedin_url === 'string' && row.linkedin_url.includes('linkedin.com/in/')
+      ? row.linkedin_url.trim()
+      : null;
+  if (!linkedinUrl) return null;
+
+  const title = typeof row.title === 'string' ? row.title.trim() : null;
+  const company =
+    (typeof row.organization_name === 'string' ? row.organization_name.trim() : '') ||
+    (row.organization && typeof (row.organization as Record<string, unknown>).name === 'string'
+      ? ((row.organization as Record<string, unknown>).name as string).trim()
+      : '') ||
+    null;
+
+  const email =
+    typeof row.email === 'string' && row.email.includes('@') ? row.email.toLowerCase().trim() : null;
+
+  return { name: name.trim(), linkedinUrl, title, company, email };
+}
+
+/** Search for prospects via Apollo.io mixed people search. Returns up to `per_page` results per call. */
+export async function searchPeopleViaApollo(
+  opts: ApolloSearchOptions
+): Promise<{ people: ApolloPerson[]; totalEntries: number; totalPages: number }> {
+  if (!config.apolloApiKey) {
+    throw new Error('APOLLO_API_KEY not configured — cannot source prospects via Apollo');
+  }
+
+  const body: Record<string, unknown> = {
+    per_page: opts.per_page ?? 25,
+    page: opts.page ?? 1,
+  };
+
+  if (opts.job_titles?.length) body.person_titles = opts.job_titles;
+  if (opts.locations?.length) body.person_locations = opts.locations;
+  if (opts.seniority?.length) body.person_seniorities = opts.seniority;
+  if (opts.industry) body.q_organization_industries = [opts.industry];
+  if (opts.keywords?.length) body.q_keywords = opts.keywords.join(' ');
+
+  const res = await fetch(APOLLO_SEARCH_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache',
+      Accept: 'application/json',
+      'x-api-key': config.apolloApiKey,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = (await res.json()) as ApolloSearchResponse;
+
+  if (res.status === 401 || res.status === 403) {
+    throw new Error(`Apollo API auth failed (${res.status})`);
+  }
+  if (!res.ok) {
+    const msg = data.error_message ?? data.error ?? `HTTP ${res.status}`;
+    throw new Error(`Apollo people search failed: ${msg}`);
+  }
+
+  const rows = [...(data.people ?? []), ...(data.contacts ?? [])];
+  const people = rows.map(r => extractPersonFromApolloResult(r)).filter((p): p is ApolloPerson => p !== null);
+
+  return {
+    people,
+    totalEntries: data.pagination?.total_entries ?? people.length,
+    totalPages: data.pagination?.total_pages ?? 1,
+  };
+}
+
 export function extractCompanyFromApollo(person: Record<string, unknown>): string {
   const org = person.organization;
   if (org && typeof org === 'object' && org !== null) {

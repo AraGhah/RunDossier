@@ -1,4 +1,5 @@
 import { query, queryOne } from '../db.js';
+import { notify } from '../notify.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -237,12 +238,11 @@ async function transition(
   return updated;
 }
 
-/** Draft → queued. Validates required fields before queuing. */
+/** Draft → queued. Validates required fields and enforces one-active-campaign-per-client. */
 export async function queueCampaign(id: string, actor = 'operator'): Promise<Campaign> {
   const campaign = await getCampaign(id);
   if (!campaign) throw new Error(`Campaign not found: ${id}`);
 
-  // Required-field validation before starting
   if (campaign.status !== 'draft' && campaign.status !== 'failed') {
     throw new Error(`Cannot start campaign in status '${campaign.status}'`);
   }
@@ -254,12 +254,65 @@ export async function queueCampaign(id: string, actor = 'operator'): Promise<Cam
     throw new Error('Locations are required before starting');
   }
 
+  // One active campaign per client — enforce sequential execution.
+  const active = await queryOne<{ id: string; name: string; status: string }>(
+    `SELECT id, name, status FROM campaigns
+     WHERE client_id = $1
+       AND id != $2
+       AND status IN ('queued','running','cancelling')
+     LIMIT 1`,
+    [campaign.client_id, id]
+  );
+  if (active) {
+    const msg =
+      `⚠️ Campaign "${campaign.name}" cannot start — another campaign is already active for this client.\n` +
+      `Active: "${active.name}" (${active.status})\n` +
+      `The new campaign is saved and will be queued after the current one finishes.`;
+    await notify(msg).catch(() => {});
+    throw new Error(
+      `Campaign "${active.name}" is already ${active.status} for this client. ` +
+      `Only one campaign can run at a time per client. ` +
+      `This campaign is saved and will start automatically when the active one completes.`
+    );
+  }
+
   const updated = await transition(id, 'queued', {
     actor, reason: 'operator started campaign',
     extraUpdates: 'started_at = COALESCE(started_at, NOW())',
   });
-  await logEvent(id, 'queued', { toStatus: 'queued', actor });
+  await notify(
+    `🚀 Campaign started: "${campaign.name}"\n` +
+    `• Target: ${campaign.target_count} prospects\n` +
+    `• Locations: ${(campaign.locations as string[]).join(', ')}`
+  ).catch(() => {});
   return updated;
+}
+
+/**
+ * Called when a campaign reaches a terminal state (completed/cancelled/failed).
+ * Checks if there's another draft campaign queued for the same client and auto-starts it.
+ */
+export async function startNextCampaignForClient(clientId: string): Promise<Campaign | null> {
+  const next = await queryOne<{ id: string; name: string }>(
+    `SELECT id, name FROM campaigns
+     WHERE client_id = $1 AND status = 'draft'
+     ORDER BY created_at ASC
+     LIMIT 1`,
+    [clientId]
+  );
+  if (!next) return null;
+
+  try {
+    const started = await queueCampaign(next.id, 'system');
+    await notify(
+      `▶️ Auto-started next campaign: "${next.name}"\n` +
+      `The previous campaign finished — the queue is now running.`
+    ).catch(() => {});
+    return started;
+  } catch (err) {
+    console.error('[campaign] auto-start next failed:', (err as Error).message);
+    return null;
+  }
 }
 
 export async function pauseCampaign(id: string, actor = 'operator'): Promise<Campaign> {
@@ -310,6 +363,13 @@ export async function cancelCampaign(id: string, opts: CancelCampaignInput = {})
     fromStatus: campaign.status, toStatus: 'cancelled',
     actor: opts.actor, reason: opts.reason,
   });
+  await notify(
+    `🚫 Campaign cancelled: "${campaign.name}"\n` +
+    (opts.reason ? `• Reason: ${opts.reason}\n` : '') +
+    `• Delivered so far: ${campaign.delivered_count}/${campaign.target_count}`
+  ).catch(() => {});
+  // Start next campaign for this client if one is waiting
+  await startNextCampaignForClient(campaign.client_id).catch(() => {});
   return updated;
 }
 
@@ -319,9 +379,20 @@ export async function completeCampaign(
   actor = 'system'
 ): Promise<Campaign> {
   const to: CampaignStatus = withIssues ? 'completed_with_issues' : 'completed';
-  return transition(id, to, {
+  const campaign = await getCampaign(id);
+  const updated = await transition(id, to, {
     actor, extraUpdates: 'completed_at = NOW()',
   });
+  if (campaign) {
+    await notify(
+      `✅ Campaign completed: "${campaign.name}"\n` +
+      `• Delivered: ${campaign.delivered_count}/${campaign.target_count} prospects` +
+      (withIssues ? '\n• Completed with some issues' : '')
+    ).catch(() => {});
+    // Kick off the next campaign for this client if one is waiting
+    await startNextCampaignForClient(campaign.client_id).catch(() => {});
+  }
+  return updated;
 }
 
 // ---------------------------------------------------------------------------
