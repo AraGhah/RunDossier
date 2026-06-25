@@ -40,14 +40,15 @@ async function abortActiveRun(): Promise<void> {
 }
 
 async function sourceProspects(queries: string[], locations: string[], target: number) {
-  const queryStr = queries.filter(Boolean).join(' ');
-  const locationStr = locations.filter(Boolean).join(' ');
-  const input = {
-    searchQuery: [queryStr, locationStr].filter(Boolean).join(' '),
+  const queryStr = queries.filter(Boolean).join(' OR ');
+  const cleanLocations = locations.filter(Boolean);
+  const input: Record<string, unknown> = {
+    searchQuery: queryStr,
     profileScraperMode: 'Short',
     maxItems: target,
     takePages: Math.ceil(target / 25) + 2,
   };
+  if (cleanLocations.length > 0) input['locations'] = cleanLocations;
   const started = await apify(`/acts/${ACTOR}/runs`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
