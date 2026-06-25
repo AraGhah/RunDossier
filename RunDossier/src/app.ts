@@ -11,6 +11,8 @@ import { registerOnboardingRoutes } from './routes/onboarding.js';
 import { registerParentBatchRoutes } from './routes/parent-batches.js';
 import { registerDashboardRoutes } from './routes/dashboard.js';
 import { registerDeliverabilityRoutes } from './routes/deliverability.js';
+import { registerCampaignRoutes } from './routes/campaigns.js';
+import { registerCampaignBuilderRoutes } from './routes/campaign-builder.js';
 import { handleAdminToken, handlePilotToken } from './routes/auth.js';
 import { corsMiddleware } from './middleware/cors.js';
 import { requireJwt } from './middleware/auth.js';
@@ -91,6 +93,10 @@ export function createApp() {
   registerOnboardingRoutes(app);
   registerDashboardRoutes(app);
   registerDeliverabilityRoutes(app);
+  registerCampaignBuilderRoutes(app);
+
+  app.use('/api/campaigns', limitAdmin);
+  registerCampaignRoutes(app);
 
   app.use('/dogfood', limitDogfood);
   registerDogfoodRoutes(app);

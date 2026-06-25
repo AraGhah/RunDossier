@@ -128,3 +128,17 @@ export function extractCompanyName(linkedInRecord: Record<string, unknown>): str
   }
   return '';
 }
+
+/** Extract current job title from a scraped LinkedIn profile record. */
+export function extractTitleFromLinkedIn(linkedInRecord: Record<string, unknown>): string {
+  if (typeof linkedInRecord.headline === 'string' && linkedInRecord.headline.trim()) {
+    return linkedInRecord.headline.trim();
+  }
+  const positions = linkedInRecord.positions ?? linkedInRecord.experience;
+  if (Array.isArray(positions) && positions.length > 0) {
+    const first = positions[0] as { title?: string; positionTitle?: string; jobTitle?: string };
+    const t = first.title ?? first.positionTitle ?? first.jobTitle ?? '';
+    if (t) return t.trim();
+  }
+  return '';
+}

@@ -1,4 +1,5 @@
 import { query, queryOne } from '../db.js';
+import { isCampaignEligibleForWork } from '../services/campaign.service.js';
 import { runPersonalizeAgent, type FirstLineVariant, type ResearchBrief } from '../agents/personalize.agent.js';
 import { LLMJsonParseError } from '../utils/parse-json.js';
 import { runQAAgent, pickBestVariant, passesW45Criteria, maxQaScore, type QABrief, type QAResult } from '../agents/qa.agent.js';
@@ -105,6 +106,15 @@ export async function handlePersonalize(job: { data: { prospectId: string } }): 
   const { prospectId } = job.data;
 
   try {
+    // Campaign guard: check before claiming the prospect.
+    const [eligCheck] = await query<{ campaign_id: string | null }>(
+      `SELECT campaign_id FROM prospects WHERE id = $1 AND status IN ('research_complete', 'qa_failed', 'personalization_failed')`,
+      [prospectId]
+    );
+    if (eligCheck && !(await isCampaignEligibleForWork(eligCheck.campaign_id))) {
+      return; // Leave prospect in current status; worker will retry when campaign resumes.
+    }
+
     const [prospect] = await query<Prospect>(
       `UPDATE prospects SET status = 'personalization_in_progress', updated_at = NOW()
        WHERE id = $1 AND status IN ('research_complete', 'qa_failed', 'personalization_failed')

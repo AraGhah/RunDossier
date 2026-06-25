@@ -1,5 +1,6 @@
 import { query } from '../db.js';
-import { scrapeLinkedIn, extractCompanyName, linkedinScrapeShouldRetry } from '../scrapers/linkedin.js';
+import { isCampaignEligibleForWork } from '../services/campaign.service.js';
+import { scrapeLinkedIn, extractCompanyName, extractTitleFromLinkedIn, linkedinScrapeShouldRetry } from '../scrapers/linkedin.js';
 import {
   enrichPersonViaApollo,
   extractCompanyFromApollo,
@@ -34,11 +35,20 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
   try {
     [prospect] = await query<Prospect>(
       `SELECT id, name, linkedin_url, email, title, company,
-              COALESCE(source, 'manual') AS source
+              campaign_id, COALESCE(source, 'manual') AS source
        FROM prospects WHERE id = $1 AND status = 'research_in_progress'`,
       [prospectId]
     );
     if (!prospect) return;
+
+    // Campaign guard: if the campaign is paused/cancelling/cancelled, release the prospect back to queued.
+    if (!(await isCampaignEligibleForWork((prospect as typeof prospect & { campaign_id?: string }).campaign_id))) {
+      await query(
+        `UPDATE prospects SET status = 'queued', updated_at = NOW() WHERE id = $1 AND status = 'research_in_progress'`,
+        [prospectId]
+      ).catch(e => console.error('[research] campaign guard release error:', e));
+      return;
+    }
 
     const linkedinUrl = String(prospect.linkedin_url ?? '').trim();
     if (!linkedinUrl) {
@@ -63,7 +73,19 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
 
     const linkedInRecord = linkedInData as Record<string, unknown>;
 
+    // Persist LinkedIn title immediately so it survives even if Apollo is absent/fails.
+    const linkedinTitle = extractTitleFromLinkedIn(linkedInRecord);
+    if (linkedinTitle && !prospect.title) {
+      await query(
+        `UPDATE prospects SET title = $1 WHERE id = $2 AND (title IS NULL OR TRIM(title) = '')`,
+        [linkedinTitle, prospectId]
+      ).catch(e => console.error('[research] linkedin title persist error:', e));
+    }
+
     let apolloData: Record<string, unknown> | null = null;
+    if (config.apolloEnabled && !config.apolloApiKey) {
+      console.warn('[research] APOLLO_API_KEY not configured — email and Apollo enrichment skipped. Prospect will have no email address at delivery.');
+    }
     if (config.apolloEnabled && config.apolloApiKey) {
       try {
         apolloData = await enrichPersonViaApollo({
