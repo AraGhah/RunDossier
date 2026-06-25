@@ -15,8 +15,9 @@ import { runFailureDigest } from './jobs/failure-digest.job.js';
 import { runCostGovernor } from './jobs/cost-governor.job.js';
 
 import { runBatchOrchestratorJob } from './jobs/batch-orchestrator.job.js';
+import { runCampaignSourcing, checkCampaignCompletion } from './jobs/campaign-sourcing.job.js';
 
-const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'batch-orchestrator', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention', 'onboarding-timers', 'failure-digest', 'cost-governor'] as const;
+const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'batch-orchestrator', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention', 'onboarding-timers', 'failure-digest', 'cost-governor', 'campaign-sourcing'] as const;
 
 /** pg-boss retries for transient worker failures (API timeouts, network blips). */
 const TRANSIENT_JOB_OPTIONS = {
@@ -160,6 +161,19 @@ export async function startQueue(): Promise<void> {
         await runFailureDigest();
       } catch (err) {
         console.error('[failure-digest] job error:', err);
+      }
+    }
+  });
+
+  // Campaign sourcing: every 5 min — picks up queued campaigns, sources prospects via Apollo, checks completion
+  await boss.schedule('campaign-sourcing', '*/5 * * * *');
+  await boss.work('campaign-sourcing', async (jobs) => {
+    for (const _job of jobs) {
+      try {
+        await runCampaignSourcing();
+        await checkCampaignCompletion();
+      } catch (err) {
+        console.error('[campaign-sourcing] job error:', err);
       }
     }
   });
