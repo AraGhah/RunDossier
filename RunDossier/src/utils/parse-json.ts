@@ -25,24 +25,29 @@ export class LLMJsonParseError extends Error {
   }
 }
 
-/** Attempt a strict parse, then one safe lenient pass (strip trailing commas). */
+/** Attempt a strict parse, then progressively more lenient passes. */
 function tryParse(candidate: string): unknown {
   const s = candidate.trim();
   if (!s) return undefined;
-  try {
-    return JSON.parse(s);
-  } catch {
-    // Lenient: remove trailing commas before } or ] (a common model slip).
-    const lenient = s.replace(/,(\s*[}\]])/g, '$1');
-    if (lenient !== s) {
-      try {
-        return JSON.parse(lenient);
-      } catch {
-        return undefined;
-      }
-    }
-    return undefined;
+
+  // Pass 1: strict
+  try { return JSON.parse(s); } catch { /* fall through */ }
+
+  // Pass 2: strip trailing commas (common model slip)
+  const lenient = s.replace(/,(\s*[}\]])/g, '$1');
+  if (lenient !== s) {
+    try { return JSON.parse(lenient); } catch { /* fall through */ }
   }
+
+  // Pass 3: escape malformed \uXXXX sequences (e.g. Arabic names reflected back
+  // by the LLM with broken escapes like \u followed by non-hex chars)
+  const base = lenient !== s ? lenient : s;
+  const fixed = base.replace(/\\u(?![0-9a-fA-F]{4})/g, '\\\\u');
+  if (fixed !== base) {
+    try { return JSON.parse(fixed); } catch { /* fall through */ }
+  }
+
+  return undefined;
 }
 
 /** Yield progressively more aggressive JSON candidates from a raw response. */
