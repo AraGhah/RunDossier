@@ -5,6 +5,7 @@ const TERMINAL_MESSAGE_PATTERNS = [
   /No LinkedIn profile returned/i,
   /free user run limit|run limit exceeded/i,
   /approve its permissions|approvePermissions/i,
+  /unsupported unicode escape sequence/i,
 ];
 
 /**

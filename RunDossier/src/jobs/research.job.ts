@@ -17,6 +17,7 @@ import { logFunnelEvent } from '../utils/funnel-log.js';
 import { evaluateResearchQuality } from '../utils/research-quality.js';
 import { formatApifyFailureForDb } from '../utils/apify-failure-log.js';
 import { ApifyScrapeError } from '../utils/apify-error.js';
+import { deepSanitizeForPg, sanitizeForPg } from '../utils/sanitize.js';
 
 interface Prospect {
   id: string;
@@ -65,13 +66,13 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
       throw new Error(`No LinkedIn profile returned for ${linkedinUrl}`);
     }
 
+    const linkedInRecord = deepSanitizeForPg(linkedInData as Record<string, unknown>);
+
     await query(
       `INSERT INTO prospect_signals_raw (prospect_id, source, raw_payload)
        VALUES ($1, 'linkedin', $2)`,
-      [prospectId, JSON.stringify(linkedInData)]
+      [prospectId, JSON.stringify(linkedInRecord)]
     );
-
-    const linkedInRecord = linkedInData as Record<string, unknown>;
 
     // Persist LinkedIn title immediately so it survives even if Apollo is absent/fails.
     const linkedinTitle = extractTitleFromLinkedIn(linkedInRecord);
@@ -97,6 +98,7 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
         });
 
         if (apolloData) {
+          apolloData = deepSanitizeForPg(apolloData);
           await query(
             `INSERT INTO prospect_signals_raw (prospect_id, source, raw_payload)
              VALUES ($1, 'apollo', $2)`,
@@ -156,6 +158,8 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
       ).catch((e) => console.error('[research] quality log error:', e));
     }
 
+    const cleanResearch = deepSanitizeForPg(research);
+
     await query(
       `UPDATE prospects
        SET research_summary = $1, top_3_signals = $2,
@@ -163,10 +167,10 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
            company = COALESCE(NULLIF(company, ''), $6)
        WHERE id = $7`,
       [
-        research.research_summary,
-        JSON.stringify(research.top_3_signals),
-        JSON.stringify(research.buying_triggers ?? []),
-        research.confidence_score,
+        cleanResearch.research_summary,
+        JSON.stringify(cleanResearch.top_3_signals),
+        JSON.stringify(cleanResearch.buying_triggers ?? []),
+        cleanResearch.confidence_score,
         status,
         companyName || null,
         prospectId,
@@ -190,7 +194,7 @@ export async function handleResearch(job: { data: { prospectId: string } }): Pro
     await query(
       `INSERT INTO failed_jobs (workflow, entity_id, error, retry_count)
        VALUES ($1, $2, $3, $4)`,
-      [failure.workflow, failure.entityId, failure.message, failure.retryCount]
+      [failure.workflow, failure.entityId, sanitizeForPg(failure.message).slice(0, 2000), failure.retryCount]
     ).catch(e => console.error('[research] failed_jobs insert error:', e));
 
     await query(
