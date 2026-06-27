@@ -3,6 +3,7 @@ import { query } from '../db.js';
 export type DeliveryEventType =
   | 'created'
   | 'ready'
+  | 'sending'
   | 'emailed'
   | 'failed'
   | 'retried'

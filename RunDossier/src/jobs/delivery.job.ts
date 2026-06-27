@@ -7,7 +7,7 @@ import { config } from '../config.js';
 import { buildDeliveryCsv, isInternalEmail, formatResearchSignals, extractCompanyDomain, type DeliveryRow } from '../utils/csv-delivery.js';
 import { buildDeliveryEmailContent, type DeliveryEmailStats } from '../utils/delivery-email.js';
 import { isValidEmail } from '../utils/resend.js';
-import { sendDeliveryEmail, type SendDeliveryEmailResult } from '../utils/send-delivery-email.js';
+import { sendDeliveryEmail, deliveryEmailConfigured, type SendDeliveryEmailResult } from '../utils/send-delivery-email.js';
 import { BEST_SHIPPED_LINE_LATERAL } from '../utils/first-line-status.js';
 import { recordDeliveryEvent } from '../utils/delivery-events.js';
 import { countThinResearch, getPipelineCounts, getLatestWorkflowRunId } from '../services/workflow-run.js';
@@ -69,9 +69,9 @@ export function planDelivery(opts: {
 
 /**
  * Map a provider send result onto a ledger status + whether to finalize the
- * prospects as delivered — pure so it can be unit-tested. A genuine failure
- * does NOT finalize, so the rows are retried on the next cycle (no silent loss);
- * a "not configured" skip finalizes to preserve the CSV-only delivery mode.
+ * prospects as delivered — pure so it can be unit-tested.
+ * Prospects are finalized ONLY when the provider confirms success (result.ok),
+ * except internal-only batches (handled before send).
  */
 export function resolveSendOutcome(
   result: Pick<SendDeliveryEmailResult, 'ok' | 'skipped'>,
@@ -80,12 +80,11 @@ export function resolveSendOutcome(
   finalize: boolean;
   deliveryStatus: Extract<DeliveryLedgerStatus, 'email_sent' | 'email_failed' | 'skipped_not_configured'>;
 } {
-  if (result.ok) return { finalize: true, deliveryStatus: 'email_sent' };
-  if (result.skipped) {
-    if (opts?.csvOnly) {
-      return { finalize: true, deliveryStatus: 'skipped_not_configured' };
-    }
-    return { finalize: false, deliveryStatus: 'email_failed' };
+  if (result.ok) {
+    return { finalize: true, deliveryStatus: 'email_sent' };
+  }
+  if (result.skipped && opts?.csvOnly) {
+    return { finalize: true, deliveryStatus: 'skipped_not_configured' };
   }
   return { finalize: false, deliveryStatus: 'email_failed' };
 }
@@ -188,6 +187,21 @@ async function logDeliveryFailure(clientId: string, message: string): Promise<vo
      VALUES ('delivery', $1, $2, 0)`,
     [clientId, message.slice(0, 500)]
   ).catch(e => console.error('[delivery] failed_jobs insert error:', e));
+}
+
+/** Exponential backoff after email_failed — avoids hammering providers (60s → 120s → … max 1h). */
+async function deliveryBackoffActive(clientId: string): Promise<boolean> {
+  const [last] = await query<{ created_at: string; attempts: number | null }>(
+    `SELECT created_at, attempts FROM deliveries
+     WHERE client_id = $1 AND status = 'email_failed'
+     ORDER BY created_at DESC LIMIT 1`,
+    [clientId]
+  );
+  if (!last) return false;
+  const elapsedMs = Date.now() - new Date(last.created_at).getTime();
+  const attempts = Math.max(1, last.attempts ?? 1);
+  const backoffSec = Math.min(3600, 60 * Math.pow(2, Math.min(attempts - 1, 6)));
+  return elapsedMs < backoffSec * 1000;
 }
 
 export interface DeliverClaimedResult {
@@ -428,6 +442,37 @@ async function deliverClaimedBatch(
     filename,
     emailStats
   );
+
+  if (!deliveryEmailConfigured() && !config.deliveryCsvOnly) {
+    const err = 'no_email_provider_configured';
+    await releaseClaim(allIds);
+    await updateDelivery(deliveryId, {
+      status: 'email_failed',
+      filename,
+      filePath,
+      error: err,
+    });
+    await logDeliveryFailure(client.id, err);
+    await recordDeliveryEvent({
+      deliveryId,
+      clientId: client.id,
+      eventType: 'failed',
+      status: 'email_failed',
+      metadata: { recipient: client.contact_email, prospect_count: deliverable.length },
+      error: err,
+    });
+    return { delivered: 0, deliveryId, finalized: false, csvRowCount: deliverable.length };
+  }
+
+  await updateDelivery(deliveryId, { status: 'delivery_ready' });
+  await recordDeliveryEvent({
+    deliveryId,
+    clientId: client.id,
+    eventType: 'sending',
+    status: 'sending',
+    metadata: { recipient: client.contact_email, prospect_count: deliverable.length },
+  });
+
   const result = await sendDeliveryEmail({
     to: client.contact_email as string,
     subject,
@@ -439,7 +484,7 @@ async function deliverClaimedBatch(
 
   const outcome = resolveSendOutcome(result, { csvOnly: config.deliveryCsvOnly });
 
-  if (outcome.finalize) {
+  if (outcome.finalize && result.ok) {
     const batchIds = [...new Set(prospects.map((p) => p.batch_id).filter(Boolean) as string[])];
     await markDelivered(allIds);
     await markBatchesDelivered(batchIds);
@@ -449,20 +494,40 @@ async function deliverClaimedBatch(
       filePath,
       providerMessageId: result.id ?? null,
       emailedAt: result.ok,
-      error: result.ok ? null : result.error ?? null,
+      error: null,
     });
     await recordDeliveryEvent({
       deliveryId,
       clientId: client.id,
-      eventType: result.ok ? 'emailed' : 'skipped',
-      status: outcome.deliveryStatus,
+      eventType: 'emailed',
+      status: 'email_sent',
       metadata: {
         recipient: client.contact_email,
         prospect_count: deliverable.length,
         provider_message_id: result.id ?? null,
         provider: result.provider ?? null,
       },
-      error: result.ok ? null : result.error ?? null,
+      error: null,
+    });
+  } else if (outcome.finalize && outcome.deliveryStatus === 'skipped_not_configured') {
+    const batchIds = [...new Set(prospects.map((p) => p.batch_id).filter(Boolean) as string[])];
+    await markDelivered(allIds);
+    await markBatchesDelivered(batchIds);
+    await updateDelivery(deliveryId, {
+      status: 'skipped_not_configured',
+      filename,
+      filePath,
+      providerMessageId: null,
+      emailedAt: false,
+      error: result.error ?? 'csv_only_mode',
+    });
+    await recordDeliveryEvent({
+      deliveryId,
+      clientId: client.id,
+      eventType: 'skipped',
+      status: 'skipped_not_configured',
+      metadata: { prospect_count: deliverable.length, csv_only: true },
+      error: result.error ?? null,
     });
   } else {
     await releaseClaim(allIds);
@@ -472,6 +537,10 @@ async function deliverClaimedBatch(
       filePath,
       error: result.error ?? 'unknown send error',
     });
+    await query(
+      `UPDATE deliveries SET attempts = COALESCE(attempts, 0) + 1 WHERE id = $1`,
+      [deliveryId]
+    ).catch(() => undefined);
     await logDeliveryFailure(client.id, result.error ?? 'email send failed');
     await recordDeliveryEvent({
       deliveryId,
@@ -528,6 +597,11 @@ export async function runDeliveryForClient(
   );
   if (!client) {
     console.warn('[delivery] unknown client:', clientId);
+    return 0;
+  }
+
+  if (await deliveryBackoffActive(clientId)) {
+    console.log('[delivery] backoff active for client:', clientId);
     return 0;
   }
 

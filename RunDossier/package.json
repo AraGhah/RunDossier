@@ -33,7 +33,12 @@
     "test": "tsx --test src/**/*.test.ts",
     "test:coverage": "node --import tsx --test --experimental-test-coverage --test-coverage-include=src/utils/** --test-coverage-include=src/middleware/** src/**/*.test.ts",
     "audit:deps": "npm audit --audit-level=high",
-    "recover": "tsx scripts/recover-dead-letters.ts"
+    "recover": "tsx scripts/recover-dead-letters.ts",
+    "delivery:diagnose": "tsx scripts/diagnose-delivery.ts",
+    "delivery:repair": "tsx scripts/retry-failed-delivery.ts -- --dry-run",
+    "delivery:retry": "tsx scripts/retry-failed-delivery.ts",
+    "delivery:test": "tsx scripts/test-delivery-email.ts",
+    "delivery:migrate": "tsx scripts/apply-delivery-events-migration.ts"
   },
   "engines": {
     "node": ">=22.12.0"

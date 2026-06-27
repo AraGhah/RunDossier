@@ -51,15 +51,15 @@ describe('resolveSendOutcome', () => {
     });
   });
 
-  it('does NOT finalize on provider failure, so the batch retries next cycle', () => {
-    assert.deepEqual(resolveSendOutcome({ ok: false }), {
+  it('does NOT finalize on provider failure even when skipped flag is set', () => {
+    assert.deepEqual(resolveSendOutcome({ ok: false, skipped: true }), {
       finalize: false,
       deliveryStatus: 'email_failed',
     });
   });
 
-  it('does NOT finalize when provider is not configured (default — retry next cycle)', () => {
-    assert.deepEqual(resolveSendOutcome({ ok: false, skipped: true }), {
+  it('does NOT finalize on provider failure', () => {
+    assert.deepEqual(resolveSendOutcome({ ok: false }), {
       finalize: false,
       deliveryStatus: 'email_failed',
     });

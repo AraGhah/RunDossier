@@ -297,6 +297,20 @@ async function main(): Promise<void> {
   }
 
   try {
+    const { countMisdeliveredProspects } = await import('../src/services/delivery-repair.js');
+    const misdelivered = await countMisdeliveredProspects();
+    record(
+      'delivery-integrity',
+      misdelivered === 0,
+      misdelivered === 0
+        ? 'Tous les prospects delivered ont un email_sent confirmé'
+        : `${misdelivered} prospect(s) delivered sans email_sent — npm run delivery:retry`
+    );
+  } catch (e) {
+    record('delivery-integrity', false, (e as Error).message);
+  }
+
+  try {
     const [tg] = await query<{ ok: boolean }>(
       `SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'telegram_updates') AS ok`
     );

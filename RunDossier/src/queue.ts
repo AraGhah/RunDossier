@@ -16,6 +16,7 @@ import { runCostGovernor } from './jobs/cost-governor.job.js';
 
 import { runBatchOrchestratorJob } from './jobs/batch-orchestrator.job.js';
 import { runCampaignSourcing, checkCampaignCompletion } from './jobs/campaign-sourcing.job.js';
+import { warnDeliveryConfigAtStartup } from './utils/delivery-config.js';
 
 const QUEUES = ['research', 'personalize', 'scheduler', 'delivery', 'batch-orchestrator', 'dogfood-scrape', 'dogfood-promote', 'prospect-search', 'pii-retention', 'onboarding-timers', 'failure-digest', 'cost-governor', 'campaign-sourcing'] as const;
 
@@ -38,6 +39,7 @@ export async function startQueue(): Promise<void> {
   });
   boss.on('error', (err: Error) => console.error('[pg-boss] error:', err));
   await boss.start();
+  warnDeliveryConfigAtStartup();
 
   for (const name of QUEUES) {
     await boss.createQueue(name, { deleteAfterSeconds: 259200 });

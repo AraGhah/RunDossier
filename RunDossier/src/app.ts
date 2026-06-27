@@ -9,6 +9,7 @@ import { handlePilotSubmit } from './routes/pilot.js';
 import { handleIntakeSubmit } from './routes/intake.js';
 import { registerOnboardingRoutes } from './routes/onboarding.js';
 import { registerParentBatchRoutes } from './routes/parent-batches.js';
+import { registerDeliveryRoutes } from './routes/delivery.js';
 import { registerDashboardRoutes } from './routes/dashboard.js';
 import { registerDeliverabilityRoutes } from './routes/deliverability.js';
 import { registerCampaignRoutes } from './routes/campaigns.js';
@@ -109,6 +110,7 @@ export function createApp() {
   app.use('/api/parent-batches', limitAdmin);
   registerProspectRoutes(app);
   registerParentBatchRoutes(app);
+  registerDeliveryRoutes(app);
 
   app.use('/api/jobs', limitAdmin);
   registerJobRoutes(app);
