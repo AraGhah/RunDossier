@@ -68,11 +68,15 @@ export function shouldSendDigest(opts: {
   pipelineActive: number;
 }): boolean {
   if (!config.telegramDigestQuiet) return true;
+  // Notify ONLY on genuine recent activity — i.e. when the system actually did
+  // work this cycle. `readyToDeliver` / `pipelineActive` are cumulative standing
+  // counts (prospects sitting in a non-terminal status, any age); leftover rows
+  // there must NOT force an hourly ping when nothing happened. They remain in the
+  // report body as context, they just no longer trigger a send.
   if (opts.deliverySummary && (opts.deliverySummary.prospectsDelivered > 0 || opts.deliverySummary.errors.length > 0)) {
     return true;
   }
   if (opts.recentFailureCount > 0) return true;
-  if (opts.readyToDeliver > 0 || opts.pipelineActive > 0) return true;
   return (
     opts.newProspects > 0 ||
     opts.searchLeads > 0 ||

@@ -19,8 +19,15 @@ describe('shouldSendDigest', () => {
     assert.equal(shouldSendDigest(idle), false);
   });
 
-  it('sends when prospects are ready to deliver', () => {
-    assert.equal(shouldSendDigest({ ...idle, readyToDeliver: 3 }), true);
+  it('stays quiet on standing pipeline state alone (no recent activity)', () => {
+    // Leftover prospects sitting in a non-terminal status must NOT trigger an
+    // hourly ping — that was the spurious "every hour even when idle" bug.
+    assert.equal(shouldSendDigest({ ...idle, readyToDeliver: 3 }), false);
+    assert.equal(shouldSendDigest({ ...idle, pipelineActive: 7 }), false);
+  });
+
+  it('sends when a prospect was actually delivered this cycle', () => {
+    assert.equal(shouldSendDigest({ ...idle, deliveredLastHour: 2 }), true);
   });
 
   it('sends when delivery cycle had activity', () => {
